@@ -1,8 +1,4 @@
-# WRoverSoftware 2025-2026
-
-This repository contains the software for Wisconsin Robotics' rover, developed for the 2026 University Rover Challenge (URC). Below are the steps to set up the development environment.
-
----
+# WRoverSoftware Installation Guide
 
 ## Table of Contents
 1. [System Requirements](#system-requirements)
