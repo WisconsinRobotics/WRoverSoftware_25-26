@@ -22,7 +22,7 @@ class BatteryDataPublisher(Node):
 
         # timer between publishes
         timer_period = 0.5 # this is in seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback
+        self.timer = self.create_timer(timer_period, self.timer_callback)
         pass
 
 
@@ -48,14 +48,19 @@ class BatteryDataPublisher(Node):
     def request_data(self):
         # We will use the PySerial Framework to read data. getting information is going
         # to be a different story
+        pass
 
-
-def main():
+def main(args = None):
+    # ROS STARTUP
     rclpy.init(args = args)
 
     battery_data_publisher = BatteryDataPublisher()
 
-    rclpy.spin(minimal_publisher)
+    rclpy.spin(battery_data_publisher)
+
+    #kill the node i guess
+    battery_datda_publisher.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':
