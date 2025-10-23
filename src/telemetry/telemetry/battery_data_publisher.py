@@ -23,12 +23,12 @@ This will go through the serial data and try to read shit
 def serial_worker():
     # While the loop is allowed to do stuff, try to read the data on the serial bus
     while(serialEventLoop.is_set()):
-
+        pass
         # inside of here, if we get a full set of data, write to data
         # use a buffer here. Write to the buffer each time we actually have data
         # if we find an escape sequence in the buffer, add the data, remove that part from the buffer
         # should probably use a bytearray()
-
+    pass
 
 
 
