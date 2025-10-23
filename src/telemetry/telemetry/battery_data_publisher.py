@@ -1,14 +1,43 @@
 # Import the relevent node packages
 import rclpy
 from rclpy.node import Node
-
 from std_msgs.msg import String
+
+# PYSERIAL
+import serial
+# Threading
+import threading
+from concurrent.futures import ThreadPoolExecutor
+
+
+
+"""GLOBAL DATA"""
+data = 0
+dataLock = threading.Lock()
+
+serialEventLoop = threading.Event()
+
+"""
+This will go through the serial data and try to read shit
+"""
+def serial_worker():
+    # While the loop is allowed to do stuff, try to read the data on the serial bus
+    while(serialEventLoop.is_set()):
+
+        # inside of here, if we get a full set of data, write to data
+        # use a buffer here. Write to the buffer each time we actually have data
+        # if we find an escape sequence in the buffer, add the data, remove that part from the buffer
+        # should probably use a bytearray()
+
+
+
 
 
 """
 Class responsible for getting, processing, and sending out battery data to subscribers.
 This will use serial port via a USB in order to communicate with the ESP32
 """
+
 class BatteryDataPublisher(Node):
     """
     Constructor for BatteryDataPublisher

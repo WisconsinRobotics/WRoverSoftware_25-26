@@ -20,6 +20,7 @@ setup(
     extras_require={
         'test': [
             'pytest',
+            "pyserial"
         ],
     },
     entry_points={
