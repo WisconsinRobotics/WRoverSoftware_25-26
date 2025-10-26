@@ -36,7 +36,6 @@ class BatteryDataPublisher(Node):
         self.serial_worker.start()
 
 
-
         # Make publisher, this will publish strings of JSON files
         self.publisher_ = self.create_publisher(String, "battery_telemetry", 10)
 
@@ -68,11 +67,13 @@ class BatteryDataPublisher(Node):
     """
     def on_cleanup(self):
         #self.get_logger().info("shutting down serial worker")
-        print("shutting down serial worker")
+        print("\n\n------- battery_data_publisher cleanup start -------")
         # stop tell the event to stop reading
+        print("shutting down serial workers")
         self.serial_event_loop.set()
         self.serial_worker.join()
-        print("workers joined")
+        print("closing serial connections...")
+        print("------- battery_data_publisher cleanup finished ------")
     
     """
     This will go through the serial data and try to read shit
