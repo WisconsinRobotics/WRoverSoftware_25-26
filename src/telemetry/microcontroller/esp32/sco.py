@@ -1,5 +1,7 @@
 from machine import ADC, Pin
 import time
+import struct
+import sys
 
 adc_pin = 34
 adc = ADC(Pin(adc_pin))
@@ -25,6 +27,12 @@ while True:
     v_batt = v_meas * DIVIDER_RATIO
     soc = voltage_to_soc(v_batt)
 
-    # Envia pela serial (USB)
-    print(f"{v_batt:.3f},{soc:.1f}")
+    data = struct.pack('<ff', v_batt, soc)
+
+    #print(v_batt, soc)
+    
+    #struck
+    sys.stdout.buffer.write(data)
+    sys.stdout.flush()
+
     time.sleep(0.5)
