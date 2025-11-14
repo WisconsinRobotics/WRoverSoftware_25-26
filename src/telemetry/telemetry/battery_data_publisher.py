@@ -25,9 +25,9 @@ class BatteryDataPublisher(Node):
     """
     Constructor for BatteryDataPublisher
     """
-    def _init_(self):
+    def __init__(self):
         # Init node class stuff
-        super()._init_("BatteryDataPublisher")
+        super().__init__("BatteryDataPublisher")
         
         # Make the worker thread that gets telemetry data
         self.get_logger().info("starting up worker")
@@ -339,5 +339,5 @@ def main(args = None):
         rclpy.shutdown()
 
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()
