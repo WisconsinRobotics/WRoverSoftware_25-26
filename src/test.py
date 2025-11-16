@@ -303,8 +303,7 @@ def quaternion_to_yaw(rv_x, rv_y, rv_z, rv_w):
 
 
 
-pipeline = dai.Pipeline()
-with dai.Device(pipeline) as device:
+with dai.Pipeline() as pipeline:
     monoLeft = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
     monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
     stereo = pipeline.create(dai.node.StereoDepth)
