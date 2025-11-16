@@ -174,7 +174,7 @@ class SectorDepthClassifier():
             gap_to_move_to = valid_gaps[0]
         except IndexError:
             print("no valid gaps u have crashed!!!!!! :)")
-            #return [0.0, 0.0, 0.0, 0.0]
+            return [0.0, 0.0, 0.0, 0.0]
             gap_to_move_to = (0,0)
         # Optional: Uncomment to debug your angles
         # print(f"Heading: {compass_angle:.1f} | Bearing: {bearing_to_target:.1f} | Target Angle: {target_angle_deg:.1f}")
