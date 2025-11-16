@@ -66,7 +66,7 @@ class SectorDepthClassifier():
 
         rows = (self.Y_PIXEL_OFFSET - np.arange(depth_full.shape[0], dtype=np.float32)) / self.FOCAL_LENGTH
         # maybe constant optimize? ^^^
-        ground_mask = depth_full * rows[:, None] < -1
+        ground_mask = depth_full * rows[:, None] < -0.4
         depth_full[ground_mask] = np.float32(10)
 
         # list of all min values of each vertical sector. values are in m
