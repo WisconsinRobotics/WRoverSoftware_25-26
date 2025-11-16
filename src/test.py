@@ -229,12 +229,13 @@ class SectorDepthClassifier():
         
         # end_time = time.time() - start_time
 
-        if abs(best_theta) < math.radians(2.0):             # almost straight within 2 degrees of straight
+        if abs(best_theta) < math.radians(7.0):             # almost straight within 2 degrees of straight
             y = 1.0
             x = 0.0
+        elif best_theta < 0:
+            return [0.0, 0.0, 1, 0.0]
         else :                  # gap is right or left
-            y = 1*math.cos(best_theta)
-            x = 1*math.sin(best_theta)
+            return [0.0, 0.0, 0.0, 1.0]
 
         return [y, x, 0.0, 0.0]
 
