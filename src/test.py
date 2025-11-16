@@ -30,7 +30,7 @@ class GPSNode(Node):
             NavSatFix,
             "fix",          
             self.gps_callback,
-            10
+            1
         )
 
     def gps_callback(self, msg):
@@ -174,7 +174,7 @@ class SectorDepthClassifier():
             gap_to_move_to = valid_gaps[0]
         except IndexError:
             print("no valid gaps u have crashed!!!!!! :)")
-            return [0.0, 0.0, 0.0, 0.0]
+            #return [0.0, 0.0, 0.0, 0.0]
             gap_to_move_to = (0,0)
         # Optional: Uncomment to debug your angles
         # print(f"Heading: {compass_angle:.1f} | Bearing: {bearing_to_target:.1f} | Target Angle: {target_angle_deg:.1f}")
@@ -303,7 +303,8 @@ def quaternion_to_yaw(rv_x, rv_y, rv_z, rv_w):
 
 
 
-with dai.Pipeline() as pipeline:
+pipeline = dai.Pipeline()
+with dai.Device(pipeline) as device:
     monoLeft = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
     monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
     stereo = pipeline.create(dai.node.StereoDepth)
