@@ -233,7 +233,7 @@ class SectorDepthClassifier():
             y = 1.0
             x = 0.0
         elif best_theta < 0:
-            return [0.0, 0.0, 1, 0.0]
+            return [0.0, 0.0, 1.0, 0.0]
         else :                  # gap is right or left
             return [0.0, 0.0, 0.0, 1.0]
 
