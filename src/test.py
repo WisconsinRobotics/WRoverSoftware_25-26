@@ -154,7 +154,7 @@ class SectorDepthClassifier():
         # This is now passed into the function.
         
         # ** You must update these with your live GPS data **
-        #rover_gps = (43.072647846958304, -89.41222468107071) 
+        rover_gps = (43.072647846958304, -89.41222468107071) 
         target_gps = (43.073112267126625, -89.4128130034407) 
 
         # compute_bearing: angle from North to target in the clockwise direction
