@@ -25,7 +25,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'battery_data_publisher = telemetry.battery_data_publisher:main'
+            #'battery_data_publisher = telemetry.battery_data_publisher:main',
+            "battery_data_sender = telemetry.battery_data_sender:main"
         ],
     },
 )

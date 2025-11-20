@@ -30,6 +30,11 @@ class BatteryDataPublisher(Node):
     def __init__(self):
         super().__init__("BatteryDataPublisher")
 
+        self.declare_parameter("esp_com_port", "/dev/ttyUSB0")
+        self.com_target = self.get_parameter("esp_com_port").get_parameter_value().string_value
+        self.get_logger().info(f"COM Target : -> {self.com_target}")
+
+
         # Thread control
         self.get_logger().info("starting up worker")
         self.serial_data = ""
@@ -107,7 +112,7 @@ class BatteryDataPublisher(Node):
     """
     def get_serial_worker(self):
         try:
-            self.serial = serial.Serial("/dev/ttyUSB1", 9600, timeout=0.1)
+            self.serial = serial.Serial(f"{self.com_target}", 9600, timeout=0.1)
             self.get_logger().info("opened serial port")
         except Exception as e:
             self.get_logger().error(f"Error opening serial: {e}")
