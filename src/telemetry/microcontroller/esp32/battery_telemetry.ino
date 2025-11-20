@@ -9,79 +9,66 @@ Preferences prefs;
 #define LASTVOLTAGE "last_voltage"
 #define LASTCURRENT "last_current"
 
-// battery voltage data for storing data
-struct __attribute__((packed)) BatteryData{
+// LED azul da ESP32 (GPIO2)
+#define BLUE_LED 2
+
+// Valor de voltagem que ativa o LED
+#define TRIGGER_VOLTAGE 50  
+
+
+// -----------------------------
+// STRUCTS
+// -----------------------------
+
+struct __attribute__((packed)) BatteryData {
   float voltage = 0;
   float current = 0;
-  float ampHours= 0;
+  float ampHours = 0;
 
   String toString(){
     return "[voltage:" + String(voltage) + 
-    ", current: " + String(current) +
-    ", ampHours: " + String(ampHours) + "]";
+           ", current:" + String(current) +
+           ", ampHours:" + String(ampHours) + "]";
   }
 };
 
-
-
-// a packet for sending over battery data etc
-struct __attribute__((packed)) Packet{
-  // start bit for decoding
+struct __attribute__((packed)) Packet {
   uint8_t start = 0xAA;
   BatteryData data;
   uint8_t checksum = 0;
   uint8_t end = 0x55;
 
   String toString(){
-    return "[data: " + data.toString() + ", checksum: " + String(checksum) + "]";
+    return "[data:" + data.toString() + 
+           ", checksum:" + String(checksum) + "]";
   }
 };
 
 
+// -----------------------------
+// GLOBALS
+// -----------------------------
 
-// data storage
-//int data = 0;
 BatteryData d;
 
+uint8_t rx_buffer[20];
+int rx_index = 0;
+bool receiving = false;
 
-
-// delta time variables
 int lastWrite = 0;
 int lastLoopCall = 0;
 
 
+// -----------------------------
+// LOAD & STORE
+// -----------------------------
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-
-  // init VMS data & load the stuff
-  prefs.begin(STORAGE,false);
-  loadData();
-}
-
-
-
-
-
-/**
-Load the data from VMS storage into memory
-*/
 void loadData(){
-  float total_charge = prefs.getFloat(TOTALCHARGE, 0);
-  float last_voltage = prefs.getFloat(LASTVOLTAGE, 0);
-  float last_current = prefs.getFloat(LASTCURRENT, 0);
-
-  d.ampHours = total_charge;
-  d.voltage = last_voltage;
-  d.current = last_current;
+  d.ampHours = prefs.getFloat(TOTALCHARGE, 0);
+  d.voltage  = prefs.getFloat(LASTVOLTAGE, 0);
+  d.current  = prefs.getFloat(LASTCURRENT, 0);
 }
 
-
-
-/**
-Stashes the data into VMS storage for persistant data
-*/
 void storeData(){
   prefs.putFloat(TOTALCHARGE, d.ampHours);
   prefs.putFloat(LASTVOLTAGE, d.voltage);
@@ -89,76 +76,139 @@ void storeData(){
 }
 
 
+// -----------------------------
+// PROCESS RAW DATA (simulação)
+// -----------------------------
 
-
-/**
-Takes the raw data and computes the voltage volumes
-*/
 void processRawData(float dt){
-  // simulate a change in voltage and currnet
   d.current = random(7,10);
   d.voltage = random(5,7);
 
-
-  // do the voltage calculations
   if(d.ampHours > 0){
     d.ampHours -= d.current * dt;
-    if(d.ampHours <= 0){
-      d.ampHours = 0;
+    if(d.ampHours < 0) d.ampHours = 0;
+  }
+}
+
+
+// -----------------------------
+// SEND PACKET (ESP → PC)
+// -----------------------------
+
+void packageData(){
+  Packet p;
+  p.data = d;
+
+  uint8_t *ptr = (uint8_t*)&p.data;
+  for (int i=0; i < sizeof(p.data); i++){
+    p.checksum ^= ptr[i];
+  }
+
+  Serial.write((uint8_t*)&p, sizeof(p));
+  Serial.flush();
+}
+
+
+// -----------------------------
+// RECEIVE PACKET (PC → ESP)
+// -----------------------------
+
+void readSerialFromPC() {
+  while (Serial.available()) {
+    uint8_t b = Serial.read();
+
+    if (!receiving) {
+      if (b == 0xAA) {
+        receiving = true;
+        rx_index = 0;
+        rx_buffer[rx_index++] = b;
+      }
+      continue;
+    }
+
+    rx_buffer[rx_index++] = b;
+
+    if (rx_index == 15) {
+      receiving = false;
+
+      if (rx_buffer[14] != 0x55) return;
+
+      uint8_t *data_ptr = &rx_buffer[1];
+
+      uint8_t chk = 0;
+      for (int i = 0; i < 12; i++){
+        chk ^= data_ptr[i];
+      }
+
+      if (chk != rx_buffer[13]) {
+        Serial.println("Checksum error on incoming packet!");
+        return;
+      }
+
+      float *fv = (float*)data_ptr;
+
+      float newV  = fv[0];
+      float newC  = fv[1];
+      float newAh = fv[2];
+
+      d.voltage = newV;
+      d.current = newC;
+      d.ampHours = newAh;
+
+      // ------------------------------
+      // TRIGGER LED
+      // ------------------------------
+      if (d.voltage == TRIGGER_VOLTAGE) {
+        digitalWrite(BLUE_LED, HIGH);
+        Serial.println("LED ON – Trigger voltage received!");
+        delay(3000);
+      } else {
+        digitalWrite(BLUE_LED, LOW);
+      }
+
+      Serial.print("Received from PC → ");
+      Serial.println(d.toString());
     }
   }
 }
 
 
-/**
-Packages the data into a packet, computes the checksum, sends out the byte data
-*/
-void packageData(){
-  // construct the packet to send out to the ROS2 Node
-  Packet p;
-  p.data = d;
+// -----------------------------
+// SETUP
+// -----------------------------
 
-  // check sum
-  byte* ptr = (byte*)&p.data;
-  size_t len = sizeof(p.data);
-  for(size_t i = 0; i < len; i++){
-    p.checksum ^= ptr[i];
-  }
+void setup() {
+  Serial.begin(9600);
+  prefs.begin(STORAGE, false);
+  loadData();
 
+  pinMode(BLUE_LED, OUTPUT);
+  digitalWrite(BLUE_LED, LOW);
 
-  // convert package into bytes and send over
-  byte* ptr_package = (byte*)&p;
-  for(size_t i = 0; i < (size_t)sizeof(p); i ++){
-    Serial.write(ptr_package[i]);
-  }
-
-  Serial.flush();
-
+  lastLoopCall = millis();
 }
 
 
+// -----------------------------
+// MAIN LOOP
+// -----------------------------
 
 void loop() {
-  // delta time loop stuff
+
+  readSerialFromPC();  // recebe dados do ROS2
+
   int now = millis();
-  int dt = now - lastLoopCall;
+  float dt = (now - lastLoopCall) / 1000.0f;
   lastLoopCall = now;
 
-  // get data and process it here
   processRawData(dt);
 
-  // Cache the charge 2 times every second
-  if(now - lastWrite > 500){
+  if (now - lastWrite > 500) {
     storeData();
-    lastWrite = millis();
+    lastWrite = now;
   }
 
-  // package and send out the data
-  packageData();
+  packageData();       // envia dados para o ROS2
 
-  //String output = "Data: " + d.toString() + " | dt: " + String(dt) + "| len: " + String(sizeof(d));
-  // sleep for the polling rate
-  sleep(1/REFRESH_RATE);
+  delay(1000 / REFRESH_RATE);
 }
-
-
