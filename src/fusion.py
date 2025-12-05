@@ -9,7 +9,7 @@ class FusionNode(Node):
         	super().__init__('fusion_node')
 
 		self.imu_state = {
-			'quaternion' : np.zeros(4),
+			'quaternion' : np.array([0.0, 0.0, 0.0, 1.0])
 			'angular_velocity' : np.zeros(3),
 			'linear_acceleration' : np.zeros(3)
 		}
@@ -18,9 +18,13 @@ class FusionNode(Node):
 		self.gnss_state = np.zeros(2)
 
 		self.state_vector = np.zeros(10)
-		self.P = np.eye(10) #covariance
-		self.Q = np.eye(10) * 0.01 #process noise
-		self.R = np.eye(3) * 5.0 # GNSS measurement noise, 5.0 is placeholder for how many meters accurate the gnss is
+		self.H = np.zeros((3,10)) #Observation
+                H[0,0] = 1
+                H[1,1] = 1
+                H[2,2] = 1
+		self.P = np.eye(10) * 0.1  #covariance
+		self.Q = np.eye(10) * 0.01 #process noise, need to measure from the robot
+		self.R = np.eye(3) * 5.0 # GNSS measurement noise, 5.0 is placeholder for how many meters^2 accurate the gnss is, need to measure
 		self.last_time = None
 		self.initialized = False
 
@@ -93,7 +97,8 @@ class FusionNode(Node):
 
 		self.update_position_state(dt)
 		self.update_covariance(dt)
-		K = self.compute_kalman_gain(H, R)
+
+		K = self.compute_kalman_gain()
 		#correct with gnss measurements here:
 
 	def update_position_state(self, dt):
@@ -121,10 +126,16 @@ class FusionNode(Node):
 		self.state_vector[3:6] = [vx_updated, vy_updated, vz_updated]
 
 	def update_covariance(self, dt):
-		pass
+		F = np.eye(10) #Jacobian of IMU state
+		F[0, 3] = dt
+		F[1, 4] = dt
+		F[2, 5] = dt
 
-	def compute_kalman_gain(self, H, R):
-		pass
+		self.P  = F @ self.P  @ F.transpose() + Q
+
+	def compute_kalman_gain(self):
+		S = self.H @ self.P @ self.H.transpose() + self.R
+		return self.P @ self.H.transpose() @ np.linalg.inv(S)
 
 	def to_cartesian(self):
 	#converts gnss to local cartesian frame
@@ -149,7 +160,7 @@ class FusionNode(Node):
 			[2 * (xz - wy),		2 * (yz + wx), 	1 - 2 * (xx + yy)]
 		])
 
-		return rotation 
+		return rotation
 
 	def publish_fused_state(self):
 		pass
