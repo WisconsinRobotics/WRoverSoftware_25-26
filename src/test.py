@@ -13,7 +13,7 @@ class SwervePublisher(Node):
     def __init__(self):
         super().__init__("swerve_publisher")
 
-        self.pub = self.create_publisher(Float32MultiArray, "swerve", 10)
+        self.pub = self.create_publisher(Float32MultiArray, "swerve", 1)
 
     def send(self, swrv):
         msg = Float32MultiArray()
@@ -44,9 +44,9 @@ class SectorDepthClassifier():
     X_PIXEL_OFFSET = np.float32(605)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
-    GAP_THRESHOLD = np.float32(1) # The minimum distance between two obstacles such that the rover can fit.
+    GAP_THRESHOLD = np.float32(0.5) # The minimum distance between two obstacles such that the rover can fit.
     DEPTH_THRESH = np.float32(2)
-
+        
     ## CHANGED: Added 'compass_angle' as an argument
     def cb(self, depth_full, compass_angle, rover_gps):
         start_time = time.time()
@@ -107,7 +107,7 @@ class SectorDepthClassifier():
             d2 = min_list[ux2]/np.cos(theta2)
             
             d = min(d2,d1) # changed to finding parrelel disctance to optical plane isntead of straightline distnace between edge of objects
-            # Calculating the theta for each gap
+            # Calculating t\\\\\eta for each gap
             
             theta = theta2 - theta1
             thetas.append(theta)
@@ -116,14 +116,14 @@ class SectorDepthClassifier():
         
         # formatted_list = [round(float(x), 2) for x in min_list]
         # print(formatted_list)
-        print("angles====================\n", (np.array(thetas)*180)/3.14) # These are the angles of each gap.
-        print("list of gaps =====================\n",gaps)        
-        print("list of distance between gaps =================================\n", distance_monitor_list, "\n\n\n")
+        # print("angles====================\n", (np.array(thetas)*180)/3.14) # These are the angles of each gap.
+        # print("list of gaps =====================\n",gaps)        
+        # print("list of distance between gaps =================================\n", distance_monitor_list, "\n\n\n")
         
         valid_gaps = []
         checked = []
         for i,d in enumerate(distance_monitor_list):
-            if d - (self.GAP_THRESHOLD + 0.5) > 0.1 :
+            if d - (self.GAP_THRESHOLD + 0.5) > 0 :
                 oldStart = gaps[i][0]
                 oldEnd = gaps[i][1]
                 z = min( min_list[oldStart], min_list[oldEnd] )
@@ -138,7 +138,7 @@ class SectorDepthClassifier():
                 else:    
                     valid_gaps.append((round(newStart), round(newEnd)))
                     checked.append(True)
-            elif d - self.GAP_THRESHOLD >= 0.1:
+            elif d - self.GAP_THRESHOLD >= 0:
                 valid_gaps.append(gaps[i])
                 checked.append(False)
 
@@ -160,7 +160,7 @@ class SectorDepthClassifier():
         if target_angle_deg > 180:
             target_angle_deg = target_angle_deg - 360  
         # target_angle_deg is currently -ve for right of camera and +ve for left of camera
-        print("target angle(-ve for for target is left +ve for right) = ", -1 * target_angle_deg)
+        # print("target angle(-ve for for target is left +ve for right) = ", -1 * target_angle_deg)
         # Convert target angle from degrees to radians for comparison with arctan result
         target_angle = -1 * math.radians(target_angle_deg) # flip signs
                                                                                                                                                                                                           
@@ -168,7 +168,7 @@ class SectorDepthClassifier():
         try:
             gap_to_move_to = valid_gaps[0]
         except IndexError:
-            print("no valid gaps u have crashed!!!!!! :)")
+            # print("no valid gaps u have crashed!!!!!! :)")
             # return [0.0, 0.0, 0.0, 0.0]
             gap_to_move_to = (0,0)
         # Optional: Uncomment to debug your angles
@@ -200,8 +200,8 @@ class SectorDepthClassifier():
                             chosen = start+i
                             best_theta = theta # Update the 'best' angle
 
-        print("chosen pixel: ", chosen)            
-        print("chosen angle to drive to: ", math.degrees(best_theta))
+        # print("chosen pixel: ", chosen)            
+        # print("chosen angle to drive to: ", math.degrees(best_theta))
             
 
         depth_full = cv2.normalize(depth_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
@@ -227,7 +227,7 @@ class SectorDepthClassifier():
         
         end_time = time.time() - start_time
         print("time :",end_time)
-        if abs(best_theta) < math.radians(7.0):             # almost straight within 2 degrees of straight
+        if abs(best_theta) < math.radians(4.0):             # almost straight within 2 degrees of straight
             y = 1.0
             x = 0.0
         elif best_theta < 0:
@@ -341,7 +341,7 @@ with dai.Pipeline() as pipeline:
     rclpy.init()
     gps_node = GPSNode()
     swerve_node = SwervePublisher()
-    swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
+    #swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
     pipeline.start()
     while pipeline.isRunning():
         rclpy.spin_once(gps_node, timeout_sec=0.0)
