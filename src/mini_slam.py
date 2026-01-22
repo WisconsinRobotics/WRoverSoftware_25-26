@@ -21,18 +21,9 @@ class SectorDepthClassifier():
     DEPTH_THRESH = np.float32(2)
 
     def topDownMap(self, depth_full):
-        # --- 1. PRE-PROCESSING ---
-        # Ensure 2D and float
-        depth_full = np.squeeze(depth_full).astype(np.float32)
 
-        # AUTO-SCALE: If values are huge (>100), assume millimeters and convert to meters
-        if np.nanmax(depth_full) > 100:
-            depth_full /= 1000.0
-
-        # CLEANUP: Handle NaNs/Zeros
-        # Replace invalid depth with a "background" value (e.g., 10 meters)
         mask = (depth_full == 0) | np.isnan(depth_full)
-        depth_full[mask] = 10.0
+        depth_full[mask] = 8.0
 
         h, w = depth_full.shape
 
@@ -40,27 +31,21 @@ class SectorDepthClassifier():
         # Create grid of indices: i = x (cols), j = y (rows)
         i_grid, j_grid = np.meshgrid(np.arange(w), np.arange(h))
 
-        # Z: Depth (Forward)
         Z = depth_full
         
-        # X: Horizontal (Left/Right)
         X_real = Z * (i_grid - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH
         
-        # Y: Vertical (Up/Down)
-        # CRITICAL FIX: In images, 'j' increases downwards.
-        # (j - center) > 0  --> Bottom of image (Floor)
-        # (j - center) < 0  --> Top of image (Ceiling)
         Y_real = Z * (j_grid - self.Y_PIXEL_OFFSET) / self.FOCAL_LENGTH
 
-        # --- 3. GROUND DETECTION FIX ---
+        # GROUND DETECTION FIX
         # Since Y is positive downwards:
         # Floor is everything BELOW the camera (Y > threshold)
         # Ceiling is everything ABOVE the camera (Y < -threshold)
         # Adjust '0.4' to your actual camera height in meters.
         floor_mask = Y_real > 0.4
-        ceiling_mask = Y_real < -0.8 # Optional: ignore high ceilings
+        ceiling_mask = Y_real < -1.5
         
-        # --- 4. MAP MAPPING ---
+
         MAP_SCALE = 100  # 100 px = 1 meter
         MAP_W, MAP_H = 1001, 801
         MAP_CX = 500
@@ -70,8 +55,8 @@ class SectorDepthClassifier():
         map_y = (MAP_CY - (Z * MAP_SCALE)).astype(np.int32)
 
         # Filter Valid Points:
-        # 1. Inside map bounds
-        # 2. NOT the floor and NOT the ceiling
+        #Inside map bounds
+        # NOT the floor and NOT the ceiling
         valid_indices = (
             (map_x >= 0) & (map_x < MAP_W) & 
             (map_y >= 0) & (map_y < MAP_H) & 
@@ -79,14 +64,14 @@ class SectorDepthClassifier():
             (Z < 9.5)
         )
 
-        # --- 5. GENERATE MAP IMAGE ---
+
         map_image = np.zeros((MAP_H, MAP_W, 3), dtype=np.uint8)
         # Draw obstacles in Green
         map_image[map_y[valid_indices], map_x[valid_indices]] = (0, 255, 0)
         # Draw Camera in Red
         cv2.rectangle(map_image, (MAP_CX-5, MAP_CY-5), (MAP_CX+5, MAP_CY), (0, 0, 255), -1)
 
-        # --- 6. GENERATE CAMERA DEBUG WINDOW ---
+
         # Normalize depth to 0-255 for visibility (Range 0m to 5m)
         depth_vis = np.clip(depth_full, 0, 5.0)
         depth_vis = (depth_vis / 5.0 * 255).astype(np.uint8)
@@ -95,10 +80,10 @@ class SectorDepthClassifier():
         camera_view = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
         
         # Highlight the detected ground in BLUE
-        # If this highlights the walls/obstacles, increase the 0.4 threshold above
+        # If this highlights the walls/obstacles, increase  the 0.4 threshold above
         camera_view[floor_mask] = (255, 0, 0) 
         
-        # --- 7. DISPLAY WINDOWS ---
+        #DISPLAY WINDOWS
         cv2.imshow("Debug: Camera View", camera_view)
         cv2.imshow("Top Down Map", map_image)
         cv2.waitKey(1)
@@ -107,8 +92,6 @@ class SectorDepthClassifier():
 
 
     
-
-
 with dai.Pipeline() as pipeline:
     monoLeft = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
     monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
@@ -121,10 +104,10 @@ with dai.Pipeline() as pipeline:
     config = stereo.initialConfig
 
     # Median filter to remove the salt n pepper type pixels
-    config.postProcessing.median = dai.MedianFilter.KERNEL_7x7
+    # config.postProcessing.median = dai.MedianFilter.KERNEL_5x5
     config.postProcessing.thresholdFilter.maxRange = 8000 # 8.0m
 
-    config.setConfidenceThreshold(30)
+    config.setConfidenceThreshold(75)
 
 
 
@@ -136,12 +119,6 @@ with dai.Pipeline() as pipeline:
 
     rightOut = monoRightOut.createOutputQueue()
     stereoOut = stereo.depth.createOutputQueue()
-    
-    imu = pipeline.create(dai.node.IMU)
-    imu.enableIMUSensor(dai.IMUSensor.ROTATION_VECTOR, 100) # 100 Hz
-    imu.setBatchReportThreshold(1)
-    imu.setMaxBatchReports(10)
-    imuQueue = imu.out.createOutputQueue(maxSize=10, blocking=False)
 
     obj = SectorDepthClassifier()
 
