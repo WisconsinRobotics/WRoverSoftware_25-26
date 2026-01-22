@@ -44,7 +44,7 @@ class SectorDepthClassifier():
     X_PIXEL_OFFSET = np.float32(605)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
-    GAP_THRESHOLD = np.float32(0.5) # The minimum distance between two obstacles such that the rover can fit.
+    GAP_THRESHOLD = np.float32(1.2) # The minimum distance between two obstacles such that the rover can fit.
     DEPTH_THRESH = np.float32(2)
         
     ## CHANGED: Added 'compass_angle' as an argument
