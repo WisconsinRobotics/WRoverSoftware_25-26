@@ -9,7 +9,7 @@ class FusionNode(Node):
         	super().__init__('fusion_node')
 
 		self.imu_state = {
-			'quaternion' : np.array([0.0, 0.0, 0.0, 1.0])
+			'quaternion' : np.array([0.0, 0.0, 0.0, 1.0]),
 			'angular_velocity' : np.zeros(3),
 			'linear_acceleration' : np.zeros(3)
 		}
@@ -19,12 +19,13 @@ class FusionNode(Node):
 
 		self.state_vector = np.zeros(10)
 		self.H = np.zeros((3,10)) #Observation
-                H[0,0] = 1
-                H[1,1] = 1
-                H[2,2] = 1
+                self.H[0,0] = 1
+                self.H[1,1] = 1
+                self.H[2,2] = 1
 		self.P = np.eye(10) * 0.1  #covariance
 		self.Q = np.eye(10) * 0.01 #process noise, need to measure from the robot
 		self.R = np.eye(3) * 5.0 # GNSS measurement noise, 5.0 is placeholder for how many meters^2 accurate the gnss is, need to measure
+		self.R[2,2] = 1e6 #makes it so z is largely ignored as we arent measuring it too closely for now
 		self.last_time = None
 		self.initialized = False
 
@@ -36,7 +37,7 @@ class FusionNode(Node):
 
 	def fusion_timer_callback(self):
                 now = self.get_clock().now().nanoseconds() * 1e-9
-                dt = 0 if self.last_time is not None else now - self.last_time
+                dt = 0 if self.last_time is None else now - self.last_time
                 self.last_time = now
 
                 self.fusion(dt)
@@ -78,7 +79,7 @@ class FusionNode(Node):
 			return
 
 		if self.gnss_ref is not None:
-			position = self.to_cartesion(self.gnss_state)
+			position = self.to_cartesian(self.gnss_state, np.array([msg.latitude, msg.longitude])
 		else:
 			position = np.zeros(3)
 
@@ -87,7 +88,7 @@ class FusionNode(Node):
 		self.state_vector[6:10] = self.imu_state['quaternion']
 
 		self.initialized = True
-		self.last_time = now
+		self.last_time = 0
 
 
 	def fusion(self, dt):
@@ -99,7 +100,9 @@ class FusionNode(Node):
 		self.update_covariance(dt)
 
 		K = self.compute_kalman_gain()
-		#correct with gnss measurements here:
+		self.gnss_correction()
+
+		self.publish_fused_state()
 
 	def update_position_state(self, dt):
 		px, py, pz = self.state_vector[0:3]
@@ -131,18 +134,56 @@ class FusionNode(Node):
 		F[1, 4] = dt
 		F[2, 5] = dt
 
-		self.P  = F @ self.P  @ F.transpose() + Q
+		self.P  = F @ self.P  @ F.transpose() + self.Q
 
 	def compute_kalman_gain(self):
 		S = self.H @ self.P @ self.H.transpose() + self.R
 		return self.P @ self.H.transpose() @ np.linalg.inv(S)
 
-	def to_cartesian(self):
-	#converts gnss to local cartesian frame
-		pass
+	def gnss_correction(self):
+		current = self.to_cartesian(self.gnss_state)
+		expected_current  = self.H @ self.state_vector
+		error = current - expected_current
 
-	def quarternion_to_rotation(self, q):
-		qx, qy, qx, qw = q
+		S = self.H @ self.P @ self.H.transpose() @ self.R
+		K = self.P @ self.H.transpose() @ np.linalg.inv(S) #kalman stuff
+
+		self.state_vector = self.state_vector + (K @ y)
+
+		I = np.eye(self.P.shape[0])
+		self.P = (I - K @ self.H) @ self.P
+
+		#renormalize quartinion
+		q = self.state_vector[6:10]
+		qn = np.linalg.norm(q)
+		if qn > 1e-12:
+			self.state_vector[6:10] = q / qn
+
+	def to_cartesian(self, latlon):
+	#converts gnss to local cartesian frame
+	#x-> East
+	#y-> Up
+		lat, lon = latlon
+		lat0, lon0 = self.gnss_ref
+
+		R = 6378137 #radius of earth in meters
+
+		lat_rad = np.deg2rad(lat)
+		lon_rad = np.deg2rad(lon)
+		lat0_rad = np.deg2rad(lat)
+		lon0_rad = np.deg2rad(lon)
+
+		dlat = lat_rad - lat0_rad
+		dlon = lon_rad - lon0_rad
+
+		x = dlon * np.cos(lat0_rad) * R
+		y = dlat * R
+		z = 0
+
+		return np.array([x, y, z])
+
+	def quaternion_to_rotation(self, q):
+		qx, qy, qz, qw = q
 
 		xx = qx * qx
 		yy = qy * qy
