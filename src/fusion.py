@@ -7,7 +7,7 @@ from pyproj import CRS, Transformer
 
 class FusionNode(Node):
 	def __init__(self):
-        	super().__init__('fusion_node')
+		super().__init__('fusion_node')
 
 		self.imu_state = {
 			'quaternion' : np.array([0.0, 0.0, 0.0, 1.0]),
@@ -20,9 +20,9 @@ class FusionNode(Node):
 
 		self.state_vector = np.zeros(10)
 		self.H = np.zeros((3,10)) #Observation
-                self.H[0,0] = 1
-                self.H[1,1] = 1
-                self.H[2,2] = 1
+		self.H[0,0] = 1
+		self.H[1,1] = 1
+		self.H[2,2] = 1
 		self.P = np.eye(10) * 0.1  #covariance
 		self.Q = np.eye(10) * 0.01 #process noise, need to measure from the robot
 		self.R = np.eye(3) * 5.0 # GNSS measurement noise, 5.0 is placeholder for how many meters^2 accurate the gnss is, need to measure
@@ -30,9 +30,9 @@ class FusionNode(Node):
 		self.last_time = None
 		self.initialized = False
 
-        	self.imu_sub = self.create_subscription(Imu, '/imu_quat_data', self.imu_callback, 10)
-        	self.gnss_sub = self.create_subscription(NavSatFix, 'fix', self.gnss_callback, 10)
-        	self.pub = self.create_publisher(Odometry, '/fused_data', 10)
+		self.imu_sub = self.create_subscription(Imu, '/imu_quat_data', self.imu_callback, 10)
+		self.gnss_sub = self.create_subscription(NavSatFix, 'fix', self.gnss_callback, 10)s
+		elf.pub = self.create_publisher(Odometry, '/fused_data', 10)
 
 		self.timer = self.create_timer(0.02, self.fusion_timer_callback)
 
@@ -43,11 +43,11 @@ class FusionNode(Node):
 
 
 	def fusion_timer_callback(self):
-                now = self.get_clock().now().nanoseconds() * 1e-9
-                dt = 0 if self.last_time is None else now - self.last_time
-                self.last_time = now
+		now = self.get_clock().now().nanoseconds() * 1e-9
+		dt = 0 if self.last_time is None else now - self.last_time
+		self.last_time = now
 
-                self.fusion(dt)
+		self.fusion(dt)
 
 	def imu_callback(self, msg: Imu):
 		self.imu_state['quaternion'] = np.array([
@@ -58,16 +58,16 @@ class FusionNode(Node):
 		])
 
 		self.imu_state['angular_velocity'] = np.array([
-		        msg.angular_velocity.x,
+			msg.angular_velocity.x,
 			msg.angular_velocity.y,
         		msg.angular_velocity.z
-    		])
+		])
 
 		self.imu_state['linear_acceleration'] = np.array([
-        		msg.linear_acceleration.x,
-        		msg.linear_acceleration.y,
-        		msg.linear_acceleration.z
-    		])
+			msg.linear_acceleration.x,
+			msg.linear_acceleration.y,
+			msg.linear_acceleration.z
+		])
 
 	def gnss_callback(self, msg: NavSatFix):
 		if self.gnss_ref is None:
@@ -83,10 +83,9 @@ class FusionNode(Node):
 
 		if self.gnss_ref is None and np.linalg.norm(self.gnss_state) != 0:
 			self.gnss_ref = self.gnss_state.copy()
-			return
 
 		if self.gnss_ref is not None:
-			position = self.to_cartesian(self.gnss_state, np.array([msg.latitude, msg.longitude])
+			position = self.to_cartesian(self.gnss_state)
 		else:
 			position = np.zeros(3)
 
@@ -100,13 +99,11 @@ class FusionNode(Node):
 
 	def fusion(self, dt):
 		self.initialize_state()
-		if np.linalg.norm(self.state_vector) == 0:
-			return
+		if not self.initialized return
 
 		self.update_position_state(dt)
 		self.update_covariance(dt)
 
-		K = self.compute_kalman_gain()
 		self.gnss_correction()
 
 		self.publish_fused_state()
@@ -152,10 +149,9 @@ class FusionNode(Node):
 		expected_current  = self.H @ self.state_vector
 		error = current - expected_current
 
-		S = self.H @ self.P @ self.H.transpose() @ self.R
-		K = self.P @ self.H.transpose() @ np.linalg.inv(S) #kalman stuff
+		K = compute_kalman_gain()
 
-		self.state_vector = self.state_vector + (K @ y)
+		self.state_vector = self.state_vector + (K @ error)
 
 		I = np.eye(self.P.shape[0])
 		self.P = (I - K @ self.H) @ self.P
@@ -169,16 +165,16 @@ class FusionNode(Node):
 	def to_cartesian(self, latlon):
 	#converts gnss to local cartesian frame
 	#x-> East
-	#y-> Up
+	#y-> North
 		lat, lon = latlon
 		lat0, lon0 = self.gnss_ref
 
-		R = 6378137 #radius of earth in meters
+		R = 6378137.0 #radius of earth in meters
 
 		lat_rad = np.deg2rad(lat)
 		lon_rad = np.deg2rad(lon)
-		lat0_rad = np.deg2rad(lat)
-		lon0_rad = np.deg2rad(lon)
+		lat0_rad = np.deg2rad(lat0)
+		lon0_rad = np.deg2rad(lon0)
 
 		dlat = lat_rad - lat0_rad
 		dlon = lon_rad - lon0_rad
@@ -261,17 +257,17 @@ class FusionNode(Node):
 
 	def ensure_utm(self, lat, lon):
     	# Build transformer once (based on start position)
-    		if self.utm_transformer is not None:
-        		return
+		if self.utm_transformer is not None:
+			return
 
-    		zone = int(np.floor((lon + 180.0) / 6.0) + 1)
+		zone = int(np.floor((lon + 180.0) / 6.0) + 1)
 		north = lat >= 0.0
 		epsg = 32600 + zone if north else 32700 + zone  # WGS84 UTM
 
  		self.utm_zone = zone
- 		self.utm_crs = CRS.from_epsg(epsg)
- 		self.utm_transformer = Transformer.from_crs(
- 		CRS.from_epsg(4326),  # WGS84 lat/lon
+		self.utm_crs = CRS.from_epsg(epsg)
+		self.utm_transformer = Transformer.from_crs(
+		CRS.from_epsg(4326),  # WGS84 lat/lon
 		self.utm_crs,
 		always_xy=True        # expects lon, lat
 		)
