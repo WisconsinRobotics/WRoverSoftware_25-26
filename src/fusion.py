@@ -3,6 +3,7 @@ import numpy as np
 from rclpy.node import Node
 from sensor_msgs.msg import Imu, NavSatFix
 from nav_msgs.msg import Odometry
+from pyproj import CRS, Transformer
 
 class FusionNode(Node):
 	def __init__(self):
@@ -34,6 +35,12 @@ class FusionNode(Node):
         	self.pub = self.create_publisher(Odometry, '/fused_data', 10)
 
 		self.timer = self.create_timer(0.02, self.fusion_timer_callback)
+
+		self.utm_transformer = None
+		self.utm_crs = None
+		self.utm_zone = None
+		self.initial_yaw = None
+
 
 	def fusion_timer_callback(self):
                 now = self.get_clock().now().nanoseconds() * 1e-9
@@ -204,7 +211,71 @@ class FusionNode(Node):
 		return rotation
 
 	def publish_fused_state(self):
-		pass
+		if not self.initialized or self.gnss_ref is None:
+			return
+
+		R = 6378137.0
+
+		x_local, y_local, _ = self.state_vector[0:3]
+
+		lat0, lon0 = self.gnss_ref
+		lat0_rad = np.deg2rad(lat0)
+
+		lat = lat0 + (y_local / R) * (180.0 / np.pi)
+		lon = lon0 + (x_local / (R * np.cos(lat0_rad))) * (180.0 / np.pi)
+
+		# Ensure UTM transformer exists (based on start zone)
+		self.ensure_utm(lat0, lon0)
+
+		# Convert to UTM (meters)
+		easting, northing = self.utm_transformer.transform(lon, lat)
+
+		# Yaw from quaternion
+		qx, qy, qz, qw = self.state_vector[6:10]
+		yaw = np.arctan2(
+			2.0 * (qw * qz + qx * qy),
+			1.0 - 2.0 * (qy * qy + qz * qz)
+		)
+
+		if self.initial_yaw is None:
+			self.initial_yaw = yaw
+		yaw_rel = yaw - self.initial_yaw
+		yaw_rel = (yaw_rel + np.pi) % (2.0 * np.pi) - np.pi  # wrap [-pi, pi]
+
+
+		msg = Odometry()
+		msg.header.stamp = self.get_clock().now().to_msg()
+		msg.header.frame_id = f"utm_zone_{self.utm_zone}"
+		msg.child_frame_id = "base_link"
+
+		msg.pose.pose.position.x = float(easting)
+		msg.pose.pose.position.y = float(northing)
+		msg.pose.pose.position.z = 0.0
+
+		# Quaternion for yaw_rel (roll=pitch=0)
+		msg.pose.pose.orientation.z = float(np.sin(yaw_rel / 2.0))
+		msg.pose.pose.orientation.w = float(np.cos(yaw_rel / 2.0))
+
+		self.pub.publish(msg)
+
+
+	def ensure_utm(self, lat, lon):
+    	# Build transformer once (based on start position)
+    		if self.utm_transformer is not None:
+        		return
+
+    		zone = int(np.floor((lon + 180.0) / 6.0) + 1)
+		north = lat >= 0.0
+		epsg = 32600 + zone if north else 32700 + zone  # WGS84 UTM
+
+ 		self.utm_zone = zone
+ 		self.utm_crs = CRS.from_epsg(epsg)
+ 		self.utm_transformer = Transformer.from_crs(
+ 		CRS.from_epsg(4326),  # WGS84 lat/lon
+		self.utm_crs,
+		always_xy=True        # expects lon, lat
+		)
+
 
 def main(args=None):
     rclpy.init(args=args)
