@@ -31,8 +31,8 @@ class FusionNode(Node):
 		self.initialized = False
 
 		self.imu_sub = self.create_subscription(Imu, '/imu_quat_data', self.imu_callback, 10)
-		self.gnss_sub = self.create_subscription(NavSatFix, 'fix', self.gnss_callback, 10)s
-		elf.pub = self.create_publisher(Odometry, '/fused_data', 10)
+		self.gnss_sub = self.create_subscription(NavSatFix, 'fix', self.gnss_callback, 10)
+		self.pub = self.create_publisher(Odometry, '/fused_data', 10)
 
 		self.timer = self.create_timer(0.02, self.fusion_timer_callback)
 
@@ -99,8 +99,10 @@ class FusionNode(Node):
 
 	def fusion(self, dt):
 		self.initialize_state()
-		if not self.initialized return
+		if not self.initialized:
+			return
 
+		self.state_vector[6:10] = self.imu_state['quaternion']
 		self.update_position_state(dt)
 		self.update_covariance(dt)
 
@@ -145,11 +147,14 @@ class FusionNode(Node):
 		return self.P @ self.H.transpose() @ np.linalg.inv(S)
 
 	def gnss_correction(self):
+		if self.gnss_ref is None or np.linalg.norm(self.gnss_state) == 0:
+			return
+
 		current = self.to_cartesian(self.gnss_state)
 		expected_current  = self.H @ self.state_vector
 		error = current - expected_current
 
-		K = compute_kalman_gain()
+		K = self.compute_kalman_gain()
 
 		self.state_vector = self.state_vector + (K @ error)
 
@@ -264,7 +269,7 @@ class FusionNode(Node):
 		north = lat >= 0.0
 		epsg = 32600 + zone if north else 32700 + zone  # WGS84 UTM
 
- 		self.utm_zone = zone
+		self.utm_zone = zone
 		self.utm_crs = CRS.from_epsg(epsg)
 		self.utm_transformer = Transformer.from_crs(
 		CRS.from_epsg(4326),  # WGS84 lat/lon
