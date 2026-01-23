@@ -261,7 +261,7 @@ class FusionNode(Node):
 
 
 	def ensure_utm(self, lat, lon):
-    	# Build transformer once (based on start position)
+		# Build transformer once (based on start position)
 		if self.utm_transformer is not None:
 			return
 
