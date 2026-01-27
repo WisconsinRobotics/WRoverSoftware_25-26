@@ -350,11 +350,11 @@ with dai.Pipeline() as pipeline:
     swerve_node = SwervePublisher()
     #swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
     pipeline.start()
+    current_heading = 0.0
     while pipeline.isRunning():
         rclpy.spin_once(gps_node, timeout_sec=0.0)
         rclpy.spin_once(swerve_node, timeout_sec=0.0)
-        imuData = imuQueue.tryGet() # Non-blocking get
-        current_heading = 0.0
+        imuData = imuQueue.tryGet()
         if imuData:
             imuPacket = imuData.packets[-1]
             rv = imuPacket.gameRotationVector
