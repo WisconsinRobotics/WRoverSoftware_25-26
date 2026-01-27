@@ -227,15 +227,22 @@ class SectorDepthClassifier():
         
         end_time = time.time() - start_time
         print("time :",end_time)
-        if abs(best_theta) < math.radians(7.0):             # almost straight within 2 degrees of straight
-            y = 1.0
-            x = 0.0
-        elif best_theta < 0:
-            return [0.0, 0.0, 0.5, 0.0]
-        else :                  # gap is right or left
-            return [0.0, 0.0, 0.0, 0.5]
-
-        return [y, x, 0.0, 0.0]
+        error = math.degrees(best_theta)
+        kP = 0.02  # Tune this: higher = faster turns, lower = smoother
+        min_speed = 0.1
+        max_speed = 0.5
+        
+        speed = error * kP
+        # Clamp speed
+        speed = max(min(-speed, max_speed), -max_speed)
+        
+        if abs(error) < 7.0: # range to move forward
+            return [1.0, 0.0, 0.0, 0.0] # Drive forward
+        else:
+        # If speed is too low the robot won't move, so add a floor
+        if abs(speed) < min_speed: 
+            speed = math.copysign(min_speed, speed)
+        return [0.0, 0.0, speed, 0.0]
 
     @staticmethod
     def compute_bearing(p1, p2):
