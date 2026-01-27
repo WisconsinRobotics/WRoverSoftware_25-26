@@ -229,8 +229,8 @@ class SectorDepthClassifier():
         print("time :",end_time)
         error = math.degrees(best_theta)
         kP = 0.02  # Tune this: higher = faster turns, lower = smoother
-        min_speed = 0.1
-        max_speed = 0.5
+        min_speed = 0.5
+        max_speed = 1.2
         
         speed = error * kP
         # Clamp speed
@@ -240,8 +240,8 @@ class SectorDepthClassifier():
             return [1.0, 0.0, 0.0, 0.0] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
-        if abs(speed) < min_speed: 
-            speed = math.copysign(min_speed, speed)
+            if abs(speed) < min_speed: 
+                speed = math.copysign(min_speed, speed)
         return [0.0, 0.0, speed, 0.0]
 
     @staticmethod
