@@ -107,8 +107,7 @@ with dai.Pipeline() as pipeline:
     # config.postProcessing.median = dai.MedianFilter.KERNEL_5x5
     config.postProcessing.thresholdFilter.maxRange = 8000 # 8.0m
 
-    config.setConfidenceThreshold(75)
-
+    config.setConfidenceThreshold(50)
 
 
     monoLeftOut = monoLeft.requestOutput((1280, 720))

@@ -149,8 +149,8 @@ class SectorDepthClassifier():
         # This is now passed into the function.
         
         # ** You must update these with your live GPS data **
-        rover_gps = (43.072647846958304, -89.41222468107071) 
-        target_gps = (43.073112267126625, -89.4128130034407) 
+        rover_gps = (43.073107912662266, -89.41245993537561)
+        target_gps = (43.0724831900561, -89.41245993537561)
 
         # compute_bearing: angle from North to target in the clockwise direction
         bearing_to_target = self.compute_bearing(rover_gps , target_gps)
@@ -168,8 +168,8 @@ class SectorDepthClassifier():
         try:
             gap_to_move_to = valid_gaps[0]
         except IndexError:
-            # print("no valid gaps u have crashed!!!!!! :)")
-            # return [0.0, 0.0, 0.0, 0.0]
+            print("no valid gaps u have crashed!!!!!! :)")
+            return [0.0, 0.0, 0.0, 0.0]
             gap_to_move_to = (0,0)
         # Optional: Uncomment to debug your angles
         # print(f"Heading: {compass_angle:.1f} | Bearing: {bearing_to_target:.1f} | Target Angle: {target_angle_deg:.1f}")
@@ -227,13 +227,13 @@ class SectorDepthClassifier():
         
         end_time = time.time() - start_time
         print("time :",end_time)
-        if abs(best_theta) < math.radians(4.0):             # almost straight within 2 degrees of straight
+        if abs(best_theta) < math.radians(7.0):             # almost straight within 2 degrees of straight
             y = 1.0
             x = 0.0
         elif best_theta < 0:
-            return [0.0, 0.0, 1.0, 0.0]
+            return [0.0, 0.0, 0.5, 0.0]
         else :                  # gap is right or left
-            return [0.0, 0.0, 0.0, 1.0]
+            return [0.0, 0.0, 0.0, 0.5]
 
         return [y, x, 0.0, 0.0]
 
