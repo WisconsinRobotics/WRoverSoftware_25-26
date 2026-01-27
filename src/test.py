@@ -52,8 +52,8 @@ class SectorDepthClassifier():
         start_time = time.time()
         # Decode and crop depth image
       
-        mask = (depth_full == 0) | (depth_full == np.nan)
-        depth_full[mask] = np.float32(10)
+        mask = (depth_full == 0) | np.isnan(depth_full)
+        depth_full[mask] = 10.0
         H,W = depth_full.shape        
         
         # start_col = 35
@@ -331,7 +331,7 @@ with dai.Pipeline() as pipeline:
     stereoOut = stereo.depth.createOutputQueue()
     
     imu = pipeline.create(dai.node.IMU)
-    imu.enableIMUSensor(dai.IMUSensor.ROTATION_VECTOR, 100) # 100 Hz
+    imu.enableIMUSensor(dai.IMUSensor.GAME_ROTATION_VECTOR, 100) # 100 Hz
     imu.setBatchReportThreshold(1)
     imu.setMaxBatchReports(10)
     imuQueue = imu.out.createOutputQueue(maxSize=10, blocking=False)
@@ -350,7 +350,7 @@ with dai.Pipeline() as pipeline:
         current_heading = 0.0
         if imuData:
             imuPacket = imuData.packets[-1]
-            rv = imuPacket.rotationVector
+            rv = imuPacket.gameRotationVector
             current_heading = quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)
             print("current heeading relative to north = ", current_heading)
         ## --- Depth Data Processing ---
