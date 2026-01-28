@@ -228,6 +228,7 @@ class SectorDepthClassifier():
         end_time = time.time() - start_time
         print("time :",end_time)
         error = math.degrees(best_theta)
+        print("error :", error)
         kP = 0.02  # Tune this: higher = faster turns, lower = smoother
         min_speed = 0.2
         max_speed = 1.0
