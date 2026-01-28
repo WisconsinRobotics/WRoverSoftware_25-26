@@ -233,8 +233,6 @@ class SectorDepthClassifier():
         max_speed = 1.0
         
         speed = error * kP
-        # Clamp speed
-        speed = max(min(-speed, max_speed), -max_speed)
         
         if abs(error) < 5.0: # range to move forward
             return [1.0, 0.0, -1.0, -1.0] # Drive forward
