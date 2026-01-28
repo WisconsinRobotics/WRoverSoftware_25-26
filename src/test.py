@@ -160,7 +160,7 @@ class SectorDepthClassifier():
         if target_angle_deg > 180:
             target_angle_deg = target_angle_deg - 360  
         # target_angle_deg is currently -ve for right of camera and +ve for left of camera
-        # print("target angle(-ve for for target is left +ve for right) = ", -1 * target_angle_deg)
+        print("target angle= ", -1 * target_angle_deg)
         # Convert target angle from degrees to radians for comparison with arctan result
         target_angle = -1 * math.radians(target_angle_deg) # flip signs
                                                                                                                                                                                                           
@@ -236,13 +236,19 @@ class SectorDepthClassifier():
         # Clamp speed
         speed = max(min(-speed, max_speed), -max_speed)
         
-        if abs(error) < 7.0: # range to move forward
+        if abs(error) < 5.0: # range to move forward
             return [1.0, 0.0, -1.0, -1.0] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
-            if abs(speed) < min_speed: 
-                speed = math.copysign(min_speed, speed)
-        return [0.0, 0.0, speed, -1.0]
+            if speed < 0:
+                speed = abs(speed)
+                if abs(speed) < min_speed: 
+                    speed = math.copysign(min_speed, speed)
+                return [0.0, 0.0, speed, -1.0] 
+            else:
+                if abs(speed) < min_speed: 
+                    speed = math.copysign(min_speed, speed)
+                return [0.0, 0.0, -1.0, speed] 
 
     @staticmethod
     def compute_bearing(p1, p2):
