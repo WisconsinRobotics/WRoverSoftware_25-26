@@ -229,20 +229,20 @@ class SectorDepthClassifier():
         print("time :",end_time)
         error = math.degrees(best_theta)
         kP = 0.02  # Tune this: higher = faster turns, lower = smoother
-        min_speed = 0.5
-        max_speed = 1.2
+        min_speed = 0.2
+        max_speed = 1.0
         
         speed = error * kP
         # Clamp speed
         speed = max(min(-speed, max_speed), -max_speed)
         
         if abs(error) < 7.0: # range to move forward
-            return [1.0, 0.0, 0.0, 0.0] # Drive forward
+            return [1.0, 0.0, -1.0, -1.0] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
             if abs(speed) < min_speed: 
                 speed = math.copysign(min_speed, speed)
-        return [0.0, 0.0, speed, 0.0]
+        return [0.0, 0.0, speed, -1.0]
 
     @staticmethod
     def compute_bearing(p1, p2):
