@@ -357,7 +357,7 @@ with dai.Pipeline() as pipeline:
         imuData = imuQueue.tryGet()
         if imuData:
             imuPacket = imuData.packets[-1]
-            rv = imuPacket.gameRotationVector
+            rv = imuPacket.rotationVector
             current_heading = quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)
             print("current heeading relative to north = ", current_heading)
         ## --- Depth Data Processing ---
