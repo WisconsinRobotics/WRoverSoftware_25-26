@@ -44,8 +44,8 @@ class SectorDepthClassifier():
     X_PIXEL_OFFSET = np.float32(605)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
-    GAP_THRESHOLD = np.float32(1.4) # The minimum distance between two obstacles such that the rover can fit.
-    DEPTH_THRESH = np.float32(2)
+    GAP_THRESHOLD = np.float32(1.3) # The minimum distance between two obstacles such that the rover can fit.
+    DEPTH_THRESH = np.float32(2.5)
         
     ## CHANGED: Added 'compass_angle' as an argument
     def cb(self, depth_full, compass_angle, rover_gps):
@@ -66,7 +66,7 @@ class SectorDepthClassifier():
 
         rows = (self.Y_PIXEL_OFFSET - np.arange(depth_full.shape[0], dtype=np.float32)) / self.FOCAL_LENGTH
         # maybe constant optimize? ^^^
-        ground_mask = depth_full * rows[:, None] < -0.4
+        ground_mask = depth_full * rows[:, None] < -0.3
         depth_full[ground_mask] = np.float32(10)
 
         # list of all min values of each vertical sector. values are in m
@@ -160,7 +160,7 @@ class SectorDepthClassifier():
         if target_angle_deg > 180:
             target_angle_deg = target_angle_deg - 360  
         # target_angle_deg is currently -ve for right of camera and +ve for left of camera
-        print("target angle= ", -1 * target_angle_deg)
+        # print("target angle= ", -1 * target_angle_deg)
         # Convert target angle from degrees to radians for comparison with arctan result
         target_angle = -1 * math.radians(target_angle_deg) # flip signs
                                                                                                                                                                                                           
@@ -235,7 +235,7 @@ class SectorDepthClassifier():
         
         speed = error * kP
         
-        if abs(error) < 5.0: # range to move forward
+        if abs(error) < 7.0: # range to move forward
             return [1.0, 0.0, -1.0, -1.0] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
