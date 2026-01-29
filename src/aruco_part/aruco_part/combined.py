@@ -123,71 +123,6 @@ tags_detected = []
 tags_fs_detected = []
 tags = {}
 
-def final_aruco_info(self):
-
-
-    videoIn = self.videoQueue.get()
-    assert isinstance(videoIn, dai.ImgFrame)
-    frame = videoIn.getCvFrame()  # pass as the img param to the detect aruco function
-    corners, ids, rejected = cv2.aruco.detectMarkers(frame, self.arucoDict, parameters=self.arucoParams)
-    #detected_markers = aruco_display(corners, ids, rejected, frame)
-
-    #img = detected_markers
-    #(corners, ids, _) = detect_aruco(img)
-
-    if ids is not None:
-        for i in enumerate(ids):
-            # corners[i]: shape (1, 4, 2)
-            pts = corners[i][0]  # shape (4, 2)
-            xs = pts[:, 0]  # all x coordinates of the 4 corners
-
-            min_x = float(xs.min())
-            max_x = float(xs.max())
-
-            # center-of-tag x in pixels
-            tag_center_x = (min_x + max_x) / 2.0
-            image_center_x = CAMERA_WIDTH / 2.0
-            x_offset = tag_center_x - image_center_x
-
-            # Estimate the distance of the ArUco tag in meters
-            distance_estimate = calculateDistance(corners[0], K, DISTORSION_COEFFS)
-
-            id_num = int(ids[i][0])
-
-            tags[f"{id_num}"] = [int(x_offset), float(distance_estimate)]
-
-            if tags_detected.count(id_num) < 12:
-                tags_detected.append(id_num)
-
-            for j in range(50):
-                if tags_detected.count(j) > 11 and j not in tags_fs_detected:
-                    print("Aruco tag with ID " + str(j) + " for sure detected.")
-                    tags_fs_detected.append(j)
-
-            if len(tags_fs_detected) > 0:
-                target_id = tags_fs_detected[0]
-                x = tags[f"{target_id}"][0]
-                dis = tags[f"{target_id}"][1]
-
-                print(f"Publishing {target_id}, {x}, {dis}")
-                return [target_id, x, dis]
-
-            else:
-                target_id = -1.0
-                x = 0.0
-                dis = 0.0
-
-                print("No aruco tags detected")
-                return [target_id, x, dis]
-
-    else:
-        target_id = -1.0
-        x = 0.0
-        dis = 0.0
-
-        print(f"No aruco tags detected")
-        return [target_id, x, dis]
-
 
 
 
@@ -478,7 +413,7 @@ def go_to_tag(x_offset, distance, linear_velocity):
     :param linear_velocity: The desired linear velocity which we want the rover to move forward in. Float.
     :return: returns the modified (or not) linear velocity and the angular velocity for correction of orientation.
     '''
-    x_center = 620  # center of screen in pixels
+    x_center = 0  # center of screen in pixels
     angular_vel = 0.0
     linear_vel = linear_velocity
     low_lin_vel = linear_vel / 2  # slower linear velocity for when we are close to the tag
@@ -489,11 +424,13 @@ def go_to_tag(x_offset, distance, linear_velocity):
         linear_vel = 0.0
 
     # Check if we need orientation correction:
+    max_error = 500
+    error = abs(x_offset - x_center)
     if x_offset > x_center + 20:
-        angular_vel = 1.0
+        angular_vel = 1.0*(error/max_error)
         return linear_vel, angular_vel
     elif x_offset < x_center - 20:
-        angular_vel = -1.0
+        angular_vel = -1.0*(error/max_error)
         return linear_vel, angular_vel
     else:
         return linear_vel, angular_vel
@@ -510,9 +447,9 @@ def go_to_tag_undetected(time_since_undetection, current_time, last_off, last_di
     :return:
     '''
     # This method is based upon pure estimation. No real data or facts are being used.
-    time_elapsed = current_time - time_since_undetection
-    linear_vel = 1.0
-    angular_vel = 1.0
+    time_elapsed = (current_time.nanoseconds - time_since_undetection.nanoseconds)*1e-9
+    linear_vel = 1.0 #m/s ?
+    angular_vel = 1.0 # rad/s ?
 
     r = linear_vel / angular_vel
 
@@ -552,6 +489,7 @@ def go_to_tag_undetected(time_since_undetection, current_time, last_off, last_di
         t = d / linear_vel
         return t
 
+    # Time elapsed is less than 
     if time_elapsed < estimation(last_off, last_dis):
         if last_off < 0.0:
             angular_vel *= -1
@@ -589,10 +527,24 @@ class DriveLogic(Node):
         self.full_search_done = False  # check if the full search has been done without finding a tag
 
         self.current_info = {}
+        
+        # Initialize Camera Paramaters
+        CAMERA_WIDTH = 1280
+        CAMERA_HEIGHT = 720
+
+        self.pipeline = dai.Pipeline()
+        cam = self.pipeline.create(dai.node.Camera).build()
+        self.videoQueue = cam.requestOutput(
+            (CAMERA_WIDTH, CAMERA_HEIGHT)
+        ).createOutputQueue()
+        self.pipeline.start()
+
+        self.arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)  # We want the 4x4 50 dictionary
+        self.arucoParams = cv2.aruco.DetectorParameters()
 
         # self.current_time = 0.0
         self.start_time = self.get_clock().now()
-        self.timer = self.create_timer(0.01, self.update_time)  # 100 Hz
+        self.timer = self.create_timer(0.1, self.update_time)  # 10 Hz
 
         self.ended_search_drive = False
         self.previous_offset = 0.0
@@ -603,19 +555,7 @@ class DriveLogic(Node):
         self.localization_msg = None
         self.imu_msg = None
 
-        # Initialize Camera Paramaters
-        CAMERA_WIDTH = 1280
-        CAMERA_HEIGHT = 720
-
-        pipeline = dai.Pipeline()
-        cam = pipeline.create(dai.node.Camera).build()
-        self.videoQueue = cam.requestOutput(
-            (CAMERA_WIDTH, CAMERA_HEIGHT)
-        ).createOutputQueue()
-        pipeline.start()
-
-        self.arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)  # We want the 4x4 50 dictionary
-        self.arucoParams = cv2.aruco.DetectorParameters()
+        
 
 
     # def localization_callback(self, msg):
@@ -634,8 +574,8 @@ class DriveLogic(Node):
         # if (self.localization_msg is None or self.imu_msg is None):
         #     return
 
-
-        aruco = final_aruco_info()
+       
+        aruco = self.final_aruco_info()  #return [target_id, x, dis]
         # localization = self.localization_msg
         # imu = self.imu_msg
         
@@ -646,6 +586,9 @@ class DriveLogic(Node):
 
         tag_found_but_not_being_detected = (aruco[0] == -1.0 and aruco[1] == 0.0
                                             and aruco[2] == 0.0 and self.ended_search_drive == True)
+
+        self.get_logger().info(f"aruco: {aruco}")
+
 
         # BEFORE THIS CODE, TURN THE LOCALIZATION INFO (AND ORIENTATION FROM IMU) TO OUR LOCAL
         # COORDINATES (CENTER OF THE CIRCLE AS THE ORIGIN, AND INITIAL POSITION OF ROVER AS (radius, 0).
@@ -815,15 +758,16 @@ class DriveLogic(Node):
         # self.get_logger().info("Publishing swerve...")
 
         if no_tag_found_yet:
-
+            self.get_logger().info("Not found yet...")
             lin_y = 0.0
             lin_x = 0.0
             ang_pos = 1.0  # self.current_info["linear_velocity"] / self.semicircle["radius"]  # publish the ang vel with actual lin vel
-            ang_neg = 0.0
+            ang_neg = -1.0
 
             sw_msg.data = [lin_y, lin_x, ang_pos, ang_neg]
 
         elif detecting_a_tag:
+            self.get_logger().info("Detecting aruco")
             linear_velocity = 1.5
             linear_vel, angular_vel = go_to_tag(aruco[1], aruco[2], linear_velocity)
 
@@ -835,24 +779,109 @@ class DriveLogic(Node):
 
             lin_y = linear_vel
             lin_x = 0.0
-            ang_pos = angular_vel
-            ang_neg = 0.0
+            ang_pos = -angular_vel
+            ang_neg = angular_vel
             sw_msg.data = [lin_y, lin_x, ang_pos, ang_neg]
 
         elif tag_found_but_not_being_detected:
-            current_time = self.get_clock().now()
-
-            linear_vel, angular_vel = go_to_tag_undetected(self.previous_time, current_time, self.previous_offset,
-                                                           self.previous_dis)
-
-            lin_y = linear_vel
+            # self.get_logger().info("Not found yet...")
+            lin_y = 0.0
             lin_x = 0.0
-            ang_pos = angular_vel
-            ang_neg = 0.0
-            sw_msg.data = [lin_y, lin_x, ang_pos, ang_neg]
+            if(self.previous_offset < 0):
+                ang_pos = 1.0  # self.current_info["linear_velocity"] / self.semicircle["radius"]  # publish the ang vel with actual lin 
+                ang_neg = -1.0
+            else:
+                ang_pos = -1.0
+                ang_neg = 1.0
+    
 
+            sw_msg.data = [lin_y, lin_x, ang_pos, ang_neg]
+            self.get_logger().info("tag found but not being detected...")
+            # current_time = self.get_clock().now()
+
+            # linear_vel, angular_vel = go_to_tag_undetected(self.previous_time, current_time, self.previous_offset,
+            #                                                self.previous_dis)
+
+            # lin_y = linear_vel
+            # lin_x = 0.0
+            # ang_pos = angular_vel
+            # ang_neg = -angular_vel
+            # sw_msg.data = [lin_y, lin_x, ang_pos, ang_neg]
+
+        self.get_logger().info("Publishing: " + str(sw_msg.data))
         self.publisher_.publish(sw_msg)
-        self.get_logger().info("Publishing swerve...")
+        
+    
+    def final_aruco_info(self):
+
+
+        videoIn = self.videoQueue.get()
+        assert isinstance(videoIn, dai.ImgFrame)
+        frame = videoIn.getCvFrame()  # pass as the img param to the detect aruco function
+        corners, ids, rejected = cv2.aruco.detectMarkers(frame, self.arucoDict, parameters=self.arucoParams)
+        detected_markers = aruco_display(corners, ids, rejected, frame)
+        corners, ids = getBestTag(detected_markers, corners, ids)  # Will make the program display just the best tag
+
+        (corners, ids, _) = corners, ids, rejected
+        #detected_markers = aruco_display(corners, ids, rejected, frame)
+
+        #img = detected_markers
+        #(corners, ids, _) = detect_aruco(img)
+
+        if ids is not None:
+            for i,marker_ids in enumerate(ids):
+                # corners[i]: shape (1, 4, 2)
+                pts = corners[i][0]  # shape (4, 2)
+                xs = pts[:, 0]  # all x coordinates of the 4 corners
+
+                min_x = float(xs.min())
+                max_x = float(xs.max())
+
+                # center-of-tag x in pixels
+                tag_center_x = (min_x + max_x) / 2.0
+                image_center_x = CAMERA_WIDTH / 2.0
+                x_offset = tag_center_x - image_center_x
+
+                # Estimate the distance of the ArUco tag in meters
+                distance_estimate = calculateDistance(corners[0], K, DISTORSION_COEFFS)
+
+                id_num = int(ids[i][0])
+
+                tags[f"{id_num}"] = [int(x_offset), float(distance_estimate)]
+
+                if tags_detected.count(id_num) < 12:
+                    tags_detected.append(id_num)
+
+                for j in range(50):
+                    if tags_detected.count(j) > 11 and j not in tags_fs_detected:
+                        print("Aruco tag with ID " + str(j) + " for sure detected.")
+                        tags_fs_detected.append(j)
+
+                if len(tags_fs_detected) > 0:
+                    target_id = tags_fs_detected[0]
+                    x = tags[f"{target_id}"][0]
+                    dis = tags[f"{target_id}"][1]
+
+                    print(f"Publishing {target_id}, {x}, {dis}")
+                    return [target_id, x, dis]
+
+                else:
+                    target_id = -1.0
+                    x = 0.0
+                    dis = 0.0
+
+                    print("No aruco tags detected")
+                    return [target_id, x, dis]
+
+        else:
+            target_id = -1.0
+            x = 0.0
+            dis = 0.0
+
+            print(f"No aruco tags detected")
+            return [target_id, x, dis]
+
+
 
 
 def main(args=None):
