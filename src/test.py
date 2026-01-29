@@ -176,7 +176,7 @@ class SectorDepthClassifier():
         # This is now passed into the function.
         
         # ** You must update these with your live GPS data **
-        #rover_gps = (43.073107912662266, -89.41245993537561)
+        rover_gps = (43.073107912662266, -89.41245993537561)
         target_gps = (43.0724831900561, -89.41245993537561)
 
         # compute_bearing: angle from North to target in the clockwise direction
@@ -366,18 +366,20 @@ with dai.Pipeline() as pipeline:
     swerve_node = SwervePublisher()
     imu_node = IMUNode()
     #swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
-    verifier = HeadingVerifier(min_move_dist=1.0, alpha=0.2)
+    #verifier = HeadingVerifier(min_move_dist=1.0, alpha=0.2)
     pipeline.start()
+    device = pipeline.getDefaultDevice()
+    print("USB SPEED: ", device.getUsbSpeed())
     current_heading = 0.0
     while pipeline.isRunning():
         rclpy.spin_once(gps_node, timeout_sec=0.0)
         rclpy.spin_once(swerve_node, timeout_sec=0.0)
         rclpy.spin_once(imu_node, timeout_sec=0.0)
 
-        final_heading = verifier.get_corrected_heading(
-            current_imu=imu_node.latest_imu, 
-            current_gps=gps_node.latest_gps
-        )
+        #final_heading = verifier.get_corrected_heading(
+        #    current_imu=imu_node.latest_imu, 
+        #    current_gps=gps_node.latest_gps
+        #)
         # imuData = imuQueue.tryGet()
         # if imuData:
         #     imuPacket = imuData.packets[-1]
@@ -388,9 +390,9 @@ with dai.Pipeline() as pipeline:
         ## --- Depth Data Processing ---
 
 
-        # current_heading = imu_node.latest_imu
-        # # current_heading = (current_heading + 270) % 360
-        # print("current heeading relative to north = ", current_heading)
+        current_heading = imu_node.latest_imu
+        current_heading = (current_heading) % 360
+        print("current heeading relative to north = ", current_heading)
 
         stereoFrame = stereoOut.get()
 
