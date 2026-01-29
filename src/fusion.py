@@ -270,12 +270,12 @@ class FusionNode(Node):
 		north = lat >= 0.0
 		epsg = 32600 + zone if north else 32700 + zone  # WGS84 UTM
 
-		self.utm_zone = zone
-		self.utm_crs = CRS.from_epsg(epsg)
-		self.utm_transformer = Transformer.from_crs(
-		CRS.from_epsg(4326),  # WGS84 lat/lon
-		self.utm_crs,
-		always_xy=True        # expects lon, lat
+		#self.utm_zone = zone
+		#self.utm_crs = CRS.from_epsg(epsg)
+		#self.utm_transformer = Transformer.from_crs(
+		#CRS.from_epsg(4326),  # WGS84 lat/lon
+		#self.utm_crs,
+		#always_xy=True        # expects lon, lat
 		)
 
 
