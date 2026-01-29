@@ -391,7 +391,7 @@ with dai.Pipeline() as pipeline:
 
 
         current_heading = imu_node.latest_imu
-        current_heading = (current_heading) % 360
+        current_heading = (current_heading - 270) % 360
         print("current heeading relative to north = ", current_heading)
 
         stereoFrame = stereoOut.get()
