@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+import depthai as dai
+from sensor_msgs.msg import Image
+import cv2
+from numpy.matlib import empty
+from sensor_msgs.msg import Image
 import math
 import numpy as np
 import time
@@ -8,53 +13,250 @@ from rclpy.node import Node
 import cv_bridge
 from std_msgs.msg import Float32MultiArray
 
+CAMERA_WIDTH = 1280
+CAMERA_HEIGHT = 720
+
+K = [[569.7166137695312, 0.0, 622.4732666015625], [0.0, 569.48486328125, 367.3853454589844], [0.0, 0.0, 1.0]]
+
+DISTORSION_COEFFS = [2.9425814151763916, 0.7698521018028259, -3.687290518428199e-05, 0.00017509849567431957,
+                     0.00862385705113411, 3.298475503921509, 1.6266201734542847, 0.09254294633865356,
+                     0.0, 0.0, 0.0, 0.0, -0.0020870917942374945, 0.004025725182145834]
+
+K = np.array(K, dtype=np.float32)  # 3x3
+DISTORSION_COEFFS = np.array(DISTORSION_COEFFS, dtype=np.float32)
+
+def aruco_display(corners, ids, rejected, image):
+    if len(corners) > 0:
+
+        ids = ids.flatten()
+
+        for (markerCorner, markerID,) in zip(corners, ids):
+            corners = markerCorner.reshape((4, 2))
+            (topLeft, topRight, bottomRight, bottomLeft) = corners
+
+            topRight = (int(topRight[0]), int(topRight[1]))
+            bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
+            bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
+            topLeft = (int(topLeft[0]), int(topLeft[1]))
+
+            cv2.line(image, topLeft, topRight, (0, 255, 0), 2)
+            cv2.line(image, topRight, bottomRight, (0, 255, 0), 2)
+            cv2.line(image, bottomRight, bottomLeft, (0, 255, 0), 2)
+            cv2.line(image, bottomLeft, topLeft, (0, 255, 0), 2)
+
+            cX = int((topLeft[0] + bottomRight[0]) / 2.0)
+            cY = int((topLeft[1] + bottomRight[1]) / 2.0)
+            cv2.circle(image, (cX, cY), 4, (0, 0, 255), -1)
+
+            cv2.putText(image, str(markerID), (topLeft[0], topLeft[1] - 10), cv2.FONT_HERSHEY_PLAIN,
+                        0.5, (0, 255, 0), 2)
+
+            print("[Interference] ArUco marker ID: {}".format(markerID))
+
+    return image
+
+
+'''This function picks picks the tag that is closer to the center of the frame.
+This way we don't have to deal with 2 tags of the same ID and just focus on 1
+side of the post.'''
+def getBestTag(frame, corners, ids):
+    if ids is None or len(corners) == 0:
+        return [], None
+
+    H, W = frame.shape[:2]
+    cy_img, cx_img = H/2, W/2
+
+    # Build list of (squared_distance, index)
+    dists = []
+    for k, c in enumerate(corners):
+        crn = c[0]  # (4,2)
+        cx = float(crn[:, 0].mean())
+        cy = float(crn[:, 1].mean())
+        d2 = (cx - cx_img) ** 2 + (cy - cy_img) ** 2
+        dists.append((d2, k))
+
+    # Pick the min-distance detection
+    _, best_k = min(dists, key=lambda x: x[0])
+    best_corner = corners[best_k]
+    best_id = int(ids[best_k, 0])
+
+    return [best_corner], np.array([[best_id]], dtype=ids.dtype)
+
+
+def calculateDistance(tag_corners, K_matrix, dist_coefficients):  #MAKE K AND DIST COEFFS CONSTANTS INSIDE THE FUNCTION
+    # coordinate of the tag considering real world dimensions
+    tag_dimensions = np.array([[-0.075, 0.075, 0.0],
+                               [0.075, 0.075, 0.0],
+                               [0.075, -0.075, 0.0],
+                               [-0.075, -0.075, 0.0]],
+                              dtype=np.float32)
+
+    # tag_corners = tag_corners[0]
+
+    # Using homogeneous coordinates to get translation and rotation vectors
+    retVal, rVec, tVec = cv2.solvePnP(tag_dimensions, tag_corners, K_matrix, dist_coefficients)
+
+    tVec = tVec.flatten()
+
+    tag_distance = float(np.linalg.norm([tVec[0], tVec[2]])) #distance from the center of the tag in meters. Ignore y
+
+    return tag_distance
+
+
+
+def detect_aruco(img: np.ndarray):
+    """Detects ArUco markers
+
+    @param img (np.ndarray): An OpenCV image
+    @return Tuple[np.ndarray, np.ndarray, np.ndarray]: A tuple containing the corners, ids, and rejected points in the image
+    """
+    arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)  # We want the 4x4 50 dictionary
+    arucoParams = cv2.aruco.DetectorParameters()
+
+    corners, ids, rejected = cv2.aruco.detectMarkers(img, arucoDict, parameters=arucoParams)
+    corners, ids = getBestTag(img, corners, ids)  # Will make the program display just the best tag
+
+    return corners, ids, rejected
+
+
+tags_detected = []
+tags_fs_detected = []
+tags = {}
+
+def final_aruco_info():
+    CAMERA_WIDTH = 1280
+    CAMERA_HEIGHT = 720
+
+    # Initialize camera
+    pipeline = dai.Pipeline()
+    cam = pipeline.create(dai.node.Camera).build()
+    videoQueue = cam.requestOutput(
+        (CAMERA_WIDTH, CAMERA_HEIGHT)
+    ).createOutputQueue()
+    pipeline.start()
+
+    arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)  # We want the 4x4 50 dictionary
+    arucoParams = cv2.aruco.DetectorParameters()
+
+    videoIn = videoQueue.get()
+    assert isinstance(videoIn, dai.ImgFrame)
+    frame = videoIn.getCvFrame()  # pass as the img param to the detect aruco function
+    corners, ids, rejected = cv2.aruco.detectMarkers(frame, arucoDict, parameters=arucoParams)
+    detected_markers = aruco_display(corners, ids, rejected, frame)
+
+    img = detected_markers
+    (corners, ids, _) = detect_aruco(img)
+
+    if ids is not None:
+        for i, marker_id in enumerate(ids):
+            # corners[i]: shape (1, 4, 2)
+            pts = corners[i][0]  # shape (4, 2)
+            xs = pts[:, 0]  # all x coordinates of the 4 corners
+
+            min_x = float(xs.min())
+            max_x = float(xs.max())
+
+            # center-of-tag x in pixels
+            tag_center_x = (min_x + max_x) / 2.0
+            image_center_x = CAMERA_WIDTH / 2.0
+            x_offset = tag_center_x - image_center_x
+
+            # Estimate the distance of the ArUco tag in meters
+            distance_estimate = calculateDistance(corners[0], K, DISTORSION_COEFFS)
+
+            id_num = int(ids[i][0])
+
+            tags[f"{id_num}"] = [int(x_offset), float(distance_estimate)]
+
+            if tags_detected.count(id_num) < 12:
+                tags_detected.append(id_num)
+
+            for j in range(50):
+                if tags_detected.count(j) > 11 and j not in tags_fs_detected:
+                    print("Aruco tag with ID " + str(j) + " for sure detected.")
+                    tags_fs_detected.append(j)
+
+            if len(tags_fs_detected) > 0:
+                target_id = tags_fs_detected[0]
+                x = tags[f"{target_id}"][0]
+                dis = tags[f"{target_id}"][1]
+
+                print(f"Publishing {target_id}, {x}, {dis}")
+                return [target_id, x, dis]
+
+            else:
+                target_id = -1.0
+                x = 0.0
+                dis = 0.0
+
+                print("No aruco tags detected")
+                return [target_id, x, dis]
+
+    else:
+        target_id = -1.0
+        x = 0.0
+        dis = 0.0
+
+        print(f"No aruco tags detected")
+        return [target_id, x, dis]
+
+
+
+
+
+
+
+
+
+
+
 
 '''A dictionary with the 2 circles inside (GNSS points area of search). Each circle contains the number of semicircles
 that will be used to search for the aruco tag, each of these with their respective radius, start positions, and end
 positions'''
 circles = {
-    "big_circle" : {
-        "semicircle_1" : {
-            "radius" : 20,
-            "start" : 0,
+    "big_circle": {
+        "semicircle_1": {
+            "radius": 20,
+            "start": 0,
             "end": lambda theta: math.pi <= theta <= (3 * math.pi) / 2
         },
-        "semicircle_2" : {
-            "radius" : 17.5,
-            "start" : math.pi,
+        "semicircle_2": {
+            "radius": 17.5,
+            "start": math.pi,
             "end": lambda theta: 0 <= theta <= (math.pi / 2)
         },
-        "semicircle_3" : {
-            "radius" : 15,
-            "start" : 0,
+        "semicircle_3": {
+            "radius": 15,
+            "start": 0,
             "end": lambda theta: math.pi <= theta <= (3 * math.pi) / 2
         },
-        "semicircle_4" : {
-            "radius" : 12.5,
-            "start" : math.pi,
+        "semicircle_4": {
+            "radius": 12.5,
+            "start": math.pi,
             "end": lambda theta: 0 <= theta <= (math.pi / 2)
         },
-        "semicircle_5" : {
-            "radius" : 10,
-            "start" : 0,
+        "semicircle_5": {
+            "radius": 10,
+            "start": 0,
             "end": lambda theta: math.pi <= theta <= (3 * math.pi) / 2
         }
     },
 
-    "small_circle" : {
-        "semicircle_1" : {
-            "radius" : 10,
-            "start" : 0,
+    "small_circle": {
+        "semicircle_1": {
+            "radius": 10,
+            "start": 0,
             "end": lambda theta: math.pi <= theta <= (3 * math.pi) / 2
         },
-        "semicircle_2" : {
-            "radius" : 7.5,
-            "start" : math.pi,
+        "semicircle_2": {
+            "radius": 7.5,
+            "start": math.pi,
             "end": lambda theta: 0 <= theta <= (math.pi / 2)
         },
-        "semicircle_3" : {
-            "radius" : 5,
-            "start" : 0,
+        "semicircle_3": {
+            "radius": 5,
+            "start": 0,
             "end": lambda theta: math.pi <= theta <= (3 * math.pi) / 2
         }
     }
@@ -91,7 +293,6 @@ def semicircle_segmentation(semicircle, distance):
 
         return theta
 
-
     angle_gap = angle_gaps_between_points(semicircle["radius"], distance)
     # Number of segments for semicircle:
     num_seg = int(math.pi // angle_gap) + 1
@@ -117,7 +318,7 @@ def semicircle_segmentation(semicircle, distance):
         if semicircle["start"] != 0:
             make_negative = math.pi
         # Append every reference point of path with respective angle and orientation:
-        for i in range (num_seg):
+        for i in range(num_seg):
             angle = (i * theta) + make_negative
             # Rover will always turn counter-clockwise and will be perpendicular to the radius:
             orientation = angle + (math.pi / 2)
@@ -126,18 +327,18 @@ def semicircle_segmentation(semicircle, distance):
             x_val = semicircle["radius"] * math.cos(angle)
             y_val = semicircle["radius"] * math.sin(angle)
             pts.append({
-                "x_position" : x_val,
-                "y_position" : y_val,
-                "angle" : angle,
-                "orientation" : orientation
+                "x_position": x_val,
+                "y_position": y_val,
+                "angle": angle,
+                "orientation": orientation
             })
         # We append the last point with the real value of pi
         if semicircle["start"] == 0:
             pts.append({
-                "x_position" : semicircle["radius"] * -1,
-                "y_position" : 0.0,
-                "angle" : math.pi,
-                "orientation" : math.pi + math.pi / 2
+                "x_position": semicircle["radius"] * -1,
+                "y_position": 0.0,
+                "angle": math.pi,
+                "orientation": math.pi + math.pi / 2
             })
         else:
             pts.append({
@@ -147,7 +348,6 @@ def semicircle_segmentation(semicircle, distance):
                 "orientation": math.pi / 2
             })
         return pts
-
 
     points = create_points_list(our_theta)
 
@@ -167,24 +367,27 @@ def get_reference_point(current_point, list_of_points, current_semicircle):
     because this way it will keep moving forward. This should be a dictionary.
     '''
     reference_point = 0
-    for i in range(len(list_of_points)-1):
+    for i in range(len(list_of_points) - 1):
         # See if the current angle of the rover is in between two points of the semicircle
         if list_of_points[i]["angle"] <= current_point["angle"] < list_of_points[i + 1]["angle"]:
             # use that point as reference
-            reference_point = list_of_points[i+1]
+            reference_point = list_of_points[i + 1]
 
     # Take the first point in the semicircle as reference if the current position of the rover is on the previous
     # quadrant of the start point of the semicircle
     if reference_point == 0:
-        if ((current_semicircle["start"] == 0 and (3 * math.pi) / 2 < current_point["angle"] < current_semicircle["start"]) or
-                (current_semicircle["start"] != 0 and math.pi / 2 < current_point["angle"] < current_semicircle["start"])):
+        if ((current_semicircle["start"] == 0 and (3 * math.pi) / 2 < current_point["angle"] < current_semicircle[
+            "start"]) or
+                (current_semicircle["start"] != 0 and math.pi / 2 < current_point["angle"] < current_semicircle[
+                    "start"])):
             reference_point = list_of_points[0]
 
 
         else:
             # print the current position_angle
             print("Point of reference not found. Probably already greater than pi or 0.")
-            print(f"Current position: {current_point['x_position']}, {current_point['y_position']}, {current_point['angle']}")
+            print(
+                f"Current position: {current_point['x_position']}, {current_point['y_position']}, {current_point['angle']}")
             reference_point = list_of_points[-1]
 
     return reference_point
@@ -229,7 +432,7 @@ def get_current_semicircle(circle, semicircle, semicircle_num, current_info, ful
     :return: Returns the updated (or not) values of the current circle and semicircle.
     '''
     # Define the number of semicircled for each circle:
-    cir_len = 3 # 5
+    cir_len = 3  # 5
     # Check if the rover has completed the current semicircle:
     if semicircle["end"](current_info["angle"]):  # Boolean expression from the circles dictionary
         if semicircle_num < cir_len:
@@ -263,6 +466,7 @@ def normalize_angle(angle):
         a += 2.0 * math.pi
     return a - math.pi
 
+
 def shortest_angular_error(theta_current, theta_goal):
     '''
     A way of knowing the shortest rotation path (positive or negative) for an object to be in a desired orientation.
@@ -289,7 +493,7 @@ def go_to_tag(x_offset, distance, linear_velocity):
     x_center = 620  # center of screen in pixels
     angular_vel = 0.0
     linear_vel = linear_velocity
-    low_lin_vel = linear_vel / 2 #slower linear velocity for when we are close to the tag
+    low_lin_vel = linear_vel / 2  # slower linear velocity for when we are close to the tag
 
     if 1.0 < distance < 2.5:
         linear_vel = low_lin_vel
@@ -324,9 +528,10 @@ def go_to_tag_undetected(time_since_undetection, current_time, last_off, last_di
 
     r = linear_vel / angular_vel
 
-    max_alignment_distance = (2 * math.pi * r) / 5    # focal width of camera is 150 degrees
-                                                      # and rover will turn only in one direction
-                                                      # so 75 deg, which is about 1/5 of circumference
+    max_alignment_distance = (2 * math.pi * r) / 5  # focal width of camera is 150 degrees
+
+    # and rover will turn only in one direction
+    # so 75 deg, which is about 1/5 of circumference
 
     def estimation(last_offset, last_distance):
         last_offset = abs(last_offset)
@@ -335,7 +540,7 @@ def go_to_tag_undetected(time_since_undetection, current_time, last_off, last_di
         if last_distance < 1.5:
             d = 0.0
         elif last_distance < 3:
-            if 100 <last_offset < 300:
+            if 100 < last_offset < 300:
                 d = max_alignment_distance * 0.4
             elif last_offset < 500:
                 d = max_alignment_distance * 0.7
@@ -374,11 +579,11 @@ class DriveLogic(Node):
     def __init__(self):
         super().__init__('drive_logic')
         self.publisher_ = self.create_publisher(Float32MultiArray, '/swerve', 10)
-        self.aruco_subscription = self.create_subscription(Float32MultiArray, 'aruco_results', self.aruco_callback, 10)
-        #self.localization_subscription = self.create_subscription(Float32MultiArray, 'localization_info', self.localization_callback, 10)
-        #self.imu_subscription = self.create_subscription(Float32MultiArray, "imu_info", self.imu_callback, 10)
+        # self.localization_subscription = self.create_subscription(Float32MultiArray, 'localization_info',
+        #                                                           self.localization_callback, 10)
+        # self.imu_subscription = self.create_subscription(Float32MultiArray, "imu_info", self.imu_callback, 10)
 
-        self.circle = "small"  #big
+        self.circle = "small"  # big
         self.sc_num = 1
         self.semicircle = circles[f"{self.circle}_circle"][f"semicircle_{self.sc_num}"]
 
@@ -393,13 +598,13 @@ class DriveLogic(Node):
         self.oriented_to_normal_path = False
         self.ended_reorientation = True
 
-        self.full_search_done = False   # check if the full search has been done without finding a tag
+        self.full_search_done = False  # check if the full search has been done without finding a tag
 
         self.current_info = {}
 
-        #self.current_time = 0.0
+        # self.current_time = 0.0
         self.start_time = self.get_clock().now()
-        #self.timer = self.create_timer(0.01, self.update_time)  # 100 Hz
+        # self.timer = self.create_timer(0.01, self.update_time)  # 100 Hz
 
         self.ended_search_drive = False
         self.previous_offset = 0.0
@@ -409,61 +614,56 @@ class DriveLogic(Node):
         self.aruco_msg = None
         self.localization_msg = None
         self.imu_msg = None
-        self.aruco_subscription
 
-        #self.subscription  # prevent unused variable warning
-
-    def aruco_callback(self, msg):
-        self.aruco_msg = msg
-        self.drive_callback()
-
-    def localization_callback(self, msg):
-        self.localization_msg = msg
-        self.drive_callback()
-
-    def imu_callback(self, msg):
-        self.imu_msg = msg
-        self.drive_callback()
+        # self.subscription  # prevent unused variable warning
 
 
-    def drive_callback(self, msg):
+    # def localization_callback(self, msg):
+    #     self.localization_msg = msg
+    #     self.drive_callback()
+    #
+    # def imu_callback(self, msg):
+    #     self.imu_msg = msg
+    #     self.drive_callback()
+
+    def drive_callback(self):
         # wait until we’ve received at least one message from each topic
-        if (self.aruco_msg is None):
-        #if (self.aruco_msg is None or
-            #self.localization_msg is None or
-            #self.imu_msg is None):
-            return
-        
+        # if (self.localization_msg is None or self.imu_msg is None):
+        #     return
 
-        self.aruco_msg.data[0] = int (self.aruco_msg.data[0])
-        aruco = self.aruco_msg
-        localization = self.localization_msg
-        imu = self.imu_msg
 
-        no_tag_found_yet = aruco.data[0] == -1.0 and aruco.data[1] == 0.0 and aruco.data[2] == 0.0 and self.ended_search_drive == False
-        detecting_a_tag = aruco.data[0] != -1.0 or aruco.data[1] != 0.0 or aruco.data[2] != 0.0
-        tag_found_but_not_being_detected = aruco.data[0] == -1.0 and aruco.data[1] == 0.0 and aruco.data[2] == 0.0 and self.ended_search_drive == True
+        aruco = final_aruco_info()
+        # localization = self.localization_msg
+        # imu = self.imu_msg
+
+        no_tag_found_yet = (aruco[0] == -1.0 and aruco[1] == 0.0 and aruco[2] == 0.0
+                            and self.ended_search_drive == False)
+
+        detecting_a_tag = aruco[0] != -1.0 or aruco[1] != 0.0 or aruco[2] != 0.0
+
+        tag_found_but_not_being_detected = (aruco[0] == -1.0 and aruco[1] == 0.0
+                                            and aruco[2] == 0.0 and self.ended_search_drive == True)
 
         # BEFORE THIS CODE, TURN THE LOCALIZATION INFO (AND ORIENTATION FROM IMU) TO OUR LOCAL
         # COORDINATES (CENTER OF THE CIRCLE AS THE ORIGIN, AND INITIAL POSITION OF ROVER AS (radius, 0).
-        #actual_x_linear_vel, actual_y_linear_vel, actual_angular_vel, current_orientation = imu.data
+        # actual_x_linear_vel, actual_y_linear_vel, actual_angular_vel, current_orientation = imu.data
+        #
+        # current_x_position, current_y_position = localization.data
 
-        #current_x_position, current_y_position = localization.data
-
-        #current_radius = math.sqrt((current_x_position ** 2) + (current_y_position ** 2))
-        #current_angle = math.atan2(current_y_position, current_x_position)
-
-        #if current_angle < 0:
-        #    current_angle += 2 * math.pi
-
-        #self.current_info = {
-        #    "x_position" : current_x_position,
-        #    "y_position" : current_y_position,
-        #    "angle" : current_angle,
-        #    "orientation" : current_orientation,
-        #    "radius" : current_radius,
-        #    "linear_velocity" : actual_x_linear_vel
-        #}
+        # current_radius = math.sqrt((current_x_position ** 2) + (current_y_position ** 2))
+        # current_angle = math.atan2(current_y_position, current_x_position)
+        #
+        # if current_angle < 0:
+        #     current_angle += 2 * math.pi
+        #
+        # self.current_info = {
+        #     "x_position": current_x_position,
+        #     "y_position": current_y_position,
+        #     "angle": current_angle,
+        #     "orientation": current_orientation,
+        #     "radius": current_radius,
+        #     "linear_velocity": actual_x_linear_vel
+        # }
 
         sw_msg = Float32MultiArray()
 
@@ -582,7 +782,6 @@ class DriveLogic(Node):
 
         #     sw_msg.data = [lin_y, lin_x, ang_pos, ang_neg]
 
-
         # elif detecting_a_tag:
         #     linear_velocity = 1.5
         #     linear_vel, angular_vel = go_to_tag(aruco.data[1], aruco.data[2], linear_velocity)
@@ -623,12 +822,12 @@ class DriveLogic(Node):
 
         elif detecting_a_tag:
             linear_velocity = 1.5
-            linear_vel, angular_vel = go_to_tag(aruco.data[1], aruco.data[2], linear_velocity)
+            linear_vel, angular_vel = go_to_tag(aruco[1], aruco[2], linear_velocity)
 
             self.full_search_done = True
             self.ended_search_drive = True
-            self.previous_offset = aruco.data[1]
-            self.previous_dis = aruco.data[2]
+            self.previous_offset = aruco[1]
+            self.previous_dis = aruco[2]
             self.previous_time = self.get_clock().now()
 
             lin_y = linear_vel
@@ -641,7 +840,7 @@ class DriveLogic(Node):
             current_time = self.get_clock().now()
 
             linear_vel, angular_vel = go_to_tag_undetected(self.previous_time, current_time, self.previous_offset,
-                                                        self.previous_dis)
+                                                           self.previous_dis)
 
             lin_y = linear_vel
             lin_x = 0.0
