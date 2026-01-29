@@ -375,8 +375,8 @@ class DriveLogic(Node):
         super().__init__('drive_logic')
         self.publisher_ = self.create_publisher(Float32MultiArray, '/swerve', 10)
         self.aruco_subscription = self.create_subscription(Float32MultiArray, 'aruco_results', self.aruco_callback, 10)
-        self.localization_subscription = self.create_subscription(Float32MultiArray, 'localization_info', self.localization_callback, 10)
-        self.imu_subscription = self.create_subscription(Float32MultiArray, "imu_info", self.imu_callback, 10)
+        #self.localization_subscription = self.create_subscription(Float32MultiArray, 'localization_info', self.localization_callback, 10)
+        #self.imu_subscription = self.create_subscription(Float32MultiArray, "imu_info", self.imu_callback, 10)
 
         self.circle = "small"  #big
         self.sc_num = 1
@@ -427,9 +427,10 @@ class DriveLogic(Node):
 
     def drive_callback(self):
         # wait until we’ve received at least one message from each topic
-        if (self.aruco_msg is None or
-            self.localization_msg is None or
-            self.imu_msg is None):
+        if (self.aruco_msg is None):
+        #if (self.aruco_msg is None or
+            #self.localization_msg is None or
+            #self.imu_msg is None):
             return
 
         self.aruco_msg.data[0] = int (self.aruco_msg.data[0])
@@ -443,24 +444,24 @@ class DriveLogic(Node):
 
         # BEFORE THIS CODE, TURN THE LOCALIZATION INFO (AND ORIENTATION FROM IMU) TO OUR LOCAL
         # COORDINATES (CENTER OF THE CIRCLE AS THE ORIGIN, AND INITIAL POSITION OF ROVER AS (radius, 0).
-        actual_x_linear_vel, actual_y_linear_vel, actual_angular_vel, current_orientation = imu.data
+        #actual_x_linear_vel, actual_y_linear_vel, actual_angular_vel, current_orientation = imu.data
 
-        current_x_position, current_y_position = localization.data
+        #current_x_position, current_y_position = localization.data
 
-        current_radius = math.sqrt((current_x_position ** 2) + (current_y_position ** 2))
-        current_angle = math.atan2(current_y_position, current_x_position)
+        #current_radius = math.sqrt((current_x_position ** 2) + (current_y_position ** 2))
+        #current_angle = math.atan2(current_y_position, current_x_position)
 
-        if current_angle < 0:
-            current_angle += 2 * math.pi
+        #if current_angle < 0:
+        #    current_angle += 2 * math.pi
 
-        self.current_info = {
-            "x_position" : current_x_position,
-            "y_position" : current_y_position,
-            "angle" : current_angle,
-            "orientation" : current_orientation,
-            "radius" : current_radius,
-            "linear_velocity" : actual_x_linear_vel
-        }
+        #self.current_info = {
+        #    "x_position" : current_x_position,
+        #    "y_position" : current_y_position,
+        #    "angle" : current_angle,
+        #    "orientation" : current_orientation,
+        #    "radius" : current_radius,
+        #    "linear_velocity" : actual_x_linear_vel
+        #}
 
         sw_msg = Float32MultiArray()
 
