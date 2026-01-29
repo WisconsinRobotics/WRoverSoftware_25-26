@@ -1,0 +1,736 @@
+[0.031s] Invoking command in '/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_compass': CMAKE_PREFIX_PATH=/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion:/home/wiscrobo/workspace/WRoverSoftware_25-26/install/telemetry:/opt/ros/humble PS1=\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ /usr/bin/cmake --build /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_compass -- -j4 -l4
+[0.125s] [35m[1mConsolidate compiler generated dependencies of target compass[0m
+[0.164s] [ 50%] [32mBuilding CXX object CMakeFiles/compass.dir/src/compass.cpp.o[0m
+[6.554s] In file included from [01m[K/usr/include/phoenix6/units/time.h:29[m[K,
+[6.554s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/configs/Configurator.hpp:14[m[K,
+[6.555s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/hardware/ParentDevice.hpp:10[m[K,
+[6.555s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/core/CorePigeon2.hpp:9[m[K,
+[6.555s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/Pigeon2.hpp:9[m[K,
+[6.555s]                  from [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7[m[K:
+[6.555s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::second_t units::literals::operator""_s(long double)[m[K’:
+[6.555s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.555s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.555s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.568s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::femtosecond_t units::literals::operator""_fs(long double)[m[K’:
+[6.568s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.568s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.568s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.574s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::picosecond_t units::literals::operator""_ps(long double)[m[K’:
+[6.574s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.574s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.575s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.580s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::nanosecond_t units::literals::operator""_ns(long double)[m[K’:
+[6.580s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.580s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.580s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.585s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::microsecond_t units::literals::operator""_us(long double)[m[K’:
+[6.585s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.586s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.586s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.590s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::millisecond_t units::literals::operator""_ms(long double)[m[K’:
+[6.590s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.590s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.590s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.596s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::centisecond_t units::literals::operator""_cs(long double)[m[K’:
+[6.596s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.596s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.596s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.602s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::decisecond_t units::literals::operator""_ds(long double)[m[K’:
+[6.603s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.603s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.604s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.608s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::decasecond_t units::literals::operator""_das(long double)[m[K’:
+[6.608s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.608s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.608s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.613s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::hectosecond_t units::literals::operator""_hs(long double)[m[K’:
+[6.613s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<100, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.613s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.613s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.617s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::kilosecond_t units::literals::operator""_ks(long double)[m[K’:
+[6.617s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.617s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.617s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.621s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::megasecond_t units::literals::operator""_Ms(long double)[m[K’:
+[6.622s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.622s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.622s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.626s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::gigasecond_t units::literals::operator""_Gs(long double)[m[K’:
+[6.626s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.626s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.627s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.631s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::terasecond_t units::literals::operator""_Ts(long double)[m[K’:
+[6.631s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.631s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.631s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.638s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::petasecond_t units::literals::operator""_Ps(long double)[m[K’:
+[6.639s] [01m[K/usr/include/phoenix6/units/time.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.639s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(time, second, seconds, s,
+[6.639s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.641s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::minute_t units::literals::operator""_min(long double)[m[K’:
+[6.642s] [01m[K/usr/include/phoenix6/units/time.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<60>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.642s]    43 | [01;36m[KUNIT_ADD[m[K(time, minute, minutes, min, unit<std::ratio<60>, seconds>)
+[6.642s]       | [01;36m[K^~~~~~~~[m[K
+[6.647s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::hour_t units::literals::operator""_hr(long double)[m[K’:
+[6.648s] [01m[K/usr/include/phoenix6/units/time.h:44:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<60>, units::unit<std::ratio<60>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.648s]    44 | [01;36m[KUNIT_ADD[m[K(time, hour, hours, hr, unit<std::ratio<60>, minutes>)
+[6.648s]       | [01;36m[K^~~~~~~~[m[K
+[6.655s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::day_t units::literals::operator""_d(long double)[m[K’:
+[6.655s] [01m[K/usr/include/phoenix6/units/time.h:45:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<24>, units::unit<std::ratio<60>, units::unit<std::ratio<60>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.656s]    45 | [01;36m[KUNIT_ADD[m[K(time, day, days, d, unit<std::ratio<24>, hours>)
+[6.656s]       | [01;36m[K^~~~~~~~[m[K
+[6.662s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::week_t units::literals::operator""_wk(long double)[m[K’:
+[6.663s] [01m[K/usr/include/phoenix6/units/time.h:46:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<7>, units::unit<std::ratio<24>, units::unit<std::ratio<60>, units::unit<std::ratio<60>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.663s]    46 | [01;36m[KUNIT_ADD[m[K(time, week, weeks, wk, unit<std::ratio<7>, days>)
+[6.663s]       | [01;36m[K^~~~~~~~[m[K
+[6.669s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::year_t units::literals::operator""_yr(long double)[m[K’:
+[6.671s] [01m[K/usr/include/phoenix6/units/time.h:47:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<365>, units::unit<std::ratio<24>, units::unit<std::ratio<60>, units::unit<std::ratio<60>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.672s]    47 | [01;36m[KUNIT_ADD[m[K(time, year, years, yr, unit<std::ratio<365>, days>)
+[6.672s]       | [01;36m[K^~~~~~~~[m[K
+[6.675s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::julian_year_t units::literals::operator""_a_j(long double)[m[K’:
+[6.675s] [01m[K/usr/include/phoenix6/units/time.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<31557600>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.675s]    48 | [01;36m[KUNIT_ADD[m[K(time, julian_year, julian_years, a_j,
+[6.675s]       | [01;36m[K^~~~~~~~[m[K
+[6.680s] [01m[K/usr/include/phoenix6/units/time.h:[m[K In function ‘[01m[Kconstexpr units::time::gregorian_year_t units::literals::operator""_a_g(long double)[m[K’:
+[6.681s] [01m[K/usr/include/phoenix6/units/time.h:50:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<31556952>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.681s]    50 | [01;36m[KUNIT_ADD[m[K(time, gregorian_year, gregorian_years, a_g,
+[6.681s]       | [01;36m[K^~~~~~~~[m[K
+[6.728s] In file included from [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:13[m[K,
+[6.729s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/hardware/ParentDevice.hpp:15[m[K,
+[6.729s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/core/CorePigeon2.hpp:9[m[K,
+[6.729s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/Pigeon2.hpp:9[m[K,
+[6.729s]                  from [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7[m[K:
+[6.729s] [01m[K/usr/include/phoenix6/ctre/phoenix6/Timestamp.hpp:[m[K In member function ‘[01m[Kunits::time::second_t ctre::phoenix6::Timestamp::GetTime() const[m[K’:
+[6.729s] [01m[K/usr/include/phoenix6/ctre/phoenix6/Timestamp.hpp:97:9:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.730s]    97 |         [01;36m[K{[m[K
+[6.730s]       |         [01;36m[K^[m[K
+[6.735s] In file included from [01m[K/usr/include/phoenix6/units/time.h:29[m[K,
+[6.735s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/configs/Configurator.hpp:14[m[K,
+[6.735s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/hardware/ParentDevice.hpp:10[m[K,
+[6.735s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/core/CorePigeon2.hpp:9[m[K,
+[6.735s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/Pigeon2.hpp:9[m[K,
+[6.735s]                  from [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7[m[K:
+[6.736s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::hertz_t units::literals::operator""_Hz(long double)[m[K’:
+[6.736s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.736s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.736s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.739s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::femtohertz_t units::literals::operator""_fHz(long double)[m[K’:
+[6.739s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.739s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.740s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.744s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::picohertz_t units::literals::operator""_pHz(long double)[m[K’:
+[6.744s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.744s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.744s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.747s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::nanohertz_t units::literals::operator""_nHz(long double)[m[K’:
+[6.747s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.747s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.747s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.751s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::microhertz_t units::literals::operator""_uHz(long double)[m[K’:
+[6.751s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.751s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.752s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.755s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::millihertz_t units::literals::operator""_mHz(long double)[m[K’:
+[6.755s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.755s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.755s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.760s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::centihertz_t units::literals::operator""_cHz(long double)[m[K’:
+[6.760s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.760s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.760s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.763s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::decihertz_t units::literals::operator""_dHz(long double)[m[K’:
+[6.763s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.763s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.764s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.768s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::decahertz_t units::literals::operator""_daHz(long double)[m[K’:
+[6.769s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.769s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.769s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.774s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::hectohertz_t units::literals::operator""_hHz(long double)[m[K’:
+[6.774s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<100, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.774s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.774s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.776s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::kilohertz_t units::literals::operator""_kHz(long double)[m[K’:
+[6.776s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.777s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.777s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.780s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::megahertz_t units::literals::operator""_MHz(long double)[m[K’:
+[6.780s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.781s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.781s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.784s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::gigahertz_t units::literals::operator""_GHz(long double)[m[K’:
+[6.784s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.784s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.785s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.788s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::terahertz_t units::literals::operator""_THz(long double)[m[K’:
+[6.788s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.788s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.789s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.792s] [01m[K/usr/include/phoenix6/units/frequency.h:[m[K In function ‘[01m[Kconstexpr units::frequency::petahertz_t units::literals::operator""_PHz(long double)[m[K’:
+[6.792s] [01m[K/usr/include/phoenix6/units/frequency.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.792s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[6.793s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.904s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::radian_t units::literals::operator""_rad(long double)[m[K’:
+[6.904s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.904s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.904s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.908s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::femtoradian_t units::literals::operator""_frad(long double)[m[K’:
+[6.908s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.909s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.909s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.912s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::picoradian_t units::literals::operator""_prad(long double)[m[K’:
+[6.912s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.912s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.913s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.916s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::nanoradian_t units::literals::operator""_nrad(long double)[m[K’:
+[6.916s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.917s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.917s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.921s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::microradian_t units::literals::operator""_urad(long double)[m[K’:
+[6.921s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.921s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.921s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.925s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::milliradian_t units::literals::operator""_mrad(long double)[m[K’:
+[6.925s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.925s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.925s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.929s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::centiradian_t units::literals::operator""_crad(long double)[m[K’:
+[6.929s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.929s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.929s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.933s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::deciradian_t units::literals::operator""_drad(long double)[m[K’:
+[6.933s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.933s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.933s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.938s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::decaradian_t units::literals::operator""_darad(long double)[m[K’:
+[6.939s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.939s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.939s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.942s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::hectoradian_t units::literals::operator""_hrad(long double)[m[K’:
+[6.943s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<100, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.943s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.943s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.946s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::kiloradian_t units::literals::operator""_krad(long double)[m[K’:
+[6.947s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.947s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.947s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.951s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::megaradian_t units::literals::operator""_Mrad(long double)[m[K’:
+[6.951s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.951s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.951s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.955s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::gigaradian_t units::literals::operator""_Grad(long double)[m[K’:
+[6.955s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.955s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.956s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.959s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::teraradian_t units::literals::operator""_Trad(long double)[m[K’:
+[6.959s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.959s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.959s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.963s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::petaradian_t units::literals::operator""_Prad(long double)[m[K’:
+[6.964s] [01m[K/usr/include/phoenix6/units/angle.h:41:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.964s]    41 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(angle, radian, radians, rad,
+[6.964s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[6.974s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::degree_t units::literals::operator""_deg(long double)[m[K’:
+[6.974s] [01m[K/usr/include/phoenix6/units/angle.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.975s]    43 | [01;36m[KUNIT_ADD[m[K(angle, degree, degrees, deg,
+[6.975s]       | [01;36m[K^~~~~~~~[m[K
+[6.982s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::arcminute_t units::literals::operator""_arcmin(long double)[m[K’:
+[6.982s] [01m[K/usr/include/phoenix6/units/angle.h:45:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 60>, units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.983s]    45 | [01;36m[KUNIT_ADD[m[K(angle, arcminute, arcminutes, arcmin, unit<std::ratio<1, 60>, degrees>)
+[6.983s]       | [01;36m[K^~~~~~~~[m[K
+[6.989s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::arcsecond_t units::literals::operator""_arcsec(long double)[m[K’:
+[6.989s] [01m[K/usr/include/phoenix6/units/angle.h:46:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 60>, units::unit<std::ratio<1, 60>, units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.989s]    46 | [01;36m[KUNIT_ADD[m[K(angle, arcsecond, arcseconds, arcsec,
+[6.989s]       | [01;36m[K^~~~~~~~[m[K
+[6.995s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::milliarcsecond_t units::literals::operator""_mas(long double)[m[K’:
+[6.995s] [01m[K/usr/include/phoenix6/units/angle.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000>, units::unit<std::ratio<1, 60>, units::unit<std::ratio<1, 60>, units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[6.995s]    48 | [01;36m[KUNIT_ADD[m[K(angle, milliarcsecond, milliarcseconds, mas, milli<arcseconds>)
+[6.995s]       | [01;36m[K^~~~~~~~[m[K
+[7.004s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::turn_t units::literals::operator""_tr(long double)[m[K’:
+[7.004s] [01m[K/usr/include/phoenix6/units/angle.h:49:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<2>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.005s]    49 | [01;36m[KUNIT_ADD[m[K(angle, turn, turns, tr, unit<std::ratio<2>, radians, std::ratio<1>>)
+[7.005s]       | [01;36m[K^~~~~~~~[m[K
+[7.009s] [01m[K/usr/include/phoenix6/units/angle.h:[m[K In function ‘[01m[Kconstexpr units::angle::gradian_t units::literals::operator""_gon(long double)[m[K’:
+[7.009s] [01m[K/usr/include/phoenix6/units/angle.h:50:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 400>, units::unit<std::ratio<2>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.009s]    50 | [01;36m[KUNIT_ADD[m[K(angle, gradian, gradians, gon, unit<std::ratio<1, 400>, turns>)
+[7.010s]       | [01;36m[K^~~~~~~~[m[K
+[7.014s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::volt_t units::literals::operator""_V(long double)[m[K’:
+[7.014s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.014s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.014s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.018s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::femtovolt_t units::literals::operator""_fV(long double)[m[K’:
+[7.018s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.018s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.019s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.022s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::picovolt_t units::literals::operator""_pV(long double)[m[K’:
+[7.022s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.022s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.023s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.026s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::nanovolt_t units::literals::operator""_nV(long double)[m[K’:
+[7.026s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.026s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.027s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.030s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::microvolt_t units::literals::operator""_uV(long double)[m[K’:
+[7.030s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.031s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.031s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.046s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::millivolt_t units::literals::operator""_mV(long double)[m[K’:
+[7.046s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.047s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.047s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.051s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::centivolt_t units::literals::operator""_cV(long double)[m[K’:
+[7.051s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.051s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.051s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.055s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::decivolt_t units::literals::operator""_dV(long double)[m[K’:
+[7.055s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.056s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.056s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.059s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::decavolt_t units::literals::operator""_daV(long double)[m[K’:
+[7.059s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.060s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.060s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.063s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::hectovolt_t units::literals::operator""_hV(long double)[m[K’:
+[7.063s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<100, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.063s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.064s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.067s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::kilovolt_t units::literals::operator""_kV(long double)[m[K’:
+[7.067s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.067s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.067s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.071s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::megavolt_t units::literals::operator""_MV(long double)[m[K’:
+[7.071s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.072s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.072s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.075s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::gigavolt_t units::literals::operator""_GV(long double)[m[K’:
+[7.075s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.075s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.075s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.079s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::teravolt_t units::literals::operator""_TV(long double)[m[K’:
+[7.079s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.079s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.080s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.083s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::petavolt_t units::literals::operator""_PV(long double)[m[K’:
+[7.083s] [01m[K/usr/include/phoenix6/units/voltage.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.084s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.084s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.092s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::statvolt_t units::literals::operator""_statV(long double)[m[K’:
+[7.092s] [01m[K/usr/include/phoenix6/units/voltage.h:44:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000, 299792458>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.092s]    44 | [01;36m[KUNIT_ADD[m[K(voltage, statvolt, statvolts, statV,
+[7.092s]       | [01;36m[K^~~~~~~~[m[K
+[7.098s] [01m[K/usr/include/phoenix6/units/voltage.h:[m[K In function ‘[01m[Kconstexpr units::voltage::abvolt_t units::literals::operator""_abV(long double)[m[K’:
+[7.098s] [01m[K/usr/include/phoenix6/units/voltage.h:46:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-3>, std::ratio<0, 1>, std::ratio<-1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.098s]    46 | [01;36m[KUNIT_ADD[m[K(voltage, abvolt, abvolts, abV, unit<std::ratio<1, 100000000>, volts>)
+[7.099s]       | [01;36m[K^~~~~~~~[m[K
+[7.103s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::meter_t units::literals::operator""_m(long double)[m[K’:
+[7.103s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.104s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.104s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.107s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::femtometer_t units::literals::operator""_fm(long double)[m[K’:
+[7.107s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.107s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.108s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.111s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::picometer_t units::literals::operator""_pm(long double)[m[K’:
+[7.111s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.111s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.111s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.115s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::nanometer_t units::literals::operator""_nm(long double)[m[K’:
+[7.115s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.115s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.115s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.122s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::micrometer_t units::literals::operator""_um(long double)[m[K’:
+[7.124s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.124s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.124s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.124s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::millimeter_t units::literals::operator""_mm(long double)[m[K’:
+[7.124s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.124s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.125s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.127s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::centimeter_t units::literals::operator""_cm(long double)[m[K’:
+[7.127s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.127s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.127s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.130s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::decimeter_t units::literals::operator""_dm(long double)[m[K’:
+[7.131s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.131s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.131s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.134s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::decameter_t units::literals::operator""_dam(long double)[m[K’:
+[7.134s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.135s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.135s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.138s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::hectometer_t units::literals::operator""_hm(long double)[m[K’:
+[7.139s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<100, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.139s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.139s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.142s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::kilometer_t units::literals::operator""_km(long double)[m[K’:
+[7.142s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.142s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.143s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.146s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::megameter_t units::literals::operator""_Mm(long double)[m[K’:
+[7.146s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.146s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.147s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.155s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::gigameter_t units::literals::operator""_Gm(long double)[m[K’:
+[7.155s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.155s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.155s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.156s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::terameter_t units::literals::operator""_Tm(long double)[m[K’:
+[7.156s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.156s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.156s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.158s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::petameter_t units::literals::operator""_Pm(long double)[m[K’:
+[7.159s] [01m[K/usr/include/phoenix6/units/length.h:42:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.159s]    42 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(length, meter, meters, m,
+[7.159s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.167s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::foot_t units::literals::operator""_ft(long double)[m[K’:
+[7.167s] [01m[K/usr/include/phoenix6/units/length.h:44:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.167s]    44 | [01;36m[KUNIT_ADD[m[K(length, foot, feet, ft, unit<std::ratio<381, 1250>, meters>)
+[7.168s]       | [01;36m[K^~~~~~~~[m[K
+[7.176s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::mil_t units::literals::operator""_mil(long double)[m[K’:
+[7.176s] [01m[K/usr/include/phoenix6/units/length.h:45:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000, 1>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.176s]    45 | [01;36m[KUNIT_ADD[m[K(length, mil, mils, mil, unit<std::ratio<1000>, feet>)
+[7.176s]       | [01;36m[K^~~~~~~~[m[K
+[7.183s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::inch_t units::literals::operator""_in(long double)[m[K’:
+[7.184s] [01m[K/usr/include/phoenix6/units/length.h:46:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 12>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.184s]    46 | [01;36m[KUNIT_ADD[m[K(length, inch, inches, in, unit<std::ratio<1, 12>, feet>)
+[7.184s]       | [01;36m[K^~~~~~~~[m[K
+[7.191s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::mile_t units::literals::operator""_mi(long double)[m[K’:
+[7.191s] [01m[K/usr/include/phoenix6/units/length.h:47:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<5280>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.191s]    47 | [01;36m[KUNIT_ADD[m[K(length, mile, miles, mi, unit<std::ratio<5280>, feet>)
+[7.191s]       | [01;36m[K^~~~~~~~[m[K
+[7.197s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::nauticalMile_t units::literals::operator""_nmi(long double)[m[K’:
+[7.197s] [01m[K/usr/include/phoenix6/units/length.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1852>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.197s]    48 | [01;36m[KUNIT_ADD[m[K(length, nauticalMile, nauticalMiles, nmi,
+[7.197s]       | [01;36m[K^~~~~~~~[m[K
+[7.204s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::astronicalUnit_t units::literals::operator""_au(long double)[m[K’:
+[7.205s] [01m[K/usr/include/phoenix6/units/length.h:50:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<149597870700>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.205s]    50 | [01;36m[KUNIT_ADD[m[K(length, astronicalUnit, astronicalUnits, au,
+[7.205s]       | [01;36m[K^~~~~~~~[m[K
+[7.210s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::lightyear_t units::literals::operator""_ly(long double)[m[K’:
+[7.210s] [01m[K/usr/include/phoenix6/units/length.h:52:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<9460730472580800>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.210s]    52 | [01;36m[KUNIT_ADD[m[K(length, lightyear, lightyears, ly,
+[7.210s]       | [01;36m[K^~~~~~~~[m[K
+[7.217s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::parsec_t units::literals::operator""_pc(long double)[m[K’:
+[7.217s] [01m[K/usr/include/phoenix6/units/length.h:54:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<648000>, units::unit<std::ratio<149597870700>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > >, std::ratio<-1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.217s]    54 | [01;36m[KUNIT_ADD[m[K(length, parsec, parsecs, pc,
+[7.218s]       | [01;36m[K^~~~~~~~[m[K
+[7.225s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::angstrom_t units::literals::operator""_angstrom(long double)[m[K’:
+[7.225s] [01m[K/usr/include/phoenix6/units/length.h:56:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10>, units::unit<std::ratio<1, 1000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > >, std::ratio<0, 1>, std::ratio<0, 1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.225s]    56 | [01;36m[KUNIT_ADD[m[K(length, angstrom, angstroms, angstrom,
+[7.226s]       | [01;36m[K^~~~~~~~[m[K
+[7.234s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::cubit_t units::literals::operator""_cbt(long double)[m[K’:
+[7.234s] [01m[K/usr/include/phoenix6/units/length.h:58:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<18>, units::unit<std::ratio<1, 12>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.234s]    58 | [01;36m[KUNIT_ADD[m[K(length, cubit, cubits, cbt, unit<std::ratio<18>, inches>)
+[7.234s]       | [01;36m[K^~~~~~~~[m[K
+[7.241s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::fathom_t units::literals::operator""_ftm(long double)[m[K’:
+[7.242s] [01m[K/usr/include/phoenix6/units/length.h:59:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<6>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.242s]    59 | [01;36m[KUNIT_ADD[m[K(length, fathom, fathoms, ftm, unit<std::ratio<6>, feet>)
+[7.242s]       | [01;36m[K^~~~~~~~[m[K
+[7.246s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::chain_t units::literals::operator""_ch(long double)[m[K’:
+[7.246s] [01m[K/usr/include/phoenix6/units/length.h:60:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<66>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.246s]    60 | [01;36m[KUNIT_ADD[m[K(length, chain, chains, ch, unit<std::ratio<66>, feet>)
+[7.246s]       | [01;36m[K^~~~~~~~[m[K
+[7.253s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::furlong_t units::literals::operator""_fur(long double)[m[K’:
+[7.254s] [01m[K/usr/include/phoenix6/units/length.h:61:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 1>, units::unit<std::ratio<66>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.254s]    61 | [01;36m[KUNIT_ADD[m[K(length, furlong, furlongs, fur, unit<std::ratio<10>, chains>)
+[7.254s]       | [01;36m[K^~~~~~~~[m[K
+[7.260s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::hand_t units::literals::operator""_hand(long double)[m[K’:
+[7.260s] [01m[K/usr/include/phoenix6/units/length.h:62:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<4>, units::unit<std::ratio<1, 12>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.260s]    62 | [01;36m[KUNIT_ADD[m[K(length, hand, hands, hand, unit<std::ratio<4>, inches>)
+[7.260s]       | [01;36m[K^~~~~~~~[m[K
+[7.267s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::league_t units::literals::operator""_lea(long double)[m[K’:
+[7.267s] [01m[K/usr/include/phoenix6/units/length.h:63:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<3>, units::unit<std::ratio<5280>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.267s]    63 | [01;36m[KUNIT_ADD[m[K(length, league, leagues, lea, unit<std::ratio<3>, miles>)
+[7.267s]       | [01;36m[K^~~~~~~~[m[K
+[7.274s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::nauticalLeague_t units::literals::operator""_nl(long double)[m[K’:
+[7.274s] [01m[K/usr/include/phoenix6/units/length.h:64:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<3>, units::unit<std::ratio<1852>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.274s]    64 | [01;36m[KUNIT_ADD[m[K(length, nauticalLeague, nauticalLeagues, nl,
+[7.275s]       | [01;36m[K^~~~~~~~[m[K
+[7.277s] [01m[K/usr/include/phoenix6/units/length.h:[m[K In function ‘[01m[Kconstexpr units::length::yard_t units::literals::operator""_yd(long double)[m[K’:
+[7.278s] [01m[K/usr/include/phoenix6/units/length.h:66:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<3>, units::unit<std::ratio<381, 1250>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1> > > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.278s]    66 | [01;36m[KUNIT_ADD[m[K(length, yard, yards, yd, unit<std::ratio<3>, feet>)
+[7.278s]       | [01;36m[K^~~~~~~~[m[K
+[7.282s] [01m[K/usr/include/phoenix6/units/acceleration.h:[m[K In function ‘[01m[Kconstexpr units::acceleration::meters_per_second_squared_t units::literals::operator""_mps_sq(long double)[m[K’:
+[7.283s] [01m[K/usr/include/phoenix6/units/acceleration.h:45:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.283s]    45 | [01;36m[KUNIT_ADD[m[K(acceleration, meters_per_second_squared, meters_per_second_squared,
+[7.283s]       | [01;36m[K^~~~~~~~[m[K
+[7.295s] [01m[K/usr/include/phoenix6/units/acceleration.h:[m[K In function ‘[01m[Kconstexpr units::acceleration::feet_per_second_squared_t units::literals::operator""_fps_sq(long double)[m[K’:
+[7.296s] [01m[K/usr/include/phoenix6/units/acceleration.h:47:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<381, 1250>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.296s]    47 | [01;36m[KUNIT_ADD[m[K(acceleration, feet_per_second_squared, feet_per_second_squared, fps_sq,
+[7.296s]       | [01;36m[K^~~~~~~~[m[K
+[7.303s] [01m[K/usr/include/phoenix6/units/acceleration.h:[m[K In function ‘[01m[Kconstexpr units::acceleration::standard_gravity_t units::literals::operator""_SG(long double)[m[K’:
+[7.303s] [01m[K/usr/include/phoenix6/units/acceleration.h:49:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.304s]    49 | [01;36m[KUNIT_ADD[m[K(acceleration, standard_gravity, standard_gravity, SG,
+[7.304s]       | [01;36m[K^~~~~~~~[m[K
+[7.310s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:[m[K In function ‘[01m[Kconstexpr units::angular_velocity::radians_per_second_t units::literals::operator""_rad_per_s(long double)[m[K’:
+[7.310s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:45:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1>, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.310s]    45 | [01;36m[KUNIT_ADD[m[K(angular_velocity, radians_per_second, radians_per_second, rad_per_s,
+[7.310s]       | [01;36m[K^~~~~~~~[m[K
+[7.316s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:[m[K In function ‘[01m[Kconstexpr units::angular_velocity::degrees_per_second_t units::literals::operator""_deg_per_s(long double)[m[K’:
+[7.316s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:47:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 180>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1>, std::ratio<1> >, std::ratio<1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.316s]    47 | [01;36m[KUNIT_ADD[m[K(angular_velocity, degrees_per_second, degrees_per_second, deg_per_s,
+[7.316s]       | [01;36m[K^~~~~~~~[m[K
+[7.321s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:[m[K In function ‘[01m[Kconstexpr units::angular_velocity::turns_per_second_t units::literals::operator""_tps(long double)[m[K’:
+[7.321s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:49:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<2>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1>, std::ratio<1> >, std::ratio<1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.321s]    49 | [01;36m[KUNIT_ADD[m[K(angular_velocity, turns_per_second, turns_per_second, tps,
+[7.321s]       | [01;36m[K^~~~~~~~[m[K
+[7.327s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:[m[K In function ‘[01m[Kconstexpr units::angular_velocity::revolutions_per_minute_t units::literals::operator""_rpm(long double)[m[K’:
+[7.327s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:51:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<2, 60>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1>, std::ratio<1> > >, std::ratio<1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.328s]    51 | [01;36m[KUNIT_ADD[m[K(angular_velocity, revolutions_per_minute, revolutions_per_minute, rpm,
+[7.328s]       | [01;36m[K^~~~~~~~[m[K
+[7.336s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:[m[K In function ‘[01m[Kconstexpr units::angular_velocity::milliarcseconds_per_year_t units::literals::operator""_mas_per_yr(long double)[m[K’:
+[7.336s] [01m[K/usr/include/phoenix6/units/angular_velocity.h:53:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 20435328000000000>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1>, std::ratio<1> >, std::ratio<1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.336s]    53 | [01;36m[KUNIT_ADD[m[K(angular_velocity, milliarcseconds_per_year, milliarcseconds_per_year,
+[7.336s]       | [01;36m[K^~~~~~~~[m[K
+[7.341s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::weber_t units::literals::operator""_Wb(long double)[m[K’:
+[7.341s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.341s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.341s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.345s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::femtoweber_t units::literals::operator""_fWb(long double)[m[K’:
+[7.345s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.345s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.345s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.349s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::picoweber_t units::literals::operator""_pWb(long double)[m[K’:
+[7.349s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.349s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.349s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.354s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::nanoweber_t units::literals::operator""_nWb(long double)[m[K’:
+[7.354s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.354s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.354s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.357s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::microweber_t units::literals::operator""_uWb(long double)[m[K’:
+[7.357s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.358s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.358s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.361s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::milliweber_t units::literals::operator""_mWb(long double)[m[K’:
+[7.361s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.362s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.362s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.365s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::centiweber_t units::literals::operator""_cWb(long double)[m[K’:
+[7.365s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.366s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.366s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.369s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::deciweber_t units::literals::operator""_dWb(long double)[m[K’:
+[7.369s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.369s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.370s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.373s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::decaweber_t units::literals::operator""_daWb(long double)[m[K’:
+[7.374s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.374s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.374s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.378s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::hectoweber_t units::literals::operator""_hWb(long double)[m[K’:
+[7.378s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<100, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.379s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.379s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.392s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::kiloweber_t units::literals::operator""_kWb(long double)[m[K’:
+[7.393s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.393s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.393s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.397s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::megaweber_t units::literals::operator""_MWb(long double)[m[K’:
+[7.397s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.397s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.397s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.401s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::gigaweber_t units::literals::operator""_GWb(long double)[m[K’:
+[7.401s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.401s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.401s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.405s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::teraweber_t units::literals::operator""_TWb(long double)[m[K’:
+[7.405s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.406s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.406s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.410s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::petaweber_t units::literals::operator""_PWb(long double)[m[K’:
+[7.410s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:43:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.410s]    43 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.410s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.414s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_flux::maxwell_t units::literals::operator""_Mx(long double)[m[K’:
+[7.414s] [01m[K/usr/include/phoenix6/units/magnetic_flux.h:46:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<2>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.414s]    46 | [01;36m[KUNIT_ADD[m[K(magnetic_flux, maxwell, maxwells, Mx,
+[7.414s]       | [01;36m[K^~~~~~~~[m[K
+[7.419s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::tesla_t units::literals::operator""_Te(long double)[m[K’:
+[7.419s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.419s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.420s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.423s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::femtotesla_t units::literals::operator""_fTe(long double)[m[K’:
+[7.423s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.424s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.424s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.427s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::picotesla_t units::literals::operator""_pTe(long double)[m[K’:
+[7.427s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.427s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.427s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.431s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::nanotesla_t units::literals::operator""_nTe(long double)[m[K’:
+[7.431s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.431s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.431s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.435s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::microtesla_t units::literals::operator""_uTe(long double)[m[K’:
+[7.435s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.435s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.436s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.440s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::millitesla_t units::literals::operator""_mTe(long double)[m[K’:
+[7.440s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 1000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.440s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.440s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.443s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::centitesla_t units::literals::operator""_cTe(long double)[m[K’:
+[7.443s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 100>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.443s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.443s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.447s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::decitesla_t units::literals::operator""_dTe(long double)[m[K’:
+[7.447s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.447s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.447s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.451s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::decatesla_t units::literals::operator""_daTe(long double)[m[K’:
+[7.451s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.451s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.452s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.455s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::hectotesla_t units::literals::operator""_hTe(long double)[m[K’:
+[7.455s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<100, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.456s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.456s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.460s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::kilotesla_t units::literals::operator""_kTe(long double)[m[K’:
+[7.460s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.460s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.460s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.464s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::megatesla_t units::literals::operator""_MTe(long double)[m[K’:
+[7.464s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.464s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.464s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.468s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::gigatesla_t units::literals::operator""_GTe(long double)[m[K’:
+[7.468s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.468s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.468s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.474s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::teratesla_t units::literals::operator""_TTe(long double)[m[K’:
+[7.475s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.475s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.475s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.476s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::petatesla_t units::literals::operator""_PTe(long double)[m[K’:
+[7.476s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1000000000000000, 1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> > >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.476s]    48 | [01;36m[KUNIT_ADD_WITH_METRIC_PREFIXES[m[K(
+[7.477s]       | [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.490s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:[m[K In function ‘[01m[Kconstexpr units::magnetic_field_strength::gauss_t units::literals::operator""_G(long double)[m[K’:
+[7.490s] [01m[K/usr/include/phoenix6/units/magnetic_field_strength.h:51:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 10000>, units::base_unit<std::ratio<0, 1>, std::ratio<1>, std::ratio<-2>, std::ratio<0, 1>, std::ratio<-1> >, std::ratio<0, 1>, std::ratio<0, 1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.490s]    51 | [01;36m[KUNIT_ADD[m[K(
+[7.491s]       | [01;36m[K^~~~~~~~[m[K
+[7.495s] [01m[K/usr/include/phoenix6/units/temperature.h:[m[K In function ‘[01m[Kconstexpr units::temperature::kelvin_t units::literals::operator""_K(long double)[m[K’:
+[7.495s] [01m[K/usr/include/phoenix6/units/temperature.h:46:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.495s]    46 | [01;36m[KUNIT_ADD[m[K(temperature, kelvin, kelvin, K,
+[7.496s]       | [01;36m[K^~~~~~~~[m[K
+[7.509s] [01m[K/usr/include/phoenix6/units/temperature.h:[m[K In function ‘[01m[Kconstexpr units::temperature::celsius_t units::literals::operator""_degC(long double)[m[K’:
+[7.509s] [01m[K/usr/include/phoenix6/units/temperature.h:48:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<27315, 100> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.509s]    48 | [01;36m[KUNIT_ADD[m[K(temperature, celsius, celsius, degC,
+[7.509s]       | [01;36m[K^~~~~~~~[m[K
+[7.524s] [01m[K/usr/include/phoenix6/units/temperature.h:[m[K In function ‘[01m[Kconstexpr units::temperature::fahrenheit_t units::literals::operator""_degF(long double)[m[K’:
+[7.525s] [01m[K/usr/include/phoenix6/units/temperature.h:50:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<5, 9>, units::unit<std::ratio<1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<27315, 100> >, std::ratio<0, 1>, std::ratio<-160, 9> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.525s]    50 | [01;36m[KUNIT_ADD[m[K(temperature, fahrenheit, fahrenheit, degF,
+[7.525s]       | [01;36m[K^~~~~~~~[m[K
+[7.533s] [01m[K/usr/include/phoenix6/units/temperature.h:[m[K In function ‘[01m[Kconstexpr units::temperature::reaumur_t units::literals::operator""_Re(long double)[m[K’:
+[7.533s] [01m[K/usr/include/phoenix6/units/temperature.h:52:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<10, 8>, units::unit<std::ratio<1>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<0, 1>, std::ratio<27315, 100> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.533s]    52 | [01;36m[KUNIT_ADD[m[K(temperature, reaumur, reaumur, Re, unit<std::ratio<10, 8>, celsius>)
+[7.533s]       | [01;36m[K^~~~~~~~[m[K
+[7.537s] [01m[K/usr/include/phoenix6/units/temperature.h:[m[K In function ‘[01m[Kconstexpr units::temperature::rankine_t units::literals::operator""_Ra(long double)[m[K’:
+[7.537s] [01m[K/usr/include/phoenix6/units/temperature.h:53:1:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<5, 9>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.537s]    53 | [01;36m[KUNIT_ADD[m[K(temperature, rankine, rankine, Ra, unit<std::ratio<5, 9>, kelvin>)
+[7.537s]       | [01;36m[K^~~~~~~~[m[K
+[7.686s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:[m[K In member function ‘[01m[Kvoid CompassDataPublisher::timer_callback()[m[K’:
+[7.687s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:45:36:[m[K [01;31m[Kerror: [m[K‘[01m[Kclass ctre::phoenix6::hardware::Pigeon2[m[K’ has no member named ‘[01m[KGetAngularVelocityX[m[K’; did you mean ‘[01m[KGetAngularVelocityXWorld[m[K’?
+[7.687s]    45 |             double gx = pigeon2imu.[01;31m[KGetAngularVelocityX[m[K().GetValue().value();
+[7.687s]       |                                    [01;31m[K^~~~~~~~~~~~~~~~~~~[m[K
+[7.687s]       |                                    [32m[KGetAngularVelocityXWorld[m[K
+[7.687s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:46:36:[m[K [01;31m[Kerror: [m[K‘[01m[Kclass ctre::phoenix6::hardware::Pigeon2[m[K’ has no member named ‘[01m[KGetAngularVelocityY[m[K’; did you mean ‘[01m[KGetAngularVelocityYWorld[m[K’?
+[7.687s]    46 |             double gy = pigeon2imu.[01;31m[KGetAngularVelocityY[m[K().GetValue().value();
+[7.688s]       |                                    [01;31m[K^~~~~~~~~~~~~~~~~~~[m[K
+[7.688s]       |                                    [32m[KGetAngularVelocityYWorld[m[K
+[7.688s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:47:36:[m[K [01;31m[Kerror: [m[K‘[01m[Kclass ctre::phoenix6::hardware::Pigeon2[m[K’ has no member named ‘[01m[KGetAngularVelocityZ[m[K’; did you mean ‘[01m[KGetAngularVelocityZWorld[m[K’?
+[7.688s]    47 |             double gz = pigeon2imu.[01;31m[KGetAngularVelocityZ[m[K().GetValue().value();
+[7.688s]       |                                    [01;31m[K^~~~~~~~~~~~~~~~~~~[m[K
+[7.688s]       |                                    [32m[KGetAngularVelocityZWorld[m[K
+[7.688s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:49:45:[m[K [01;31m[Kerror: [m[K‘[01m[Kstd::numbers[m[K’ has not been declared
+[7.688s]    49 |             constexpr double deg2rad = std::[01;31m[Knumbers[m[K::pi / 180.0;
+[7.688s]       |                                             [01;31m[K^~~~~~~[m[K
+[7.972s] In file included from [01m[K/usr/include/phoenix6/units/time.h:29[m[K,
+[7.973s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/configs/Configurator.hpp:14[m[K,
+[7.973s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/hardware/ParentDevice.hpp:10[m[K,
+[7.973s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/core/CorePigeon2.hpp:9[m[K,
+[7.973s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/Pigeon2.hpp:9[m[K,
+[7.973s]                  from [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7[m[K:
+[7.973s] /usr/include/phoenix6/units/base.h: In instantiation of ‘[01m[Kconstexpr UnitTypeLhs units::operator-(const UnitTypeLhs&, const UnitTypeRhs&) [with UnitTypeLhs = units::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > >; UnitTypeRhs = units::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > >; typename std::enable_if<units::traits::has_linear_scale<UnitTypeLhs, UnitTypeRhs>::value, int>::type <anonymous> = 0][m[K’:
+[7.974s] [01m[K/usr/include/phoenix6/ctre/phoenix6/Timestamp.hpp:116:75:[m[K   required from here
+[7.974s] [01m[K/usr/include/phoenix6/units/base.h:2576:38:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[7.974s]  2576 |         inline constexpr UnitTypeLhs [01;36m[Koperator[m[K-(const UnitTypeLhs& lhs, const UnitTypeRhs& rhs) noexcept
+[7.974s]       |                                      [01;36m[K^~~~~~~~[m[K
+[8.063s] In file included from [01m[K/usr/include/phoenix6/ctre/phoenix6/hardware/ParentDevice.hpp:15[m[K,
+[8.063s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/core/CorePigeon2.hpp:9[m[K,
+[8.064s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/Pigeon2.hpp:9[m[K,
+[8.064s]                  from [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7[m[K:
+[8.064s] /usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp: In instantiation of ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<1>, units::base_unit<> > >][m[K’:
+[8.064s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:35:48:[m[K   required from here
+[8.064s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:783:11:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[8.064s]   783 |         T [01;36m[KGetValue[m[K() const
+[8.064s]       |           [01;36m[K^~~~~~~~[m[K
+[8.065s] /usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp: In instantiation of ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >][m[K’:
+[8.065s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:54:63:[m[K   required from here
+[8.065s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:783:11:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[8.082s] /usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp: In instantiation of ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >][m[K’:
+[8.082s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:76:72:[m[K   required from here
+[8.082s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:783:11:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[8.469s] In file included from [01m[K/usr/include/phoenix6/units/time.h:29[m[K,
+[8.469s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/configs/Configurator.hpp:14[m[K,
+[8.469s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/hardware/ParentDevice.hpp:10[m[K,
+[8.469s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/core/CorePigeon2.hpp:9[m[K,
+[8.470s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/Pigeon2.hpp:9[m[K,
+[8.470s]                  from [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7[m[K:
+[8.470s] /usr/include/phoenix6/units/base.h: In instantiation of ‘[01m[Kconstexpr UnitType units::make_unit(T) [with UnitType = units::unit_t<units::unit<std::ratio<1>, units::base_unit<> > >; T = double; <template-parameter-1-3> = void][m[K’:
+[8.470s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:787:43:[m[K   required from ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<1>, units::base_unit<> > >][m[K’
+[8.470s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:35:48:[m[K   required from here
+[8.470s] [01m[K/usr/include/phoenix6/units/base.h:2229:35:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[8.471s]  2229 |         inline constexpr UnitType [01;36m[Kmake_unit[m[K(const T value) noexcept
+[8.471s]       |                                   [01;36m[K^~~~~~~~~[m[K
+[8.471s] /usr/include/phoenix6/units/base.h: In instantiation of ‘[01m[Kconstexpr UnitType units::make_unit(T) [with UnitType = units::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >; T = double; <template-parameter-1-3> = void][m[K’:
+[8.471s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:787:43:[m[K   required from ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >][m[K’
+[8.471s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:54:63:[m[K   required from here
+[8.471s] [01m[K/usr/include/phoenix6/units/base.h:2229:35:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[8.483s] /usr/include/phoenix6/units/base.h: In instantiation of ‘[01m[Kconstexpr UnitType units::make_unit(T) [with UnitType = units::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >; T = double; <template-parameter-1-3> = void][m[K’:
+[8.483s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:787:43:[m[K   required from ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >][m[K’
+[8.483s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:76:72:[m[K   required from here
+[8.484s] [01m[K/usr/include/phoenix6/units/base.h:2229:35:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.150s] In file included from [01m[K/usr/include/phoenix6/ctre/phoenix6/hardware/ParentDevice.hpp:15[m[K,
+[11.151s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/core/CorePigeon2.hpp:9[m[K,
+[11.151s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/Pigeon2.hpp:9[m[K,
+[11.151s]                  from [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7[m[K:
+[11.151s] /usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp: In instantiation of ‘[01m[Kunits::frequency::hertz_t ctre::phoenix6::StatusSignal<T>::GetAppliedUpdateFrequency() const [with T = double; units::frequency::hertz_t = units::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > > >][m[K’:
+[11.151s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:871:43:[m[K   required from here
+[11.151s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:871:43:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.152s]   871 |         virtual units::frequency::hertz_t [01;36m[KGetAppliedUpdateFrequency[m[K() const override
+[11.152s]       |                                           [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[11.433s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:35:55:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.433s]    35 |             double qx = [01;36m[Kpigeon2imu.GetQuatX().GetValue()[m[K.value();
+[11.434s]       |                         [01;36m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~[m[K
+[11.434s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:54:63:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.434s]    54 |             double ax = [01;36m[Kpigeon2imu.GetAccelerationX().GetValue()[m[K.value();
+[11.434s]       |                         [01;36m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~[m[K
+[11.434s] [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:76:72:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.434s]    76 |             euler_message.orientation.x = [01;36m[Kpigeon2imu.GetRoll().GetValue()[m[K.value() * deg2rad;
+[11.435s]       |                                           [01;36m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~[m[K
+[11.435s] In file included from [01m[K/usr/include/phoenix6/ctre/phoenix6/hardware/ParentDevice.hpp:15[m[K,
+[11.435s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/core/CorePigeon2.hpp:9[m[K,
+[11.435s]                  from [01m[K/usr/include/phoenix6/ctre/phoenix6/Pigeon2.hpp:9[m[K,
+[11.435s]                  from [01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7[m[K:
+[11.435s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:[m[K In member function ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<1>, units::base_unit<> > >][m[K’:
+[11.435s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:783:11:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.436s]   783 |         T [01;36m[KGetValue[m[K() const
+[11.436s]       |           [01;36m[K^~~~~~~~[m[K
+[11.436s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:[m[K In member function ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >][m[K’:
+[11.436s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:783:11:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<980665, 100000>, units::unit<std::ratio<1>, units::base_unit<std::ratio<1>, std::ratio<0, 1>, std::ratio<-2> > > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.436s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:[m[K In member function ‘[01m[KT ctre::phoenix6::StatusSignal<T>::GetValue() const [with T = units::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >][m[K’:
+[11.436s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:783:11:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1, 180>, units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > >, std::ratio<1> > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.471s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:[m[K In member function ‘[01m[Kunits::frequency::hertz_t ctre::phoenix6::StatusSignal<T>::GetAppliedUpdateFrequency() const [with T = int][m[K’:
+[11.471s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:871:43:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<-1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.472s]   871 |         virtual units::frequency::hertz_t [01;36m[KGetAppliedUpdateFrequency[m[K() const override
+[11.472s]       |                                           [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[11.472s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:[m[K In member function ‘[01m[Kctre::phoenix::StatusCode ctre::phoenix6::StatusSignal<T>::SetUpdateFrequency(units::frequency::hertz_t, units::time::second_t) [with T = int][m[K’:
+[11.472s] [01m[K/usr/include/phoenix6/ctre/phoenix6/StatusSignal.hpp:846:35:[m[K [01;36m[Knote: [m[Kparameter passing for argument of type ‘[01m[Kunits::unit_t<units::unit<std::ratio<1>, units::base_unit<std::ratio<0, 1>, std::ratio<0, 1>, std::ratio<1> > > >[m[K’ when C++17 is enabled changed to match C++14 ]8;;https://gcc.gnu.org/gcc-10/changes.html#empty_basein GCC 10.1]8;;
+[11.472s]   846 |         ctre::phoenix::StatusCode [01;36m[KSetUpdateFrequency[m[K(units::frequency::hertz_t frequencyHz, units::time::second_t timeoutSeconds = 50_ms) override
+[11.472s]       |                                   [01;36m[K^~~~~~~~~~~~~~~~~~[m[K
+[11.671s] gmake[2]: *** [CMakeFiles/compass.dir/build.make:76: CMakeFiles/compass.dir/src/compass.cpp.o] Error 1
+[11.672s] gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/compass.dir/all] Error 2
+[11.674s] gmake: *** [Makefile:146: all] Error 2
+[11.683s] Invoked command in '/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_compass' returned '2': CMAKE_PREFIX_PATH=/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion:/home/wiscrobo/workspace/WRoverSoftware_25-26/install/telemetry:/opt/ros/humble PS1=\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ /usr/bin/cmake --build /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_compass -- -j4 -l4
