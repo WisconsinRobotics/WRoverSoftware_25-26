@@ -1,0 +1,42 @@
+[1.421s] Invoking command in '/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_fusion': PS1=\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/wr_fusion build --build-base /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build install --record /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/install.log --single-version-externally-managed install_data
+[1.950s] running egg_info
+[1.952s] creating ../../build/wr_fusion/wr_fusion.egg-info
+[1.952s] writing ../../build/wr_fusion/wr_fusion.egg-info/PKG-INFO
+[1.952s] writing dependency_links to ../../build/wr_fusion/wr_fusion.egg-info/dependency_links.txt
+[1.953s] writing entry points to ../../build/wr_fusion/wr_fusion.egg-info/entry_points.txt
+[1.953s] writing requirements to ../../build/wr_fusion/wr_fusion.egg-info/requires.txt
+[1.953s] writing top-level names to ../../build/wr_fusion/wr_fusion.egg-info/top_level.txt
+[1.954s] writing manifest file '../../build/wr_fusion/wr_fusion.egg-info/SOURCES.txt'
+[1.957s] reading manifest file '../../build/wr_fusion/wr_fusion.egg-info/SOURCES.txt'
+[1.959s] writing manifest file '../../build/wr_fusion/wr_fusion.egg-info/SOURCES.txt'
+[1.959s] running build
+[1.959s] running build_py
+[1.960s] creating /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build
+[1.960s] creating /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build/lib
+[1.960s] creating /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build/lib/wr_fusion
+[1.960s] copying wr_fusion/__init__.py -> /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build/lib/wr_fusion
+[1.960s] copying wr_fusion/fusion.py -> /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build/lib/wr_fusion
+[1.961s] running install
+[1.961s] running install_lib
+[1.963s] creating /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages/wr_fusion
+[1.963s] copying /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build/lib/wr_fusion/__init__.py -> /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages/wr_fusion
+[1.963s] copying /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build/lib/wr_fusion/fusion.py -> /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages/wr_fusion
+[1.965s] byte-compiling /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages/wr_fusion/__init__.py to __init__.cpython-310.pyc
+[1.965s] byte-compiling /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages/wr_fusion/fusion.py to fusion.cpython-310.pyc
+[1.968s]   File "/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages/wr_fusion/fusion.py", line 278
+[1.969s]     		)
+[1.969s]     		^
+[1.969s] SyntaxError: unmatched ')'
+[1.970s] 
+[1.970s] running install_data
+[1.970s] creating /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/share/ament_index
+[1.970s] creating /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/share/ament_index/resource_index
+[1.970s] creating /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/share/ament_index/resource_index/packages
+[1.971s] copying resource/wr_fusion -> /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/share/ament_index/resource_index/packages
+[1.971s] copying package.xml -> /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/share/wr_fusion
+[1.971s] running install_egg_info
+[1.973s] Copying ../../build/wr_fusion/wr_fusion.egg-info to /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages/wr_fusion-0.0.0-py3.10.egg-info
+[1.976s] running install_scripts
+[2.022s] Installing fusion script to /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/wr_fusion
+[2.023s] writing list of installed files to '/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/install.log'
+[2.098s] Invoked command in '/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_fusion' returned '0': PS1=\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/wr_fusion build --build-base /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/build install --record /home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/build/wr_fusion/install.log --single-version-externally-managed install_data

@@ -1,0 +1,5 @@
+source;share/wr_compass/local_setup.bash
+source;share/wr_compass/local_setup.dsv
+source;share/wr_compass/local_setup.ps1
+source;share/wr_compass/local_setup.sh
+source;share/wr_compass/local_setup.zsh
