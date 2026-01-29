@@ -33,10 +33,7 @@ class ArmLogic(Node):
 
         timer_period = 0.05  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
-
-        timer_period = 0.01  # seconds
-        self.timer_wrist = self.create_timer(timer_period, self.timer_update_wrist)
-
+        
         #Define Postion of left and right position of wrist
         self.kohler_shift = 130
         self.D_PAD = [0,0,0,0,0,0] #Array to keep track of which buttons are pressed

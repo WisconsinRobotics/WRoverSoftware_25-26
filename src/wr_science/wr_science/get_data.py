@@ -16,7 +16,13 @@ class SensorsRawNode(Node):
         
         self.serial_data_port = self.declare_parameter('/serial_data_port', '/dev/ttyUSB0').value
         self.serial_baud_rate = self.declare_parameter('/serial_baud_rate', 115200).value
-
+        
+        
+        self.subscription_buttons = self.create_subscription(
+            Int16MultiArray,
+            'buttons_arm',
+            self.listener_callback_buttons,
+            10)
         # initiate the serial connection with the arduino
         try:
             self.ser = serial.Serial(port=self.serial_data_port,baudrate=self.serial_baud_rate,timeout=0.5)
@@ -24,33 +30,29 @@ class SensorsRawNode(Node):
             self.get_logger().warn("USB connection to Arduino unsuccessful :( maybe try turning it off and on again?")
             rclpy.shutdown()
 
-        # initialize empty fluorometer message
-        self.fluoro_vals = Int16MultiArray()
-        self.fluoro_vals.layout.label[0] = "colors"
-        self.fluoro_vals.layout.size[0] = 9
-        self.fluoro_vals.layout.label[1] = "wavelength, reading"
-        self.fluoro_vals.layout.size[1] = 2
-        self.fluoro_vals.data = np.array([[415,445,480,515,555,590,630,680,0],
-                                          [0,  0,  0,  0,  0,  0,  0,  0,  0]])
+        # # initialize empty fluorometer message
+        # self.fluoro_vals = Int16MultiArray()
+        # #self.fluoro_vals.layout.label[0] = "colors"
+        # self.fluoro_vals.layout.size[0] = 9
+        # #self.fluoro_vals.layout.label[1] = "wavelength, reading"
+        # self.fluoro_vals.layout.size[1] = 2
+        # self.fluoro_vals.data = np.array([[415,445,480,515,555,590,630,680,0],
+        #                                   [0,  0,  0,  0,  0,  0,  0,  0,  0]])
 
-        # initialize empty soil sensor message
-        self.soil_vals = Int16MultiArray()
-        self.soil_vals.layout.label[0] = "measurements"
-        self.soil_vals.layout.size[0] = 2
-        self.soil_vals.data = [0,0]
+        # # initialize empty soil sensor message
+        # self.soil_vals = Int16MultiArray()
+        # #self.soil_vals.layout.label[0] = "measurements"
+        # self.soil_vals.layout.size[0] = 2
+        # self.soil_vals.data = [0,0]
 
-        # Flush any backlog and read a line to make sure the port input is current. 
-        self.ser.flushInput()
-        self.ser.readline()
+        # # Flush any backlog and read a line to make sure the port input is current. 
+        # self.ser.flushInput()
+        # self.ser.readline()
 
-        timer_period = 0.05  # seconds
-        self.timer = self.create_timer(timer_period, self.operate)
+        #timer_period = 0.05  # seconds
+        #self.timer = self.create_timer(timer_period, self.operate)
 
-        self.subscription_buttons = self.create_subscription(
-            Int16MultiArray,
-            'buttons_arm',
-            self.listener_callback_buttons,
-            10)
+     
 
         
     def operate(self):
@@ -80,7 +82,7 @@ class SensorsRawNode(Node):
         if(x==1):
             self.ser.write("g_up".encode()) #Turn on pump when releasing
         elif(x==0):
-            self.ser.write("g   _down".encode()) #Turn off pump when releasing
+            self.ser.write("g_down".encode()) #Turn off pump when releasing
 
     def listener_callback_buttons(self, msg):
         buttons = msg.data
