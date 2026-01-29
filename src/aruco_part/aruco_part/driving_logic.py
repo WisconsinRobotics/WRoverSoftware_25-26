@@ -432,6 +432,7 @@ class DriveLogic(Node):
             self.imu_msg is None):
             return
 
+        self.aruco_msg.data[0] = int (self.aruco_msg.data[0])
         aruco = self.aruco_msg
         localization = self.localization_msg
         imu = self.imu_msg

@@ -91,9 +91,10 @@ def calculateDistance(tag_corners, K_matrix, dist_coefficients):  #MAKE K AND DI
                                [-0.075, -0.075, 0.0]],
                               dtype=np.float32)
 
-    tag_corners = tag_corners[0]
+    # tag_corners = tag_corners[0]
 
     # Using homogeneous coordinates to get translation and rotation vectors
+    # print(f"COrners shape: {tag_corners}, dimensionns shape: {tag_dimensions.shape}")
     retVal, rVec, tVec = cv2.solvePnP(tag_dimensions, tag_corners, K_matrix, dist_coefficients)
 
     tVec = tVec.flatten()
@@ -156,7 +157,7 @@ class ArucoDetectionPublisher(Node):
                 x_offset = tag_center_x - image_center_x
 
                 # Estimate the distance of the ArUco tag in meters
-                distance_estimate = calculateDistance(corners[i][0], K, DISTORSION_COEFFS)
+                distance_estimate = calculateDistance(corners[0], K, DISTORSION_COEFFS)
 
                 id_num = int(ids[i][0])
 
@@ -172,9 +173,9 @@ class ArucoDetectionPublisher(Node):
 
                 if len(self.tags_fs_detected) > 0:
                     target_id = self.tags_fs_detected[0]
-                    x = self.tags[f"{target_id}"][0]
-                    dis = self.tags[f"{target_id}"][1]
-                    pub_msg.data = [target_id, x, dis]
+                    x = float (self.tags[f"{target_id}"][0])
+                    dis = float (self.tags[f"{target_id}"][1])
+                    pub_msg.data = [float (target_id), x, dis]
 
                     self.publisher_.publish(pub_msg)
                     self.get_logger().info(f"Publishing {pub_msg.data[0]}, {pub_msg.data[1]}, {pub_msg.data[2]}")
