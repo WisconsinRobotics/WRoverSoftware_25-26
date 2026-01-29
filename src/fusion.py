@@ -282,4 +282,5 @@ def main(args=None):
     rclpy.init(args=args)
     node = FusionNode()
     rclpy.spin(node)
+    print(self.state_vector[0:10])
     rclpy.shutdown()
