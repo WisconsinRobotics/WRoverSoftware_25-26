@@ -24,7 +24,7 @@ class XboxPublisher(Node):
         self.motion = [0.0, 0.0,0.0,0.0]
 
         self.buttons_publisher_ = self.create_publisher(Int16MultiArray, 'buttons_arm', 2)
-        self.buttons=[0,0,0,0,0,0] #Up, Down, Left, Right, A, B
+        self.buttons=[0,0,0,0,0,0,0] #Up, Down, Left, Right, A, B, X
 
 
     def timer_callback(self):
@@ -56,6 +56,7 @@ class XboxPublisher(Node):
                         print("BUTTON B")
                         self.buttons[5] = 1
                     elif event.button == 2: # X Button
+                        self.buttons[6] = 1
                         self.get_logger().info("Pressed ARM controller (ARM)")
 
             elif event.type == pygame.JOYBUTTONUP:
@@ -64,6 +65,8 @@ class XboxPublisher(Node):
                         self.buttons[4] = 0
                     elif event.button == 1:  # B button
                         self.buttons[5] = 0
+                    elif event.button == 2: # X Button
+                        self.buttons[6] = 0
             if event.type == pygame.JOYHATMOTION:
                 if event.joy == CONTROLLER:
                     if event.value[0] == -1:  # D-Pad Left
