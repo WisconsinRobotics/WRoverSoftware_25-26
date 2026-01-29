@@ -4,21 +4,22 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='wr_science',
-            executable='science_control',
-            name='science_control'
+            package='wr_science_data',
+            executable='get_data',
+            name='get_data'
         ),
         
         Node(
-            package='wr_science',
+            package='wr_science_data',
+            executable='science_control',
+            name='science_control'
+        ),
+        Node(
+            package='wr_science_data',
             executable='send_to_can',
             name='send_to_can'
         ),
-        #Node(
-        #    package='arm_test_python',
-        #    executable='rail_subscriber',
-        #    name='rail_subscriber'
-        #),
+ 
         Node(
             package='wr_can_comms',
             executable='can_comms',

@@ -2,7 +2,7 @@ import os
 from glob import glob
 from setuptools import find_packages, setup
 
-package_name = 'wr_science'
+package_name = 'wr_science_data'
 
 setup(
     name=package_name,
@@ -16,20 +16,16 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='nico',
+    maintainer='wiscrobo',
     maintainer_email='nicolasdittmarg1@gmail.com',
     description='TODO: Package description',
     license='Apache-2.0',
-    extras_require={
-        'test': [
-            'pytest',
-        ],
-    },
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'get_data = wr_science.get_data:main',
-            'science_control = wr_science.science_control:main',
-            'send_to_can = wr_science.send_to_can:main',
+            'get_data = wr_science_data.get_data:main',
+            'send_to_can = wr_science_data.send_to_can:main',
+            'science_control = wr_science_data.science_control:main',
         ],
     },
 )
