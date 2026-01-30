@@ -422,6 +422,8 @@ def go_to_tag(x_offset, distance, linear_velocity):
         linear_vel = low_lin_vel
     elif distance <= 1.0:
         linear_vel = 0.0
+        angular_vel = 0.0
+        return linear_vel,angular_vel
 
     # Check if we need orientation correction:
     max_error = 500
@@ -768,6 +770,8 @@ class DriveLogic(Node):
 
         elif detecting_a_tag:
             self.get_logger().info("Detecting aruco")
+
+            self.get_logger().info("Aruco: " + str(aruco))
             linear_velocity = 1.5
             linear_vel, angular_vel = go_to_tag(aruco[1], aruco[2], linear_velocity)
 
