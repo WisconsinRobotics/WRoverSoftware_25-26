@@ -55,14 +55,14 @@ class IMUNode(Node):
 
 class SectorDepthClassifier():
     def __init__(self):
-        self.debug = False
+        self.debug = True
         # This sets up the code to broadcast video to the network
-        if self.debug:
-            self.context = zmq.Context()
-            self.socket = self.context.socket(zmq.PUB)
-            self.socket.setsockopt(zmq.CONFLATE, 1)
-            self.socket.bind("tcp://*:6000")  # Binds to port 5555
-            print("Video Streamer initialized on port 6000")
+        #if self.debug:
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.PUB)
+        self.socket.setsockopt(zmq.CONFLATE, 1)
+        self.socket.bind("tcp://*:9876")  # Binds to port 5555
+        print("Video Streamer initialized on port 6000")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
@@ -187,7 +187,7 @@ class SectorDepthClassifier():
                         gap_to_move_to = (round(safe_px_start), round(safe_px_end))
 
         # 6. Visualization Block
-        if True:
+        if self.debug:
             depth_vis = cv2.normalize(depth_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
             depth_vis = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
 
@@ -206,8 +206,8 @@ class SectorDepthClassifier():
                 chosen_pixel = int((math.tan(best_theta) * self.FOCAL_LENGTH) + self.X_PIXEL_OFFSET)
                 cv2.line(depth_vis, (chosen_pixel, 0), (chosen_pixel, H-1), (0, 0, 255), 3)
             
-            cv2.imshow("Aasd", depth_vis)
-            cv2.waitKey(1)
+            # cv2.imshow("Aasd", depth_vis)
+            # cv2.waitKey(1)
 
             try:
                 # Compress to jpg to save bandwidth
