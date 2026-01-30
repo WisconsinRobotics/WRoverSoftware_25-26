@@ -562,9 +562,9 @@ class DriveLogic(Node):
         self.imu_msg = None
 
         #LED CODE
-        self.led_cli = self.create_client(Float32MultiArray, 'change_LED')
-        self.led_req = Float32MultiArray()
-
+        self.led_pub = self.create_publisher(Float32MultiArray, 'led', 1)
+        self.led_msg = Float32MultiArray()
+        self.flashing = True
         self.led_mode = "real"
         if (self.led_mode == "real"):
             self.blinkLightColor("RED")
@@ -776,7 +776,6 @@ class DriveLogic(Node):
 
         # self.publisher_.publish(sw_msg)
         # self.get_logger().info("Publishing swerve...")
-
         if no_tag_found_yet:
             self.get_logger().info("Not found yet...")
             lin_y = 0.0
@@ -906,26 +905,23 @@ class DriveLogic(Node):
             return [target_id, x, dis]
     def blinkLightColor(self,color):
         if self.led_mode == "real":
-            while not self.led_cli.wait_for_service(timeout_sec=1.0):
-                self.model.get_logger().info('service not available, waiting again...')
             self.flashing = not self.flashing
             if color == "RED":
-                self.led_req = [255.0, 0.0, 0.0]
+                self.led_msg.data = [255.0, 0.0, 0.0]
    
             elif color == "GREEN":
-                self.led_req.red = 0
                 if (self.flashing):
-                    self.led_req = [0.0, 255.0, 0.0]
+                    self.led_msg.data = [0.0, 255.0, 0.0]
                 else:
-                    self.led_req = [0.0, 0.0, 0.0]
-                self.led_req.blue = 0
+                    self.led_msg.data = [0.0, 0.0, 0.0]
             elif color == "BLUE":
-                    self.led_req = [0.0, 0.0, 255.0]
+                    self.led_msg.data = [0.0, 0.0, 255.0]
 
             else:
-                     self.led_req = [0.0, 0.0, 0.0]
+                     self.led_msg.data = [0.0, 0.0, 0.0]
 
-            return self.led_cli.call_async(self.led_req)
+            #PUBLISH HERE
+            self.led_pub.publish(self.led_msg)
         else:
             if color == "RED":
                 self.model.get_logger().info('Blinked LED Red')
