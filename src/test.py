@@ -55,21 +55,25 @@ class IMUNode(Node):
 
 class SectorDepthClassifier():
     def __init__(self):
-        self.debug = True
+        self.debug = False
+
+        # self.commit_frames = 6    
+        # self.lock_counter = 0      
+        # self.last_command = [0.0, 0.0, 0.0, 0.0]
         # This sets up the code to broadcast video to the network
-        #if self.debug:
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.PUB)
-        self.socket.setsockopt(zmq.CONFLATE, 1)
-        self.socket.bind("tcp://*:9876")  # Binds to port 5555
-        print("Video Streamer initialized on port 6000")
+        if self.debug:
+            self.context = zmq.Context()
+            self.socket = self.context.socket(zmq.PUB)
+            self.socket.setsockopt(zmq.CONFLATE, 1)
+            self.socket.bind("tcp://*:5000")  # Binds to port 5555
+            print("Video Streamer initialized on port 6000")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
-    GAP_THRESHOLD = np.float32(1.5) # The minimum distance between two obstacles such that the rover can fit.
-    DEPTH_THRESH = np.float32(2.85)
-    SAFETY_BUFFER = 0.7   
+    GAP_THRESHOLD = np.float32(1.85) # The minimum distance between two obstacles such that the rover can fit.
+    DEPTH_THRESH = np.float32(2.65)
+    SAFETY_BUFFER = 0.9   
         
     ## CHANGED: Added 'compass_angle' as an argument
     def cb(self, depth_full, compass_angle, rover_gps):
@@ -88,11 +92,11 @@ class SectorDepthClassifier():
 
         rows = (self.Y_PIXEL_OFFSET - np.arange(depth_full.shape[0], dtype=np.float32)) / self.FOCAL_LENGTH
         # maybe constant optimize? ^^^
-        ground_mask = depth_full * rows[:, None] < -0.3
+        ground_mask = depth_full * rows[:, None] < -0.23
         depth_full[ground_mask] = np.float32(10)
 
         # list of all min values of each vertical sector. values are in m
-        min_list = np.percentile(depth_full, 8, axis=0)
+        min_list = np.percentile(depth_full, 6, axis=0)
 
         # newmask = (depth_full == np.nan)
         # depth_full[newmask] = np.float32(10)
@@ -133,7 +137,7 @@ class SectorDepthClassifier():
 
         # compute_bearing: angle from North to target in the clockwise direction
         bearing_to_target = self.compute_bearing(rover_gps , target_gps)
-        bearing_to_target = 90 # always moves
+        bearing_to_target = 0 # always moves north if 0 east if 90 and so on
         # Calculate the relative angle the rover needs to turn to
         # diff: how many degrees we need to turn from current heading to hit bearing
         target_angle_deg = (360 - (compass_angle - bearing_to_target)) % 360
@@ -218,7 +222,7 @@ class SectorDepthClassifier():
 
                     # 3. Send as a single message (Receiver uses recv(), not recv_multipart())
                     self.socket.send(jpg_as_text)
-                    print("--------------------------sent frame -----------------------------")
+                    # print("--------------------------sent frame -----------------------------")
             except Exception as e:
                 print(f"")
 
@@ -228,8 +232,10 @@ class SectorDepthClassifier():
         if best_theta == 999.0:
             print("YOUR HAVE CRASHED NO VALID GAPSS S ---- :))))")
             # Return a "Stop" command [Speed, Angle, LeftMotor, RightMotor]
-            print("error = not moving lol")
-            return [0.0, 0.0, -1.0, -1.0] 
+            if target_angle_deg >= 0:
+                return [0.0, 0.0, -1.0, 0.25]
+            else:
+                return [0.0, 0.0, 0.25 , -1.0] 
 
         end_time = time.time() - start_time
         # print("time :",end_time)
@@ -241,8 +247,10 @@ class SectorDepthClassifier():
         
         speed = error * kP
         
-        if abs(error) < 3.7: # range to move forward
-            return [0.8, 0.0, -1.0, -1.0] # Drive forward
+        if abs(error) < 6.5: # range to move forward
+            speed = ((min_list[640]+min_list[639]+min_list[641])/3) * 0.13 # moves slower if there is more stuff in front of it 
+            print("speed = ", speed)
+            return [float(speed), 0.0, -1.0, -1.0] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
             if speed < 0:
@@ -375,7 +383,7 @@ with dai.Pipeline() as pipeline:
             imuPacket = imuData.packets[-1]
             rv = imuPacket.rotationVector
             current_heading = quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)
-            current_heading = -1 * (current_heading) % 360
+            current_heading = -1 * (current_heading - 53.5) % 360
             print("current heeading relative to north = ", current_heading)
         ## --- Depth Data Processing ---
         # msg = imu_node.latest_imu
