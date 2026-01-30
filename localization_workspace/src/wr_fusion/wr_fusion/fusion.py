@@ -3,7 +3,7 @@ import numpy as np
 from rclpy.node import Node
 from sensor_msgs.msg import Imu, NavSatFix
 from nav_msgs.msg import Odometry
-#from pyproj import CRS, Transformer
+from pyproj import CRS, Transformer
 
 class FusionNode(Node):
 	def __init__(self):
@@ -226,10 +226,10 @@ class FusionNode(Node):
 		lon = lon0 + (x_local / (R * np.cos(lat0_rad))) * (180.0 / np.pi)
 
 		# Ensure UTM transformer exists (based on start zone)
-		#self.ensure_utm(lat0, lon0)
+		self.ensure_utm(lat0, lon0)
 
 		# Convert to UTM (meters)
-		#easting, northing = self.utm_transformer.transform(lon, lat)
+		easting, northing = self.utm_transformer.transform(lon, lat)
 
 		# Yaw from quaternion
 		qx, qy, qz, qw = self.state_vector[6:10]
@@ -246,7 +246,7 @@ class FusionNode(Node):
 
 		msg = Odometry()
 		msg.header.stamp = self.get_clock().now().to_msg()
-		msg.header.frame_id = "idk what this does" #f"utm_zone_{self.utm_zone}"
+		msg.header.frame_id = f"utm_zone_{self.utm_zone}"
 		msg.child_frame_id = "base_link"
 
 		msg.pose.pose.position.x = float(easting)
@@ -269,12 +269,12 @@ class FusionNode(Node):
 		north = lat >= 0.0
 		epsg = 32600 + zone if north else 32700 + zone  # WGS84 UTM
 
-		#self.utm_zone = zone
-		#self.utm_crs = CRS.from_epsg(epsg)
-		#self.utm_transformer = Transformer.from_crs(
-		#CRS.from_epsg(4326),  # WGS84 lat/lon
-		#self.utm_crs,
-		#always_xy=True        # expects lon, lat
+		self.utm_zone = zone
+		self.utm_crs = CRS.from_epsg(epsg)
+		self.utm_transformer = Transformer.from_crs(
+		CRS.from_epsg(4326),  # WGS84 lat/lon
+		self.utm_crs,
+		always_xy=True        # expects lon, lat
 		)
 
 
