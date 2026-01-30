@@ -18,7 +18,7 @@ class SwervePublisher(Node):
     def __init__(self):
         super().__init__("swerve_publisher")
 
-        self.pub = self.create_publisher(Float32MultiArray, "swerve", 10)
+        self.pub = self.create_publisher(Float32MultiArray, "tank", 10)
 
     def send(self, swrv):
         msg = Float32MultiArray()
@@ -55,7 +55,7 @@ class IMUNode(Node):
 
 class SectorDepthClassifier():
     def __init__(self):
-        self.debug = False
+        self.debug = True
 
         # self.commit_frames = 6    
         # self.lock_counter = 0      
@@ -65,7 +65,7 @@ class SectorDepthClassifier():
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.PUB)
             self.socket.setsockopt(zmq.CONFLATE, 1)
-            self.socket.bind("tcp://*:8000")  # Binds to port 5555
+            self.socket.bind("tcp://*:9050")  # Binds to port 5555
             print("Video Streamer initialized on port 6000")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
@@ -137,7 +137,7 @@ class SectorDepthClassifier():
 
         # compute_bearing: angle from North to target in the clockwise direction
         bearing_to_target = self.compute_bearing(rover_gps , target_gps)
-        bearing_to_target = 100 # always moves north if 0 east if 90 and so on
+        bearing_to_target = 0 # always moves north if 0 east if 90 and so on
         # Calculate the relative angle the rover needs to turn to
         # diff: how many degrees we need to turn from current heading to hit bearing
         target_angle_deg = (360 - (compass_angle - bearing_to_target)) % 360
@@ -233,7 +233,7 @@ class SectorDepthClassifier():
             print("YOUR HAVE CRASHED NO VALID GAPSS S ---- :))))")
             # Return a "Stop" command [Speed, Angle, LeftMotor, RightMotor]
             
-            return [0.0, 0.0, 0.25 , -1.0] 
+            return [ 0.5 , -0.5] 
 
         end_time = time.time() - start_time
         # print("time :",end_time)
@@ -248,18 +248,18 @@ class SectorDepthClassifier():
         if abs(error) < 6.5: # range to move forward
             speed = ((min_list[640]+min_list[639]+min_list[641])/3) * 0.13 # moves slower if there is more stuff in front of it 
             print("speed = ", speed)
-            return [float(speed), 0.0, -1.0, -1.0] # Drive forward
+            return [float(speed), float(speed)] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
             if speed < 0:
                 speed = abs(speed)
                 if abs(speed) < min_speed: 
                     speed = math.copysign(min_speed, speed)
-                return [0.0, 0.0, speed, -1.0] 
+                return [speed, -speed] 
             else:
                 if abs(speed) < min_speed: 
                     speed = math.copysign(min_speed, speed)
-                return [0.0, 0.0, -1.0, speed] 
+                return [-speed, speed] 
 
     @staticmethod
     def compute_bearing(p1, p2):
