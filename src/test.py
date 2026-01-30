@@ -65,15 +65,15 @@ class SectorDepthClassifier():
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.PUB)
             self.socket.setsockopt(zmq.CONFLATE, 1)
-            self.socket.bind("tcp://*:5000")  # Binds to port 5555
+            self.socket.bind("tcp://*:8000")  # Binds to port 5555
             print("Video Streamer initialized on port 6000")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
-    GAP_THRESHOLD = np.float32(1.85) # The minimum distance between two obstacles such that the rover can fit.
+    GAP_THRESHOLD = np.float32(1.65) # The minimum distance between two obstacles such that the rover can fit.
     DEPTH_THRESH = np.float32(2.65)
-    SAFETY_BUFFER = 0.9   
+    SAFETY_BUFFER = 1.0   
         
     ## CHANGED: Added 'compass_angle' as an argument
     def cb(self, depth_full, compass_angle, rover_gps):
@@ -92,7 +92,7 @@ class SectorDepthClassifier():
 
         rows = (self.Y_PIXEL_OFFSET - np.arange(depth_full.shape[0], dtype=np.float32)) / self.FOCAL_LENGTH
         # maybe constant optimize? ^^^
-        ground_mask = depth_full * rows[:, None] < -0.23
+        ground_mask = depth_full * rows[:, None] < -0.3
         depth_full[ground_mask] = np.float32(10)
 
         # list of all min values of each vertical sector. values are in m
@@ -137,7 +137,7 @@ class SectorDepthClassifier():
 
         # compute_bearing: angle from North to target in the clockwise direction
         bearing_to_target = self.compute_bearing(rover_gps , target_gps)
-        bearing_to_target = 0 # always moves north if 0 east if 90 and so on
+        bearing_to_target = 100 # always moves north if 0 east if 90 and so on
         # Calculate the relative angle the rover needs to turn to
         # diff: how many degrees we need to turn from current heading to hit bearing
         target_angle_deg = (360 - (compass_angle - bearing_to_target)) % 360
@@ -232,10 +232,8 @@ class SectorDepthClassifier():
         if best_theta == 999.0:
             print("YOUR HAVE CRASHED NO VALID GAPSS S ---- :))))")
             # Return a "Stop" command [Speed, Angle, LeftMotor, RightMotor]
-            if target_angle_deg >= 0:
-                return [0.0, 0.0, -1.0, 0.25]
-            else:
-                return [0.0, 0.0, 0.25 , -1.0] 
+            
+            return [0.0, 0.0, 0.25 , -1.0] 
 
         end_time = time.time() - start_time
         # print("time :",end_time)
@@ -383,7 +381,7 @@ with dai.Pipeline() as pipeline:
             imuPacket = imuData.packets[-1]
             rv = imuPacket.rotationVector
             current_heading = quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)
-            current_heading = -1 * (current_heading - 53.5) % 360
+            current_heading = -1 * (current_heading - 183.5) % 360
             print("current heeading relative to north = ", current_heading)
         ## --- Depth Data Processing ---
         # msg = imu_node.latest_imu
