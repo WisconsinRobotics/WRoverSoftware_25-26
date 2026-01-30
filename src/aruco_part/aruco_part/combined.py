@@ -12,6 +12,8 @@ import rclpy
 from rclpy.node import Node
 import cv_bridge
 from std_msgs.msg import Float32MultiArray
+import zmq
+import base64
 
 CAMERA_WIDTH = 1280
 CAMERA_HEIGHT = 720
@@ -557,6 +559,12 @@ class DriveLogic(Node):
         self.localization_msg = None
         self.imu_msg = None
 
+        # #Camera display
+        # sel.context = zmo.Context
+        # self.socket = self.context.socket(zmp.PUB)
+        # self.socket.setsockopt(zmq.CONFLATE, 1)
+        # self.socket.bind("tcp://*:6000")
+
         
 
 
@@ -789,7 +797,7 @@ class DriveLogic(Node):
 
         elif tag_found_but_not_being_detected:
             # self.get_logger().info("Not found yet...")
-            lin_y = 0.0
+            lin_y = 0.1
             lin_x = 0.0
             if(self.previous_offset < 0):
                 ang_pos = 1.0  # self.current_info["linear_velocity"] / self.semicircle["radius"]  # publish the ang vel with actual lin 
@@ -798,7 +806,7 @@ class DriveLogic(Node):
                 ang_pos = -1.0
                 ang_neg = 1.0
     
-
+        
             sw_msg.data = [lin_y, lin_x, ang_pos, ang_neg]
             self.get_logger().info("tag found but not being detected...")
             # current_time = self.get_clock().now()
