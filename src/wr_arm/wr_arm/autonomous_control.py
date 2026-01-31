@@ -10,7 +10,6 @@ import math
 
 
 WRIST_SPEED_VALUE = .5
-GRIPPER_SPEED_VALUE = .5
 class ArmLogic(Node):
 
     def __init__(self):
@@ -28,7 +27,7 @@ class ArmLogic(Node):
             10)
         self.subscription_buttons = self.create_subscription(
             Float64MultiArray,
-            'keyboard_key_positions',
+            'keyboard_center',
             self.listener_callback_key_positions,
             10)
 
@@ -42,7 +41,7 @@ class ArmLogic(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         timer_period = 0.01  # seconds
-        self.timer_wrist = self.create_timer(timer_period, self.timer_update_wrist)
+        #self.timer_wrist = self.create_timer(timer_period, self.timer_update_wrist)
 
         #Define Postion of left and right position of wrist
         self.kohler_shift = 135.0
@@ -82,9 +81,9 @@ class ArmLogic(Node):
         self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
         self.arm_publisher_up_and_down.publish(self.msg_up_and_down)
         self.arm_publisher_forwards_and_bacwards.publish(self.msg_forwards_and_backwards)
-        self.arm_publisher_wrist_left.publish(self.msg_wrist_left)
-        self.arm_publisher_wrist_right.publish(self.msg_wrist_right)
-        self.arm_publisher_gripper.publish(self.msg_gripper)
+        # self.arm_publisher_wrist_left.publish(self.msg_wrist_left)
+        # self.arm_publisher_wrist_right.publish(self.msg_wrist_right)
+        # self.arm_publisher_gripper.publish(self.msg_gripper)
 
 
     def get_linear_rail_speed(self, left, right) -> Float64:
@@ -93,49 +92,8 @@ class ArmLogic(Node):
         return ((left+1)/2 - (right+1)/2)
 
     
-    def timer_update_wrist(self):
-        #Publishing
-        
-        if self.absolute_wrist >= 0 + self.kohler_shift and self.absolute_wrist <= 100 + self.kohler_shift and 1 in self.D_PAD:
-            #self.get_logger().info(str(self.absolute_wrist))
-            self.get_wrist_position(self.D_PAD[0],self.D_PAD[1],self.D_PAD[2],self.D_PAD[3], self.D_PAD[4], self.D_PAD[5])
-            self.msg_wrist_right.data = float(self.wrist_positions[0])
-            self.msg_wrist_left.data = float(self.wrist_positions[1])
-
-
-    def get_wrist_position(self, up, down, left, right,x,y) -> Float32MultiArray:
-        if(x==1):
-            self.modifier = 1
-        elif(y==1):
-            self.modifier = 1
-        else:
-            self.modifier = 1
-        if up == 1:
-            self.wrist_positions[0] += WRIST_SPEED_VALUE*self.modifier
-            self.wrist_positions[1] += WRIST_SPEED_VALUE*self.modifier
-            #if self.absolute_wrist >= 0 + self.kohler_shift + 1:
-            #    self.absolute_wrist += -WRIST_SPEED_VALUE #COMMENTED OUT LIMITS, can zero from bottom
-        elif down == 1:
-            self.wrist_positions[0] += -WRIST_SPEED_VALUE*self.modifier
-            self.wrist_positions[1] += -WRIST_SPEED_VALUE*self.modifier
-            #if self.absolute_wrist <= 100 + self.kohler_shift - 1:
-            #    self.absolute_wrist += WRIST_SPEED_VALUE
-        elif left == 1:
-            self.wrist_positions[0] += WRIST_SPEED_VALUE*self.modifier
-            self.wrist_positions[1] += -WRIST_SPEED_VALUE*self.modifier
-        elif right == 1:
-            self.wrist_positions[0] += -WRIST_SPEED_VALUE*self.modifier
-            self.wrist_positions[1] += WRIST_SPEED_VALUE*self.modifier
     
-     
-    
-    def get_gripper_speed(self, a, b) -> float:
-        if a == 1:
-            return GRIPPER_SPEED_VALUE
-        elif b == 1:
-            return -GRIPPER_SPEED_VALUE
-        else:
-            return 0
+ 
 
     def listener_callback_joy(self, msg):
         #self.get_logger().info('I heard: "%s"' % msg.data)
@@ -163,11 +121,7 @@ class ArmLogic(Node):
         #Expecting D-Pad
         self.D_PAD = [buttons[0], buttons[1], buttons[2], buttons[3], buttons[6],buttons[7]] # up, down, left, right, x, y
         
-        #Expecting A and B buttons
-        gripper_speed = self.get_gripper_speed(buttons[4], buttons[5])
         
-
-        self.msg_gripper.data = float(gripper_speed)
     def listener_callback_key_positions(self, msg):
         #msg should be [x away,  y away] from target
         # left of screen is negative x
