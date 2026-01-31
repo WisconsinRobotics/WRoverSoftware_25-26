@@ -18,7 +18,7 @@ class SwervePublisher(Node):
     def __init__(self):
         super().__init__("swerve_publisher")
 
-        self.pub = self.create_publisher(Float32MultiArray, "tank", 10)
+        self.pub = self.create_publisher(Float32MultiArray, "swerve", 10)
 
     def send(self, swrv):
         msg = Float32MultiArray()
@@ -65,7 +65,7 @@ class SectorDepthClassifier():
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.PUB)
             self.socket.setsockopt(zmq.CONFLATE, 1)
-            self.socket.bind("tcp://*:9050")  # Binds to port 5555
+            self.socket.bind("tcp://*:8050")  # Binds to port 5555
             print("Video Streamer initialized on port 6000")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
@@ -232,8 +232,10 @@ class SectorDepthClassifier():
         if best_theta == 999.0:
             print("YOUR HAVE CRASHED NO VALID GAPSS S ---- :))))")
             # Return a "Stop" command [Speed, Angle, LeftMotor, RightMotor]
-            
-            return [ 0.5 , -0.5] 
+            if(target_angle_deg > 0): 
+                return [ 0.0 , 0.0, -0.5, 0.5] 
+            else:
+                return [0.0, 0.0, 0.5, -0.5]
 
         end_time = time.time() - start_time
         # print("time :",end_time)
@@ -246,20 +248,20 @@ class SectorDepthClassifier():
         speed = error * kP
         
         if abs(error) < 6.5: # range to move forward
-            speed = ((min_list[640]+min_list[639]+min_list[641])/3) * 0.13 # moves slower if there is more stuff in front of it 
+            speed = ((min_list[640]+min_list[639]+min_list[641])/3) * 0.09 # moves slower if there is more stuff in front of it 
             print("speed = ", speed)
-            return [float(speed), float(speed)] # Drive forward
+            return [float(speed), 0.0,-1.0,-1.0] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
             if speed < 0:
                 speed = abs(speed)
                 if abs(speed) < min_speed: 
                     speed = math.copysign(min_speed, speed)
-                return [speed, -speed] 
+                return [0.0,0.0,speed, -1.0] 
             else:
                 if abs(speed) < min_speed: 
                     speed = math.copysign(min_speed, speed)
-                return [-speed, speed] 
+                return [0.0,0.0, -1.0, speed] 
 
     @staticmethod
     def compute_bearing(p1, p2):
