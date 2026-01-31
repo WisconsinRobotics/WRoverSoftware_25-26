@@ -14,14 +14,14 @@ def generate_launch_description():
             package='wr_arm',
             executable='send_to_can',
             name='send_to_can'
-        ),
+        )
         
         
         #Control with xbox
-        Node(
-           package='wr_controller',
-           executable='xbox_controller',
-           name='xbox_controller'
-        )
+#        Node(
+#           package='wr_controller',
+#           executable='xbox_controller',
+#           name='xbox_controller'
+#        )
 
     ])

@@ -82,7 +82,7 @@ class ArmLogic(Node):
     def get_linear_rail_speed(self, left, right) -> Float64:
         #Reverse if right is positive
         #Converting -1 -> 1 range of triggers to 0->1
-        return ((left+1)/2 - (right+1)/2)
+        return (-(left+1)/2 + (right+1)/2)
     
     # def set_wrist_speeds(self, up, down, left, right) -> Float32MultiArray:
     #     #Assume left is forward
