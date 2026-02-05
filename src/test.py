@@ -41,14 +41,14 @@ class GPSNode(Node):
 
 class SectorDepthClassifier():
 
-    X_PIXEL_OFFSET = np.float32(605)  #(648.040894)
+    X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
     GAP_THRESHOLD = np.float32(1.3) # The minimum distance between two obstacles such that the rover can fit.
     DEPTH_THRESH = np.float32(2.5)
         
     ## CHANGED: Added 'compass_angle' as an argument
-    def cb(self, depth_full, compass_angle, rover_gps):
+    def cb(self, depth_full, compass_angle, rover_gps, debug_img=False):
         start_time = time.time()
         # Decode and crop depth image
       
@@ -203,27 +203,27 @@ class SectorDepthClassifier():
         # print("chosen pixel: ", chosen)            
         # print("chosen angle to drive to: ", math.degrees(best_theta))
             
+        if debug_img:
+            depth_full = cv2.normalize(depth_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+            depth_full = cv2.cvtColor(depth_full, cv2.COLOR_GRAY2BGR)
 
-        # depth_full = cv2.normalize(depth_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-        # depth_full = cv2.cvtColor(depth_full, cv2.COLOR_GRAY2BGR)
+            depth_full[ground_mask] = (255, 0, 0)
 
-        # depth_full[ground_mask] = (255, 0, 0)
+            for gap in valid_gaps:
+                start_point, end_point = (gap[0], 0), (gap[1], 719)
+                color = (0, 255, 0)
+                depth_full = cv2.rectangle(depth_full, start_point, end_point, color, -1)
 
-        # for gap in valid_gaps:
-        #     start_point, end_point = (gap[0], 0), (gap[1], 719)
-        #     color = (0, 255, 0)
-        #     depth_full = cv2.rectangle(depth_full, start_point, end_point, color, -1)
+                # Publish overlay
 
-        #     # Publish overlay
-
-        # start_point, end_point = (gap_to_move_to[0], 0), (gap_to_move_to[1], 719)
-        # color = (0, 255, 255)
-        # depth_full = cv2.rectangle(depth_full, start_point, end_point, color, -1)
+            start_point, end_point = (gap_to_move_to[0], 0), (gap_to_move_to[1], 719)
+            color = (0, 255, 255)
+            depth_full = cv2.rectangle(depth_full, start_point, end_point, color, -1)
 
 
 
-        # cv2.imshow("obstacle avoidance", depth_full)
-        # cv2.waitKey(1)
+            cv2.imshow("obstacle avoidance", depth_full)
+            cv2.waitKey(1)
         
         end_time = time.time() - start_time
         print("time :",end_time)
@@ -381,8 +381,8 @@ with dai.Pipeline() as pipeline:
 
         swerve_node.send(swerve_cmd)
 
-        # if cv2.waitKey(1) == ord('q'):
-        #     break
+        if cv2.waitKey(1) == ord('q'):
+            break
         
 
     pipeline.stop()
