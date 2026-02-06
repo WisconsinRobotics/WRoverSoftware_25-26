@@ -23,7 +23,6 @@ class BottleDetector(Node):
         
         # --- Camera ---
         cam = self.pipeline.create(dai.node.Camera).build() # Create Camera node
-        #cam.setBoardSocket(dai.CameraBoardSocket.CAM_A) # Use camera A (the center camera)
         cam_output = cam.requestOutput((1280, 720), type=dai.ImgFrame.Type.BGR888p) # Set video resolution to 720p 3 channel BGR format
         
         # --- ImageManip ---
