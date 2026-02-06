@@ -1,0 +1,27 @@
+[1.219s] Invoking command in '/home/vboxuser/WRoverSoftware_25-26/build/aruco_part': PYTHONPATH=/home/vboxuser/WRoverSoftware_25-26/build/aruco_part/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/vboxuser/WRoverSoftware_25-26/build/aruco_part/build --no-deps symlink_data
+[1.688s] running develop
+[1.888s] running egg_info
+[1.895s] creating aruco_part.egg-info
+[1.896s] writing aruco_part.egg-info/PKG-INFO
+[1.898s] writing dependency_links to aruco_part.egg-info/dependency_links.txt
+[1.902s] writing entry points to aruco_part.egg-info/entry_points.txt
+[1.903s] writing requirements to aruco_part.egg-info/requires.txt
+[1.903s] writing top-level names to aruco_part.egg-info/top_level.txt
+[1.905s] writing manifest file 'aruco_part.egg-info/SOURCES.txt'
+[1.906s] reading manifest file 'aruco_part.egg-info/SOURCES.txt'
+[1.906s] writing manifest file 'aruco_part.egg-info/SOURCES.txt'
+[1.913s] running build_ext
+[1.913s] Creating /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/python3.10/site-packages/aruco-part.egg-link (link to .)
+[1.916s] Installing driving_logic script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.917s] Installing fake_sensors script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.917s] Installing fake_tag script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.918s] Installing path_visualizer script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.921s] 
+[1.921s] Installed /home/vboxuser/WRoverSoftware_25-26/build/aruco_part
+[1.921s] running symlink_data
+[1.921s] creating /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/share/ament_index
+[1.921s] creating /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/share/ament_index/resource_index
+[1.921s] creating /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/share/ament_index/resource_index/packages
+[1.922s] symbolically linking /home/vboxuser/WRoverSoftware_25-26/build/aruco_part/resource/aruco_part -> /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/share/ament_index/resource_index/packages
+[1.922s] symbolically linking /home/vboxuser/WRoverSoftware_25-26/build/aruco_part/package.xml -> /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/share/aruco_part
+[1.976s] Invoked command in '/home/vboxuser/WRoverSoftware_25-26/build/aruco_part' returned '0': PYTHONPATH=/home/vboxuser/WRoverSoftware_25-26/build/aruco_part/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/vboxuser/WRoverSoftware_25-26/build/aruco_part/build --no-deps symlink_data

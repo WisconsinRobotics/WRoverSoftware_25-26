@@ -1,0 +1,22 @@
+[1.422s] Invoking command in '/home/vboxuser/WRoverSoftware_25-26/build/aruco_part': PYTHONPATH=/home/vboxuser/WRoverSoftware_25-26/build/aruco_part/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/vboxuser/WRoverSoftware_25-26/build/aruco_part/build --no-deps symlink_data
+[1.913s] running develop
+[2.148s] running egg_info
+[2.149s] writing aruco_part.egg-info/PKG-INFO
+[2.150s] writing dependency_links to aruco_part.egg-info/dependency_links.txt
+[2.150s] writing entry points to aruco_part.egg-info/entry_points.txt
+[2.150s] writing requirements to aruco_part.egg-info/requires.txt
+[2.150s] writing top-level names to aruco_part.egg-info/top_level.txt
+[2.150s] reading manifest file 'aruco_part.egg-info/SOURCES.txt'
+[2.150s] writing manifest file 'aruco_part.egg-info/SOURCES.txt'
+[2.155s] running build_ext
+[2.158s] Creating /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/python3.10/site-packages/aruco-part.egg-link (link to .)
+[2.162s] Installing camera_info script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[2.162s] Installing driving_logic script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[2.162s] Installing fake_sensors script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[2.162s] Installing fake_tag script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[2.162s] Installing finding_tag script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[2.162s] Installing path_visualizer script to /home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[2.162s] 
+[2.162s] Installed /home/vboxuser/WRoverSoftware_25-26/build/aruco_part
+[2.162s] running symlink_data
+[2.206s] Invoked command in '/home/vboxuser/WRoverSoftware_25-26/build/aruco_part' returned '0': PYTHONPATH=/home/vboxuser/WRoverSoftware_25-26/build/aruco_part/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vboxuser/WRoverSoftware_25-26/install/aruco_part/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/vboxuser/WRoverSoftware_25-26/build/aruco_part/build --no-deps symlink_data

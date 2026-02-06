@@ -48,6 +48,7 @@ class CameraInfoPublisher(Node):
 
         # Initialize camera
         self.pipeline = dai.Pipeline()
+        self.bridge = cv_bridge.CvBridge()
         cam = self.pipeline.create(dai.node.Camera).build()
         self.videoQueue = cam.requestOutput(
             (CAMERA_WIDTH, CAMERA_HEIGHT)
