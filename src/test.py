@@ -8,6 +8,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float64
 
 class SwervePublisher(Node):
     def __init__(self):
@@ -35,8 +36,17 @@ class GPSNode(Node):
 
     def gps_callback(self, msg):
         self.latest_gps = (msg.latitude, msg.longitude)
-        
 
+class IMUNode(Node):
+    def __init__(self):
+        super().__init__("imu_listener")
+
+        self.latest_imu = 0.0
+
+        self.create_subscription(Float64, "compass_data_topic", )
+        
+    def imu_cb(self, msg):
+        self.latest_imu = msg.data
 
 
 class SectorDepthClassifier():
@@ -342,31 +352,37 @@ with dai.Pipeline() as pipeline:
     rightOut = monoRightOut.createOutputQueue()
     stereoOut = stereo.depth.createOutputQueue()
     
-    imu = pipeline.create(dai.node.IMU)
-    imu.enableIMUSensor(dai.IMUSensor.GAME_ROTATION_VECTOR, 100) # 100 Hz
-    imu.setBatchReportThreshold(1)
-    imu.setMaxBatchReports(10)
-    imuQueue = imu.out.createOutputQueue(maxSize=10, blocking=False)
+    # imu = pipeline.create(dai.node.IMU)
+    # imu.enableIMUSensor(dai.IMUSensor.GAME_ROTATION_VECTOR, 100) # 100 Hz
+    # imu.setBatchReportThreshold(1)
+    # imu.setMaxBatchReports(10)
+    # imuQueue = imu.out.createOutputQueue(maxSize=10, blocking=False)
 
     obj = SectorDepthClassifier()
 
     rclpy.init()
     gps_node = GPSNode()
     swerve_node = SwervePublisher()
+    imu_node = IMUNode()
     #swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
     pipeline.start()
     current_heading = 0.0
     while pipeline.isRunning():
         rclpy.spin_once(gps_node, timeout_sec=0.0)
         rclpy.spin_once(swerve_node, timeout_sec=0.0)
-        imuData = imuQueue.tryGet()
-        if imuData:
-            imuPacket = imuData.packets[-1]
-            rv = imuPacket.rotationVector
-            current_heading = quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)
-            current_heading = (current_heading + 270) % 360
-            print("current heeading relative to north = ", current_heading)
+        rclpy.spin_once(imu_node, timeout_sec=0.0)
+        # imuData = imuQueue.tryGet()
+        # if imuData:
+        #     imuPacket = imuData.packets[-1]
+        #     rv = imuPacket.rotationVector
+        #     current_heading = quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)
+        #     current_heading = (current_heading + 270) % 360
+        #     print("current heeading relative to north = ", current_heading)
         ## --- Depth Data Processing ---
+        current_heading = imu_node.latest_imu
+        # current_heading = (current_heading + 270) % 360
+        print("current heeading relative to north = ", current_heading)
+
         stereoFrame = stereoOut.get()
 
         assert stereoFrame.validateTransformations()
