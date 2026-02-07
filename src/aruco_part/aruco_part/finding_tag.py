@@ -91,9 +91,10 @@ def calculateDistance(tag_corners, K_matrix, dist_coefficients):  #MAKE K AND DI
                                [-0.075, -0.075, 0.0]],
                               dtype=np.float32)
 
-    tag_corners = tag_corners[0]
+    # tag_corners = tag_corners[0]
 
     # Using homogeneous coordinates to get translation and rotation vectors
+    print(f"COrners shape: {tag_corners.sha}, dimensionns shape: {tag_dimensions.shape}")
     retVal, rVec, tVec = cv2.solvePnP(tag_dimensions, tag_corners, K_matrix, dist_coefficients)
 
     tVec = tVec.flatten()
@@ -156,7 +157,7 @@ class ArucoDetectionPublisher(Node):
                 x_offset = tag_center_x - image_center_x
 
                 # Estimate the distance of the ArUco tag in meters
-                distance_estimate = calculateDistance(corners[i][0], K, DISTORSION_COEFFS)
+                distance_estimate = calculateDistance(corners[0], K, DISTORSION_COEFFS)
 
                 id_num = int(ids[i][0])
 
