@@ -43,7 +43,7 @@ class IMUNode(Node):
 
         self.latest_imu = 0.0
 
-        self.create_subscription(Float64, "compass_data_topic", )
+        self.create_subscription(Float64, "compass_data_topic", self.imu_cb, 1)
         
     def imu_cb(self, msg):
         self.latest_imu = msg.data
@@ -56,6 +56,7 @@ class SectorDepthClassifier():
     FOCAL_LENGTH = np.float32(563.33333)
     GAP_THRESHOLD = np.float32(1.9) # The minimum distance between two obstacles such that the rover can fit.
     DEPTH_THRESH = np.float32(2.85)
+    SAFETY_BUFFER = 0.4   
         
     ## CHANGED: Added 'compass_angle' as an argument
     def cb(self, depth_full, compass_angle, rover_gps, debug_img=False):
@@ -107,14 +108,21 @@ class SectorDepthClassifier():
         thetas = []
         distance_monitor_list = []
         for gap in gaps:
-            ux1 = gap[0]
-            ux2 = gap[1]
+            ux1_raw = gap[0]
+            ux2_raw = gap[1]
             
+            # --- CHANGE 1: EDGE HANDLING (VIRTUAL EXTENSION) ---
+            # If the gap touches the edge of the image, we pretend it is 500 pixels wider.
+            # This allows the 'median' of the gap to shift toward the target even if 
+            # the target is currently off-screen.
+            ux1 = -500 if ux1_raw <= 5 else ux1_raw
+            ux2 = (W + 500) if ux2_raw >= (W - 5) else ux2_raw
+
             theta1 = np.arctan((ux1 - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH) 
             theta2 = np.arctan((ux2 - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
 
-            d1 = min_list[ux1]/np.cos(theta1)
-            d2 = min_list[ux2]/np.cos(theta2)
+            d1 = min_list[ux1_raw]/np.cos(theta1)
+            d2 = min_list[ux2_raw]/np.cos(theta2)
             
             d = min(d2,d1) # changed to finding parrelel disctance to optical plane isntead of straightline distnace between edge of objects
             # Calculating t\\\\\eta for each gap
@@ -132,25 +140,33 @@ class SectorDepthClassifier():
         
         valid_gaps = []
         checked = []
-        for i,d in enumerate(distance_monitor_list):
-            if d - (self.GAP_THRESHOLD) > 0 :
+# --- CHANGE 2: IMPROVED SAFETY BUFFER & DISCARD LOGIC ---
+        for i, dist in enumerate(distance_monitor_list):
+            # Only consider gaps wider than our minimum threshold
+            if dist >= self.GAP_THRESHOLD:
                 oldStart = gaps[i][0]
                 oldEnd = gaps[i][1]
-                z = min( min_list[oldStart], min_list[oldEnd] )
-                xStart = (z * (oldStart - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
-                newStart = ((xStart + 0.45) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
-                xEnd = (z * (oldEnd - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
-                newEnd = ((xEnd - 0.45) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
+                z = min(min_list[oldStart], min_list[oldEnd])
                 
-                if newStart >= newEnd:
-                    valid_gaps.append(gaps[i])
-                    checked.append(False)
-                else:    
+                # Convert pixel edges to physical meters (X-axis)
+                xStart = (z * (oldStart - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
+                xEnd = (z * (oldEnd - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
+                
+                # Apply the safety buffer (moving the target points inward)
+                newStart_phys = xStart + self.SAFETY_BUFFER
+                newEnd_phys = xEnd - self.SAFETY_BUFFER
+                
+                # Convert back to pixel coordinates
+                newStart = ((newStart_phys) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
+                newEnd = ((newEnd_phys) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
+                
+                # If newStart < newEnd, the gap is still wide enough for the rover
+                if newStart < newEnd:
                     valid_gaps.append((round(newStart), round(newEnd)))
                     checked.append(True)
-            elif d - self.GAP_THRESHOLD >= 0:
-                valid_gaps.append(gaps[i])
-                checked.append(False)
+                else:
+                    # Gap was too small after adding safety buffers. Discard it!
+                    continue 
 
         ## --- START: IMU Target Angle Implementation ---
         ## CHANGED: This block now uses the live 'compass_angle'
@@ -184,31 +200,15 @@ class SectorDepthClassifier():
         # Optional: Uncomment to debug your angles
         # print(f"Heading: {compass_angle:.1f} | Bearing: {bearing_to_target:.1f} | Target Angle: {target_angle_deg:.1f}")
         
-        # Initialize 'best_theta' based on the *first* valid gap
-        try:
-            start_init, end_init = gap_to_move_to
-            median_init = start_init + (end_init - start_init) // 2
-            best_theta = np.arctan((median_init - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
-        except (ValueError, IndexError): # Catches (0,0) if no valid gaps
-            best_theta = 0.0 # Default to 0 (straight ahead)
-        chosen = -1
+        best_theta = 999.0
         # Now, loop through all gaps and find the one closest to our target_angle
-        for (start, end), isChecked in zip(valid_gaps, checked):
-                if not isChecked:
-                    median = start + (end - start) // 2 
-                    theta = np.arctan((median - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
+        for (start, end) in valid_gaps:
+            median = start + (end - start) // 2 
+            theta = np.arctan((median - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
 
-                    if abs(target_angle - theta) < abs(target_angle - best_theta):
-                        gap_to_move_to = (start, end)
-                        best_theta = theta # Update the 'best' angle
-                else:
-                    for i in range(start, end + 1):
-                        theta = np.arctan((i - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
-
-                        if abs(target_angle - theta) < abs(target_angle - best_theta):
-                            gap_to_move_to = (start, end)
-                            chosen = start+i
-                            best_theta = theta # Update the 'best' angle
+            if abs(target_angle - theta) < abs(target_angle - best_theta):
+                gap_to_move_to = (start, end)
+                best_theta = theta 
 
         # print("chosen pixel: ", chosen)            
         # print("chosen angle to drive to: ", math.degrees(best_theta))
