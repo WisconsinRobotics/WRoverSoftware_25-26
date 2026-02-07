@@ -54,8 +54,8 @@ class SectorDepthClassifier():
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
-    GAP_THRESHOLD = np.float32(1.3) # The minimum distance between two obstacles such that the rover can fit.
-    DEPTH_THRESH = np.float32(2.5)
+    GAP_THRESHOLD = np.float32(1.9) # The minimum distance between two obstacles such that the rover can fit.
+    DEPTH_THRESH = np.float32(2.85)
         
     ## CHANGED: Added 'compass_angle' as an argument
     def cb(self, depth_full, compass_angle, rover_gps, debug_img=False):
@@ -133,14 +133,14 @@ class SectorDepthClassifier():
         valid_gaps = []
         checked = []
         for i,d in enumerate(distance_monitor_list):
-            if d - (self.GAP_THRESHOLD + 0.5) > 0 :
+            if d - (self.GAP_THRESHOLD) > 0 :
                 oldStart = gaps[i][0]
                 oldEnd = gaps[i][1]
                 z = min( min_list[oldStart], min_list[oldEnd] )
                 xStart = (z * (oldStart - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
-                newStart = ((xStart + 0.6) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
+                newStart = ((xStart + 0.45) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
                 xEnd = (z * (oldEnd - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
-                newEnd = ((xEnd - 0.6) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
+                newEnd = ((xEnd - 0.45) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
                 
                 if newStart >= newEnd:
                     valid_gaps.append(gaps[i])
@@ -179,7 +179,7 @@ class SectorDepthClassifier():
             gap_to_move_to = valid_gaps[0]
         except IndexError:
             print("no valid gaps u have crashed!!!!!! :)")
-            return [0.0, 0.0, -1.0, -1.0]
+            return [-0.3, 0.0, -1.0, -1.0]
             gap_to_move_to = (0,0)
         # Optional: Uncomment to debug your angles
         # print(f"Heading: {compass_angle:.1f} | Bearing: {bearing_to_target:.1f} | Target Angle: {target_angle_deg:.1f}")
