@@ -3,6 +3,7 @@ setup.cfg
 setup.py
 aruco_part/__init__.py
 aruco_part/camera_info.py
+aruco_part/combined.py
 aruco_part/driving_logic.py
 aruco_part/fake_sensors.py
 aruco_part/fake_tag.py

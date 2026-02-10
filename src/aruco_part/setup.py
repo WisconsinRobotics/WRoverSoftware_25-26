@@ -30,6 +30,7 @@ setup(
             'path_visualizer = aruco_part.path_visualizer:main',
             'camera_info = aruco_part.camera_info:main',
             'finding_tag = aruco_part.finding_tag:main',
+            'combined = aruco_part.combined:main',
         ],
     },
 )

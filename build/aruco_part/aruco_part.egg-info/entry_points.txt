@@ -1,5 +1,6 @@
 [console_scripts]
 camera_info = aruco_part.camera_info:main
+combined = aruco_part.combined:main
 driving_logic = aruco_part.driving_logic:main
 fake_sensors = aruco_part.fake_sensors:main
 fake_tag = aruco_part.fake_tag:main
