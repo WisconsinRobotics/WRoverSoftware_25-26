@@ -1,7 +1,7 @@
 import math
 
 class HeadingVerifier:
-    def __init__(self, min_move_dist=1.5, alpha=0.1):
+    def __init__(self, min_move_dist, alpha=0.1):
         """
         Args:
             min_move_dist (float): Meters robot must move before updating correction.

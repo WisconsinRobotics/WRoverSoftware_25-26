@@ -9,6 +9,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float64
+from gps_heading import HeadingVerifier
 
 class SwervePublisher(Node):
     def __init__(self):
@@ -175,7 +176,7 @@ class SectorDepthClassifier():
         # This is now passed into the function.
         
         # ** You must update these with your live GPS data **
-        rover_gps = (43.073107912662266, -89.41245993537561)
+        #rover_gps = (43.073107912662266, -89.41245993537561)
         target_gps = (43.0724831900561, -89.41245993537561)
 
         # compute_bearing: angle from North to target in the clockwise direction
@@ -246,7 +247,7 @@ class SectorDepthClassifier():
         speed = error * kP
         
         if abs(error) < 7.0: # range to move forward
-            return [1.0, 0.0, -1.0, -1.0] # Drive forward
+            return [0.7, 0.0, -1.0, -1.0] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
             if speed < 0:
@@ -365,12 +366,18 @@ with dai.Pipeline() as pipeline:
     swerve_node = SwervePublisher()
     imu_node = IMUNode()
     #swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
+    verifier = HeadingVerifier(min_move_dist=1.0, alpha=0.2)
     pipeline.start()
     current_heading = 0.0
     while pipeline.isRunning():
         rclpy.spin_once(gps_node, timeout_sec=0.0)
         rclpy.spin_once(swerve_node, timeout_sec=0.0)
         rclpy.spin_once(imu_node, timeout_sec=0.0)
+
+        final_heading = verifier.get_corrected_heading(
+            current_imu=imu_node.latest_imu, 
+            current_gps=gps_node.latest_gps
+        )
         # imuData = imuQueue.tryGet()
         # if imuData:
         #     imuPacket = imuData.packets[-1]
@@ -379,9 +386,11 @@ with dai.Pipeline() as pipeline:
         #     current_heading = (current_heading + 270) % 360
         #     print("current heeading relative to north = ", current_heading)
         ## --- Depth Data Processing ---
-        current_heading = imu_node.latest_imu
-        # current_heading = (current_heading + 270) % 360
-        print("current heeading relative to north = ", current_heading)
+
+
+        # current_heading = imu_node.latest_imu
+        # # current_heading = (current_heading + 270) % 360
+        # print("current heeading relative to north = ", current_heading)
 
         stereoFrame = stereoOut.get()
 
