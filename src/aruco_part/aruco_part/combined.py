@@ -123,32 +123,20 @@ tags_detected = []
 tags_fs_detected = []
 tags = {}
 
-def final_aruco_info():
-    CAMERA_WIDTH = 1280
-    CAMERA_HEIGHT = 720
+def final_aruco_info(self):
 
-    # Initialize camera
-    pipeline = dai.Pipeline()
-    cam = pipeline.create(dai.node.Camera).build()
-    videoQueue = cam.requestOutput(
-        (CAMERA_WIDTH, CAMERA_HEIGHT)
-    ).createOutputQueue()
-    pipeline.start()
 
-    arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)  # We want the 4x4 50 dictionary
-    arucoParams = cv2.aruco.DetectorParameters()
-
-    videoIn = videoQueue.get()
+    videoIn = self.videoQueue.get()
     assert isinstance(videoIn, dai.ImgFrame)
     frame = videoIn.getCvFrame()  # pass as the img param to the detect aruco function
-    corners, ids, rejected = cv2.aruco.detectMarkers(frame, arucoDict, parameters=arucoParams)
-    detected_markers = aruco_display(corners, ids, rejected, frame)
+    corners, ids, rejected = cv2.aruco.detectMarkers(frame, self.arucoDict, parameters=self.arucoParams)
+    #detected_markers = aruco_display(corners, ids, rejected, frame)
 
-    img = detected_markers
-    (corners, ids, _) = detect_aruco(img)
+    #img = detected_markers
+    #(corners, ids, _) = detect_aruco(img)
 
     if ids is not None:
-        for i, marker_id in enumerate(ids):
+        for i in enumerate(ids):
             # corners[i]: shape (1, 4, 2)
             pts = corners[i][0]  # shape (4, 2)
             xs = pts[:, 0]  # all x coordinates of the 4 corners
@@ -604,7 +592,7 @@ class DriveLogic(Node):
 
         # self.current_time = 0.0
         self.start_time = self.get_clock().now()
-        # self.timer = self.create_timer(0.01, self.update_time)  # 100 Hz
+        self.timer = self.create_timer(0.01, self.update_time)  # 100 Hz
 
         self.ended_search_drive = False
         self.previous_offset = 0.0
@@ -615,7 +603,19 @@ class DriveLogic(Node):
         self.localization_msg = None
         self.imu_msg = None
 
-        # self.subscription  # prevent unused variable warning
+        # Initialize Camera Paramaters
+        CAMERA_WIDTH = 1280
+        CAMERA_HEIGHT = 720
+
+        pipeline = dai.Pipeline()
+        cam = pipeline.create(dai.node.Camera).build()
+        self.videoQueue = cam.requestOutput(
+            (CAMERA_WIDTH, CAMERA_HEIGHT)
+        ).createOutputQueue()
+        pipeline.start()
+
+        self.arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)  # We want the 4x4 50 dictionary
+        self.arucoParams = cv2.aruco.DetectorParameters()
 
 
     # def localization_callback(self, msg):
@@ -626,6 +626,9 @@ class DriveLogic(Node):
     #     self.imu_msg = msg
     #     self.drive_callback()
 
+    def update_time(self):
+        self.drive_callback()
+
     def drive_callback(self):
         # wait until we’ve received at least one message from each topic
         # if (self.localization_msg is None or self.imu_msg is None):
@@ -635,7 +638,7 @@ class DriveLogic(Node):
         aruco = final_aruco_info()
         # localization = self.localization_msg
         # imu = self.imu_msg
-
+        
         no_tag_found_yet = (aruco[0] == -1.0 and aruco[1] == 0.0 and aruco[2] == 0.0
                             and self.ended_search_drive == False)
 
