@@ -4,6 +4,8 @@ import rclpy
 import numpy as np
 import depthai as dai
 from rclpy.node import Node
+from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
 from object_detection_msgs.msg import Detection
 from ament_index_python.packages import get_package_share_directory
 
@@ -11,9 +13,15 @@ from ament_index_python.packages import get_package_share_directory
 
 class HammerDetector(Node):
     def __init__(self):
-        # --- Initialize publisher ---
+        # --- Initialize node ---
         super().__init__('hammer_detector')
-        self.publisher_ = self.create_publisher(Detection, 'hammer_detections', 10)
+        
+        # --- Initialize publishers ---
+        self.detection_publisher = self.create_publisher(Detection, 'detection_msg', 10)
+        self.image_publisher = self.create_publisher(Image, 'detection_image', 10)
+        
+        # --- Initialize cvbridge ---
+        self.bridge = CvBridge()
         
         # --- Find the model path ---
         model_path = os.path.join(get_package_share_directory('object_detection'), 'resource', 'hammer.blob')
@@ -74,11 +82,6 @@ class HammerDetector(Node):
         # NN data
         nn_data = self.nn.tryGet()
         
-        # Camera data
-        cam_data = self.cam.tryGet()
-        if cam_data is not None:
-            frame = cam_data.getCvFrame()
-        
         if nn_data is not None:
             # Get output layer
             output = nn_data.getTensor("output0")
@@ -97,8 +100,26 @@ class HammerDetector(Node):
                 msg.conf = float(best_conf)
                 msg.distance = 0.0
                 
-                self.publisher_.publish(msg) 
-
+                self.detection_publisher.publish(msg)
+                
+                # Camera data
+                cam_data = self.cam.tryGet()
+                if cam_data is not None:
+                    # Get frame
+                    frame = cam_data.getCvFrame()
+                    
+                    # Draw bounding boxes
+                    x1 = int(best_box[0] * 640)
+                    y1 = int(best_box[1] * 640)
+                    x2 = int(best_box[2] * 640)
+                    y2 = int(best_box[3] * 640)
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                    cv2.putText(frame, f"{best_conf:.2f}", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    
+                    # Convert to image message and publish
+                    image = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
+                    self.image_publisher.publish(image)
+                    
             
 
 def main(args=None):
