@@ -47,7 +47,7 @@ class IMUNode(Node):
         self.create_subscription(Float64, "compass_data_topic", self.imu_cb, 1)
         
     def imu_cb(self, msg):
-        self.latest_imu = msg.data
+        self.latest_imu = (msg.data - 270) % 360
 
 
 class SectorDepthClassifier():
@@ -326,12 +326,12 @@ def quaternion_to_yaw(rv_x, rv_y, rv_z, rv_w):
 
 
 with dai.Pipeline() as pipeline:
-    monoLeft = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
-    monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
+    monoLeft = pipeline.create(dai.node.MonoCamera).build(dai.CameraBoardSocket.CAM_B)
+    monoRight = pipeline.create(dai.node.MonoCamera).build(dai.CameraBoardSocket.CAM_C)
     stereo = pipeline.create(dai.node.StereoDepth)
 
     stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.ROBOTICS)
-    stereo.setDepthAlign(dai.CameraBoardSocket.CAM_A)
+    stereo.setDepthAlign(dai.CameraBoardSocket.CAM_B)
     stereo.setOutputSize(1280, 720)
 
     config = stereo.initialConfig
@@ -341,8 +341,6 @@ with dai.Pipeline() as pipeline:
     config.postProcessing.thresholdFilter.maxRange = 8000 # 8.0m
 
     config.setConfidenceThreshold(30)
-
-
 
     monoLeftOut = monoLeft.requestOutput((1280, 720))
     monoRightOut = monoRight.requestOutput((1280, 720))
@@ -366,20 +364,19 @@ with dai.Pipeline() as pipeline:
     swerve_node = SwervePublisher()
     imu_node = IMUNode()
     #swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
-    #verifier = HeadingVerifier(min_move_dist=1.0, alpha=0.2)
+    verifier = HeadingVerifier(min_move_dist=1.0, alpha=0.2)
     pipeline.start()
-    device = pipeline.getDefaultDevice()
-    print("USB SPEED: ", device.getUsbSpeed())
     current_heading = 0.0
     while pipeline.isRunning():
         rclpy.spin_once(gps_node, timeout_sec=0.0)
         rclpy.spin_once(swerve_node, timeout_sec=0.0)
         rclpy.spin_once(imu_node, timeout_sec=0.0)
 
-        #final_heading = verifier.get_corrected_heading(
-        #    current_imu=imu_node.latest_imu, 
-        #    current_gps=gps_node.latest_gps
-        #)
+        final_heading = verifier.get_corrected_heading(
+            current_imu=imu_node.latest_imu, 
+            current_gps=gps_node.latest_gps
+        )
+
         # imuData = imuQueue.tryGet()
         # if imuData:
         #     imuPacket = imuData.packets[-1]
@@ -391,7 +388,6 @@ with dai.Pipeline() as pipeline:
 
 
         current_heading = imu_node.latest_imu
-        current_heading = (current_heading - 270) % 360
         print("current heeading relative to north = ", current_heading)
 
         stereoFrame = stereoOut.get()
