@@ -110,6 +110,13 @@ def receive_canbus(num_messages: int, infty: bool = False):
                     pid_pos_raw = int(pid_pos_bits, 2)
                     pid_pos_deg = pid_pos_raw / 50
                     #print(f"PID Position: {pid_pos_deg} degrees")
+            
+                case 58:
+                    #B0-B1: ADC1 in Volts (scale factor 1000)
+                    adc1_bits = data[0:16]
+                    adc1_raw = int(adc1_bits, 2)
+                    adc1_volts = adc1_raw /1000
+                    print(f"ADC1 value: {adc1_volts}")
 
                 # case 28:
                 #     # B0-B1: ADC1 in V (scale factor 1000)
