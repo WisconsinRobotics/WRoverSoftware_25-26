@@ -301,7 +301,7 @@ def build_msg(command: str, value: int, vesc_id: int, raw: bool = False):
             # ADC2 is V
             # ADC3 is V
             # PPM is % / 100
-            command_id = 28
+            command_id = 58
             scaling = 0
             is_status = True
 
