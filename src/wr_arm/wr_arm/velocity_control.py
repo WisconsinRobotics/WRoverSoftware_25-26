@@ -8,7 +8,7 @@ from std_msgs.msg import Int16MultiArray
 import math
 
 
-WRIST_SPEED_VALUE = .6
+WRIST_SPEED_VALUE = .5
 GRIPPER_SPEED_VALUE = .5
 class ArmLogic(Node):
 
@@ -40,7 +40,7 @@ class ArmLogic(Node):
 
         #Define Postion of left and right position of wrist
         self.kohler_shift = 130
-        self.D_PAD = [0,0,0,0] #Array to keep track of which buttons are pressed
+        self.D_PAD = [0,0,0,0,0,0] #Array to keep track of which buttons are pressed
         #self.absolute_wrist = 50 + self.kohler_shift#Start at zero
         #self.wrist_positions = [0.0 + self.absolute_wrist ,0.0 + self.absolute_wrist] #[lef,right]
  
@@ -62,7 +62,11 @@ class ArmLogic(Node):
         self.msg_wrist_right.data = 0.0
 
         self.msg_gripper = Float64()
-        self.msg_gripper.data = 0.0
+        self.msg_gripper.data = 0.
+        
+        self.going_down = 0
+        self.modifier = 1
+
 
     
     #Put publishers in timer to limit rate of publishing
@@ -100,25 +104,41 @@ class ArmLogic(Node):
     
     def timer_update_wrist(self):
         #Publishing
-        self.set_wrist_speeds(self.D_PAD[0],self.D_PAD[1],self.D_PAD[2],self.D_PAD[3])
+        self.set_wrist_speeds(self.D_PAD[0],self.D_PAD[1],self.D_PAD[2],self.D_PAD[3], self.D_PAD[4],self.D_PAD[5])
 
 
-    def set_wrist_speeds(self, up, down, left, right) -> Float32MultiArray:
-        if up == 1:
-            self.msg_wrist_right.data = WRIST_SPEED_VALUE
-            self.msg_wrist_left.data = WRIST_SPEED_VALUE
-        elif down == 1:
-            self.msg_wrist_right.data = -WRIST_SPEED_VALUE
-            self.msg_wrist_left.data = -WRIST_SPEED_VALUE
-        elif left == 1:
-            self.msg_wrist_right.data = -WRIST_SPEED_VALUE
-            self.msg_wrist_left.data = WRIST_SPEED_VALUE 
-        elif right == 1:
-            self.msg_wrist_right.data = WRIST_SPEED_VALUE
-            self.msg_wrist_left.data = -WRIST_SPEED_VALUE
+    def set_wrist_speeds(self, up, down, left, right, x, y) -> Float32MultiArray:
+        if(x==1):
+            self.modifier = .5
+        elif(y==1):
+            self.modifier = .3
         else:
-            self.msg_wrist_right.data = 0.0
-            self.msg_wrist_left.data = 0.0 
+            self.modifier = 1
+        self.get_logger().info('I heard: "%s"' % self.modifier)
+        if up == 1:
+            self.msg_wrist_right.data = WRIST_SPEED_VALUE*self.modifier
+            self.msg_wrist_left.data = WRIST_SPEED_VALUE*self.modifier
+            self.going_down = 0
+        elif down == 1:
+            self.msg_wrist_right.data = -WRIST_SPEED_VALUE*self.modifier
+            self.msg_wrist_left.data = -WRIST_SPEED_VALUE*self.modifier
+            self.going_down = 10
+        elif right == 1:
+            self.msg_wrist_right.data = -(WRIST_SPEED_VALUE*0.8)*self.modifier
+            self.msg_wrist_left.data = (WRIST_SPEED_VALUE*1.2)*self.modifier
+            self.going_down = 0
+        elif left == 1:
+            self.msg_wrist_right.data = (WRIST_SPEED_VALUE*1.2)*self.modifier
+            self.msg_wrist_left.data = -(WRIST_SPEED_VALUE*0.8)*self.modifier
+            self.going_down = 0
+        else:
+            if(self.going_down>0):
+                self.msg_wrist_right.data = WRIST_SPEED_VALUE*self.modifier
+                self.msg_wrist_left.data = WRIST_SPEED_VALUE*self.modifier
+                self.going_down -= 1
+            else:
+                self.msg_wrist_right.data = 0.0
+                self.msg_wrist_left.data = 0.0 
  
 
     
@@ -138,19 +158,19 @@ class ArmLogic(Node):
         linear_rail_speed = self.get_linear_rail_speed(motion[3], motion[2])
 
         #Expecting (left y joystick)
-        self.msg_up_and_down = motion[0]
+        self.msg_up_and_down.data = motion[0]
 
         #Expecting (right y joystick)
-        self.msg_forwards_and_backwards = motion[1]  
+        self.msg_forwards_and_backwards.data = motion[1]  
 
         #Publishing
-        self.msg_linear_rail.data = linear_rail_speed
+        self.msg_side_to_side.data = linear_rail_speed
 
     def listener_callback_buttons(self, msg):
         buttons = msg.data
         
         #Expecting D-Pad
-        self.D_PAD = [buttons[0], buttons[1], buttons[2], buttons[3]] # up, down, left, right
+        self.D_PAD = [buttons[0], buttons[1], buttons[2], buttons[3], buttons[6],buttons[7]] # up, down, left, right, x, y
         
         #Expecting A and B buttons
         gripper_speed = self.get_gripper_speed(buttons[4], buttons[5])

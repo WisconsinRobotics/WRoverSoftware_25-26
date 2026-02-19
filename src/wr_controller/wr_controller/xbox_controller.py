@@ -24,6 +24,7 @@ class XboxPublisher(Node):
         self.motion = [0.0, 0.0,0.0,0.0]
 
         self.buttons_publisher_ = self.create_publisher(Int16MultiArray, 'buttons_arm', 2)
+
         self.buttons=[0,0,0,0,0,0,0,0] #Up, Down, Left, Right, A, B, X. Y
 
 
@@ -73,6 +74,7 @@ class XboxPublisher(Node):
                         self.buttons[6] = 0
                     elif event.button == 3: # X Button
                         self.buttons[7] = 0
+
             if event.type == pygame.JOYHATMOTION:
                 if event.joy == CONTROLLER:
                     if event.value[0] == -1:  # D-Pad Left
