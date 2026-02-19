@@ -24,7 +24,7 @@ class XboxPublisher(Node):
         self.motion = [0.0, 0.0,0.0,0.0]
 
         self.buttons_publisher_ = self.create_publisher(Int16MultiArray, 'buttons_arm', 2)
-        self.buttons=[0,0,0,0,0,0] #Up, Down, Left, Right, A, B
+        self.buttons=[0,0,0,0,0,0,0,0] #Up, Down, Left, Right, A, B, X. Y
 
 
     def timer_callback(self):
@@ -34,9 +34,10 @@ class XboxPublisher(Node):
         if len(self.joysticks) > 0:
             # Currently set up for bluetooth, might change later
             self.motion = [-self.joysticks[CONTROLLER].get_axis(1), #Left stick up and down
-                        -self.joysticks[CONTROLLER].get_axis(3),  #Right stick up and down
-                        self.joysticks[CONTROLLER].get_axis(4), #Right Trigger
+                        -self.joysticks[CONTROLLER].get_axis(4),  #Right stick up and down
+                        self.joysticks[CONTROLLER].get_axis(2), #Right Trigger
                         self.joysticks[CONTROLLER].get_axis(5) ]# Left Trigger 
+            #self.get_logger().info("Motion: " + str(self.motion)) 
             for i in range(4):
                 if abs(self.motion[i]) < self.AXIS_BOUNDARY:
                     self.motion[i] = 0.0
@@ -56,7 +57,11 @@ class XboxPublisher(Node):
                         print("BUTTON B")
                         self.buttons[5] = 1
                     elif event.button == 2: # X Button
+                        self.buttons[6] = 1
                         self.get_logger().info("Pressed ARM controller (ARM)")
+                    elif event.button == 3: # X Button
+                        self.buttons[7] = 1
+                        self.get_logger().info("Pressed Y")
 
             elif event.type == pygame.JOYBUTTONUP:
                 if event.joy == CONTROLLER:
@@ -64,6 +69,10 @@ class XboxPublisher(Node):
                         self.buttons[4] = 0
                     elif event.button == 1:  # B button
                         self.buttons[5] = 0
+                    elif event.button == 2: # X Button
+                        self.buttons[6] = 0
+                    elif event.button == 3: # X Button
+                        self.buttons[7] = 0
             if event.type == pygame.JOYHATMOTION:
                 if event.joy == CONTROLLER:
                     if event.value[0] == -1:  # D-Pad Left
