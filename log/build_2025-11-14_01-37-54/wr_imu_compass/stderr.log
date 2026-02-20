@@ -1,0 +1,17 @@
+[31mCMake Error at CMakeLists.txt:14 (find_package):
+  By not providing "Findphoenix6.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "phoenix6",
+  but CMake did not find one.
+
+  Could not find a package configuration file provided by "phoenix6" with any
+  of the following names:
+
+    phoenix6Config.cmake
+    phoenix6-config.cmake
+
+  Add the installation prefix of "phoenix6" to CMAKE_PREFIX_PATH or set
+  "phoenix6_DIR" to a directory containing one of the above files.  If
+  "phoenix6" provides a separate development package or SDK, be sure it has
+  been installed.
+
+[0m

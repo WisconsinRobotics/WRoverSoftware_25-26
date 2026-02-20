@@ -1,0 +1,239 @@
+[0.111s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.111s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=4, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0xffff91adbd90>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0xffff91adb880>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0xffff91adb880>>)
+[0.262s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.262s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.262s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.263s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.263s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.263s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.263s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26'
+[0.263s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.263s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.264s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.264s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.264s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.264s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.264s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.264s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.264s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extensions ['ignore', 'ignore_ament_install']
+[0.279s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extension 'ignore'
+[0.279s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extension 'ignore_ament_install'
+[0.279s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extensions ['colcon_pkg']
+[0.279s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extension 'colcon_pkg'
+[0.279s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extensions ['colcon_meta']
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extension 'colcon_meta'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extensions ['ros']
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extension 'ros'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extensions ['cmake', 'python']
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extension 'cmake'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extension 'python'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extensions ['python_setup_py']
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(docs) by extension 'python_setup_py'
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ignore', 'ignore_ament_install']
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore'
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore_ament_install'
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_pkg']
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_pkg'
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_meta']
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_meta'
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ros']
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ros'
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['cmake', 'python']
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'cmake'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['python_setup_py']
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python_setup_py'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extensions ['ignore', 'ignore_ament_install']
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extension 'ignore'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extension 'ignore_ament_install'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extensions ['colcon_pkg']
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extension 'colcon_pkg'
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extensions ['colcon_meta']
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extension 'colcon_meta'
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extensions ['ros']
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_can_comms) by extension 'ros'
+[0.286s] DEBUG:colcon.colcon_core.package_identification:Package 'src/wr_can_comms' with type 'ros.ament_python' and name 'wr_can_comms'
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extensions ['ignore', 'ignore_ament_install']
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extension 'ignore'
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extension 'ignore_ament_install'
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extensions ['colcon_pkg']
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extension 'colcon_pkg'
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extensions ['colcon_meta']
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extension 'colcon_meta'
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extensions ['ros']
+[0.287s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_imu_compass) by extension 'ros'
+[0.288s] DEBUG:colcon.colcon_core.package_identification:Package 'src/wr_imu_compass' with type 'ros.ament_cmake' and name 'wr_imu_compass'
+[0.288s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extensions ['ignore', 'ignore_ament_install']
+[0.288s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extension 'ignore'
+[0.288s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extension 'ignore_ament_install'
+[0.289s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extensions ['colcon_pkg']
+[0.289s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extension 'colcon_pkg'
+[0.289s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extensions ['colcon_meta']
+[0.289s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extension 'colcon_meta'
+[0.289s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extensions ['ros']
+[0.289s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_control) by extension 'ros'
+[0.289s] DEBUG:colcon.colcon_core.package_identification:Package 'src/wr_swerve_control' with type 'ros.ament_python' and name 'wr_swerve_control'
+[0.289s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extensions ['ignore', 'ignore_ament_install']
+[0.290s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extension 'ignore'
+[0.290s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extension 'ignore_ament_install'
+[0.290s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extensions ['colcon_pkg']
+[0.290s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extension 'colcon_pkg'
+[0.290s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extensions ['colcon_meta']
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extension 'colcon_meta'
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extensions ['ros']
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_swerve_motor) by extension 'ros'
+[0.292s] DEBUG:colcon.colcon_core.package_identification:Package 'src/wr_swerve_motor' with type 'ros.ament_python' and name 'wr_swerve_motor'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extensions ['ignore', 'ignore_ament_install']
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extension 'ignore'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extension 'ignore_ament_install'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extensions ['colcon_pkg']
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extension 'colcon_pkg'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extensions ['colcon_meta']
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extension 'colcon_meta'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extensions ['ros']
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(src/wr_xbox_controller) by extension 'ros'
+[0.293s] DEBUG:colcon.colcon_core.package_identification:Package 'src/wr_xbox_controller' with type 'ros.ament_python' and name 'wr_xbox_controller'
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.323s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.323s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.325s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 309 installed packages in /opt/ros/humble
+[0.326s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'cmake_args' from command line to 'None'
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'cmake_target' from command line to 'None'
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'cmake_clean_cache' from command line to 'False'
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'cmake_clean_first' from command line to 'False'
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'cmake_force_configure' from command line to 'False'
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'ament_cmake_args' from command line to 'None'
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'catkin_cmake_args' from command line to 'None'
+[0.364s] Level 5:colcon.colcon_core.verb:set package 'wr_can_comms' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.364s] DEBUG:colcon.colcon_core.verb:Building package 'wr_can_comms' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms', 'merge_install': False, 'path': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_can_comms', 'symlink_install': False, 'test_result_base': None}
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'cmake_args' from command line to 'None'
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'cmake_target' from command line to 'None'
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'cmake_clean_cache' from command line to 'False'
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'cmake_clean_first' from command line to 'False'
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'cmake_force_configure' from command line to 'False'
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'ament_cmake_args' from command line to 'None'
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'catkin_cmake_args' from command line to 'None'
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_imu_compass' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.365s] DEBUG:colcon.colcon_core.verb:Building package 'wr_imu_compass' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_imu_compass', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass', 'merge_install': False, 'path': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_imu_compass', 'symlink_install': False, 'test_result_base': None}
+[0.365s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'cmake_args' from command line to 'None'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'cmake_target' from command line to 'None'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'cmake_clean_cache' from command line to 'False'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'cmake_clean_first' from command line to 'False'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'cmake_force_configure' from command line to 'False'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'ament_cmake_args' from command line to 'None'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'catkin_cmake_args' from command line to 'None'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_control' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.366s] DEBUG:colcon.colcon_core.verb:Building package 'wr_swerve_control' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_control', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_control', 'merge_install': False, 'path': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_swerve_control', 'symlink_install': False, 'test_result_base': None}
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'cmake_args' from command line to 'None'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'cmake_target' from command line to 'None'
+[0.366s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'cmake_clean_cache' from command line to 'False'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'cmake_clean_first' from command line to 'False'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'cmake_force_configure' from command line to 'False'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'ament_cmake_args' from command line to 'None'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'catkin_cmake_args' from command line to 'None'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_swerve_motor' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.367s] DEBUG:colcon.colcon_core.verb:Building package 'wr_swerve_motor' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor', 'merge_install': False, 'path': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_swerve_motor', 'symlink_install': False, 'test_result_base': None}
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'cmake_args' from command line to 'None'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'cmake_target' from command line to 'None'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.367s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'cmake_clean_cache' from command line to 'False'
+[0.368s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'cmake_clean_first' from command line to 'False'
+[0.368s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'cmake_force_configure' from command line to 'False'
+[0.368s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'ament_cmake_args' from command line to 'None'
+[0.368s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'catkin_cmake_args' from command line to 'None'
+[0.368s] Level 5:colcon.colcon_core.verb:set package 'wr_xbox_controller' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.368s] DEBUG:colcon.colcon_core.verb:Building package 'wr_xbox_controller' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller', 'merge_install': False, 'path': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_xbox_controller', 'symlink_install': False, 'test_result_base': None}
+[0.368s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.371s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.372s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_can_comms' with build type 'ament_python'
+[0.372s] Level 1:colcon.colcon_core.shell:create_environment_hook('wr_can_comms', 'ament_prefix_path')
+[0.376s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.376s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/wr_can_comms/hook/ament_prefix_path.ps1'
+[0.377s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/wr_can_comms/hook/ament_prefix_path.dsv'
+[0.377s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/wr_can_comms/hook/ament_prefix_path.sh'
+[0.378s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.378s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.384s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_imu_compass' with build type 'ament_cmake'
+[0.385s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_imu_compass'
+[0.385s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.385s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.390s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_swerve_control' with build type 'ament_python'
+[0.390s] Level 1:colcon.colcon_core.shell:create_environment_hook('wr_swerve_control', 'ament_prefix_path')
+[0.390s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_control/share/wr_swerve_control/hook/ament_prefix_path.ps1'
+[0.390s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_control/share/wr_swerve_control/hook/ament_prefix_path.dsv'
+[0.391s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_control/share/wr_swerve_control/hook/ament_prefix_path.sh'
+[0.392s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.392s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.402s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_swerve_motor' with build type 'ament_python'
+[0.402s] Level 1:colcon.colcon_core.shell:create_environment_hook('wr_swerve_motor', 'ament_prefix_path')
+[0.403s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/share/wr_swerve_motor/hook/ament_prefix_path.ps1'
+[0.403s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/share/wr_swerve_motor/hook/ament_prefix_path.dsv'
+[0.403s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/share/wr_swerve_motor/hook/ament_prefix_path.sh'
+[0.404s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.404s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.650s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_can_comms'
+[0.650s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.650s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.656s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_imu_compass': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_imu_compass -DCMAKE_INSTALL_PREFIX=/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass
+[0.921s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_swerve_control'
+[0.922s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.922s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.187s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_swerve_motor'
+[1.187s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.187s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.225s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_imu_compass' returned '1': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_imu_compass -DCMAKE_INSTALL_PREFIX=/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass
+[1.269s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(wr_imu_compass)
+[1.272s] Level 1:colcon.colcon_core.environment:checking '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass' for CMake module files
+[1.272s] Level 1:colcon.colcon_core.environment:checking '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass' for CMake config files
+[1.273s] Level 1:colcon.colcon_core.environment:checking '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/bin'
+[1.273s] Level 1:colcon.colcon_core.environment:checking '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/lib/pkgconfig/wr_imu_compass.pc'
+[1.273s] Level 1:colcon.colcon_core.environment:checking '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/lib/python3.10/site-packages'
+[1.273s] Level 1:colcon.colcon_core.environment:checking '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/bin'
+[1.273s] INFO:colcon.colcon_core.shell:Creating package script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/share/wr_imu_compass/package.ps1'
+[1.274s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/share/wr_imu_compass/package.dsv'
+[1.274s] INFO:colcon.colcon_core.shell:Creating package script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/share/wr_imu_compass/package.sh'
+[1.275s] INFO:colcon.colcon_core.shell:Creating package script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/share/wr_imu_compass/package.bash'
+[1.277s] INFO:colcon.colcon_core.shell:Creating package script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/share/wr_imu_compass/package.zsh'
+[1.277s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass/share/colcon-core/packages/wr_imu_compass)
+[2.017s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[2.018s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[2.018s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '1'
+[2.018s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[2.025s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[2.025s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[2.025s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[2.076s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[2.077s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/local_setup.ps1'
+[2.078s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/_local_setup_util_ps1.py'
+[2.080s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/setup.ps1'
+[2.082s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/local_setup.sh'
+[2.083s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/_local_setup_util_sh.py'
+[2.086s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/setup.sh'
+[2.087s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/local_setup.bash'
+[2.088s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/setup.bash'
+[2.089s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/local_setup.zsh'
+[2.090s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/setup.zsh'

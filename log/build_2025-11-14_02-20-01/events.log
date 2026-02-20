@@ -1,0 +1,64 @@
+[0.000000] (-) TimerEvent: {}
+[0.002544] (wr_can_comms) JobQueued: {'identifier': 'wr_can_comms', 'dependencies': OrderedDict()}
+[0.002628] (wr_imu_compass) JobQueued: {'identifier': 'wr_imu_compass', 'dependencies': OrderedDict()}
+[0.002697] (wr_swerve_control) JobQueued: {'identifier': 'wr_swerve_control', 'dependencies': OrderedDict()}
+[0.002760] (wr_swerve_motor) JobQueued: {'identifier': 'wr_swerve_motor', 'dependencies': OrderedDict()}
+[0.002825] (wr_xbox_controller) JobQueued: {'identifier': 'wr_xbox_controller', 'dependencies': OrderedDict()}
+[0.003195] (wr_can_comms) JobStarted: {'identifier': 'wr_can_comms'}
+[0.021091] (wr_imu_compass) JobStarted: {'identifier': 'wr_imu_compass'}
+[0.031876] (wr_swerve_control) JobStarted: {'identifier': 'wr_swerve_control'}
+[0.033412] (wr_swerve_motor) JobStarted: {'identifier': 'wr_swerve_motor'}
+[0.099920] (-) TimerEvent: {}
+[0.200282] (-) TimerEvent: {}
+[0.287101] (wr_imu_compass) JobProgress: {'identifier': 'wr_imu_compass', 'progress': 'cmake'}
+[0.287168] (wr_imu_compass) Command: {'cmd': ['/usr/bin/cmake', '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_imu_compass', '-DCMAKE_INSTALL_PREFIX=/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_imu_compass'], 'cwd': '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_imu_compass', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'wizk'), ('XDG_SESSION_TYPE', 'wayland'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/wizk'), ('OLDPWD', '/home/wizk/Desktop/Robotics'), ('DESKTOP_SESSION', 'ubuntu'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('SYSTEMD_EXEC_PID', '1548'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('IM_CONFIG_PHASE', '1'), ('WAYLAND_DISPLAY', 'wayland-0'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'wizk'), ('IGN_GAZEBO_MODEL_PATH', '/opt/ros/humble/share'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('USERNAME', 'wizk'), ('TERM', 'xterm-256color'), ('GAZEBO_MODEL_PATH', '/opt/ros/humble/share'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin'), ('SESSION_MANAGER', 'local/linux:@/tmp/.ICE-unix/1524,unix/linux:/tmp/.ICE-unix/1524'), ('XDG_MENU_PREFIX', 'gnome-'), ('GNOME_TERMINAL_SCREEN', '/org/gnome/Terminal/screen/89d9028a_fd0a_423c_9f67_7e18ab5c026f'), ('GNOME_SETUP_DISPLAY', ':1'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('DISPLAY', ':0'), ('LANG', 'en_US.UTF-8'), ('XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu'), ('XAUTHORITY', '/run/user/1000/.mutter-Xwaylandauth.WUJ5F3'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('GNOME_TERMINAL_SERVICE', ':1.154'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('SHELL', '/bin/bash'), ('QT_ACCESSIBILITY', '1'), ('GDMSESSION', 'ubuntu'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('IGN_GAZEBO_RESOURCE_PATH', '/opt/ros/humble/share'), ('GAZEBO_RESOURCE_PATH', '/opt/ros/humble/share'), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_imu_compass'), ('LC_ALL', 'en_US.UTF-8'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu:/etc/xdg'), ('XDG_DATA_DIRS', '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('VTE_VERSION', '6800'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[0.300389] (-) TimerEvent: {}
+[0.400688] (-) TimerEvent: {}
+[0.501123] (-) TimerEvent: {}
+[0.568599] (wr_imu_compass) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.568776] (wr_imu_compass) StdoutLine: {'line': b'-- Found rclcpp: 16.0.15 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[0.579191] (wr_imu_compass) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.7 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[0.581130] (wr_imu_compass) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.7 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[0.586099] (wr_imu_compass) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.7 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[0.594068] (wr_imu_compass) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.601230] (-) TimerEvent: {}
+[0.604292] (wr_imu_compass) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.630849] (wr_imu_compass) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[0.631868] (wr_imu_compass) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.8 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[0.701344] (-) TimerEvent: {}
+[0.742255] (wr_imu_compass) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[0.801440] (-) TimerEvent: {}
+[0.803892] (wr_imu_compass) StderrLine: {'line': b'\x1b[31mCMake Error at CMakeLists.txt:14 (find_package):\n'}
+[0.804048] (wr_imu_compass) StderrLine: {'line': b'  By not providing "Findphoenix6.cmake" in CMAKE_MODULE_PATH this project has\n'}
+[0.804100] (wr_imu_compass) StderrLine: {'line': b'  asked CMake to find a package configuration file provided by "phoenix6",\n'}
+[0.804155] (wr_imu_compass) StderrLine: {'line': b'  but CMake did not find one.\n'}
+[0.804251] (wr_imu_compass) StderrLine: {'line': b'\n'}
+[0.804350] (wr_imu_compass) StderrLine: {'line': b'  Could not find a package configuration file provided by "phoenix6" with any\n'}
+[0.804445] (wr_imu_compass) StderrLine: {'line': b'  of the following names:\n'}
+[0.804628] (wr_imu_compass) StderrLine: {'line': b'\n'}
+[0.804701] (wr_imu_compass) StderrLine: {'line': b'    phoenix6Config.cmake\n'}
+[0.804747] (wr_imu_compass) StderrLine: {'line': b'    phoenix6-config.cmake\n'}
+[0.804788] (wr_imu_compass) StderrLine: {'line': b'\n'}
+[0.804826] (wr_imu_compass) StderrLine: {'line': b'  Add the installation prefix of "phoenix6" to CMAKE_PREFIX_PATH or set\n'}
+[0.804866] (wr_imu_compass) StderrLine: {'line': b'  "phoenix6_DIR" to a directory containing one of the above files.  If\n'}
+[0.804949] (wr_imu_compass) StderrLine: {'line': b'  "phoenix6" provides a separate development package or SDK, be sure it has\n'}
+[0.804991] (wr_imu_compass) StderrLine: {'line': b'  been installed.\n'}
+[0.805064] (wr_imu_compass) StderrLine: {'line': b'\n'}
+[0.805100] (wr_imu_compass) StderrLine: {'line': b'\x1b[0m\n'}
+[0.805136] (wr_imu_compass) StdoutLine: {'line': b'-- Configuring incomplete, errors occurred!\n'}
+[0.805180] (wr_imu_compass) StdoutLine: {'line': b'See also "/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_imu_compass/CMakeFiles/CMakeOutput.log".\n'}
+[0.855928] (wr_imu_compass) CommandEnded: {'returncode': 1}
+[0.901599] (-) TimerEvent: {}
+[0.908975] (wr_imu_compass) JobEnded: {'identifier': 'wr_imu_compass', 'rc': 1}
+[1.002510] (-) TimerEvent: {}
+[1.103769] (-) TimerEvent: {}
+[1.204187] (-) TimerEvent: {}
+[1.304706] (-) TimerEvent: {}
+[1.405530] (-) TimerEvent: {}
+[1.506502] (-) TimerEvent: {}
+[1.607321] (-) TimerEvent: {}
+[1.619271] (wr_swerve_motor) JobEnded: {'identifier': 'wr_swerve_motor', 'rc': 'SIGINT'}
+[1.628894] (wr_can_comms) JobEnded: {'identifier': 'wr_can_comms', 'rc': 'SIGINT'}
+[1.638686] (wr_swerve_control) JobEnded: {'identifier': 'wr_swerve_control', 'rc': 'SIGINT'}
+[1.649347] (wr_xbox_controller) JobSkipped: {'identifier': 'wr_xbox_controller'}
+[1.649402] (-) EventReactorShutdown: {}

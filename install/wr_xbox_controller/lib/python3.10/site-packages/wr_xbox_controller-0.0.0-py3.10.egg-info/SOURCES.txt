@@ -1,0 +1,16 @@
+LICENSE
+package.xml
+setup.cfg
+setup.py
+../../build/wr_xbox_controller/wr_xbox_controller.egg-info/PKG-INFO
+../../build/wr_xbox_controller/wr_xbox_controller.egg-info/SOURCES.txt
+../../build/wr_xbox_controller/wr_xbox_controller.egg-info/dependency_links.txt
+../../build/wr_xbox_controller/wr_xbox_controller.egg-info/entry_points.txt
+../../build/wr_xbox_controller/wr_xbox_controller.egg-info/requires.txt
+../../build/wr_xbox_controller/wr_xbox_controller.egg-info/top_level.txt
+../../build/wr_xbox_controller/wr_xbox_controller.egg-info/zip-safe
+resource/wr_xbox_controller
+wr_xbox_controller/__init__.py
+wr_xbox_controller/arm_xbox.py
+wr_xbox_controller/old_xbox_controller.py
+wr_xbox_controller/xbox_controller.py

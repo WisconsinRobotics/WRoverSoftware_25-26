@@ -1,0 +1,3 @@
+[console_scripts]
+swerve_control = wr_swerve_control.swerve_control:main
+

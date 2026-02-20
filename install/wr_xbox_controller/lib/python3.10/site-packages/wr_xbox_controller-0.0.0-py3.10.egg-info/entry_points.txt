@@ -1,0 +1,5 @@
+[console_scripts]
+arm_xbox_control = wr_xbox_controller.arm_xbox:main
+old_xbox_controller = wr_xbox_controller.old_xbox_controller:main
+xbox_controller = wr_xbox_controller.xbox_controller:main
+

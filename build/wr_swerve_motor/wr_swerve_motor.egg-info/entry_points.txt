@@ -1,0 +1,3 @@
+[console_scripts]
+swerve_motor = wr_swerve_motor.swerve_motor:main
+

@@ -1,0 +1,3 @@
+[console_scripts]
+can_comms = wr_can_comms.can_comms:main
+

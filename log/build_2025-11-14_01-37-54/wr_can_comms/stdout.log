@@ -1,0 +1,35 @@
+running egg_info
+creating ../../build/wr_can_comms/wr_can_comms.egg-info
+writing ../../build/wr_can_comms/wr_can_comms.egg-info/PKG-INFO
+writing dependency_links to ../../build/wr_can_comms/wr_can_comms.egg-info/dependency_links.txt
+writing entry points to ../../build/wr_can_comms/wr_can_comms.egg-info/entry_points.txt
+writing requirements to ../../build/wr_can_comms/wr_can_comms.egg-info/requires.txt
+writing top-level names to ../../build/wr_can_comms/wr_can_comms.egg-info/top_level.txt
+writing manifest file '../../build/wr_can_comms/wr_can_comms.egg-info/SOURCES.txt'
+reading manifest file '../../build/wr_can_comms/wr_can_comms.egg-info/SOURCES.txt'
+writing manifest file '../../build/wr_can_comms/wr_can_comms.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms
+copying wr_can_comms/can_comms.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms
+copying wr_can_comms/__init__.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms
+running install
+running install_lib
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms
+copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms/can_comms.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms
+copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms/__init__.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms
+byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms/can_comms.py to can_comms.cpython-310.pyc
+byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/ament_index
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/ament_index/resource_index
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/ament_index/resource_index/packages
+copying resource/wr_can_comms -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/ament_index/resource_index/packages
+copying package.xml -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/wr_can_comms
+running install_egg_info
+Copying ../../build/wr_can_comms/wr_can_comms.egg-info to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms-0.0.0-py3.10.egg-info
+running install_scripts
+Installing can_comms script to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/wr_can_comms
+writing list of installed files to '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/install.log'

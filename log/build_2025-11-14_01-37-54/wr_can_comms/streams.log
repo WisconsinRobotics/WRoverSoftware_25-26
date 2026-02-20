@@ -1,0 +1,38 @@
+[1.265s] Invoking command in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_can_comms': PYTHONPATH=/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/wr_can_comms build --build-base /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build install --record /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/install.log --single-version-externally-managed install_data
+[1.546s] running egg_info
+[1.551s] creating ../../build/wr_can_comms/wr_can_comms.egg-info
+[1.552s] writing ../../build/wr_can_comms/wr_can_comms.egg-info/PKG-INFO
+[1.552s] writing dependency_links to ../../build/wr_can_comms/wr_can_comms.egg-info/dependency_links.txt
+[1.552s] writing entry points to ../../build/wr_can_comms/wr_can_comms.egg-info/entry_points.txt
+[1.553s] writing requirements to ../../build/wr_can_comms/wr_can_comms.egg-info/requires.txt
+[1.553s] writing top-level names to ../../build/wr_can_comms/wr_can_comms.egg-info/top_level.txt
+[1.553s] writing manifest file '../../build/wr_can_comms/wr_can_comms.egg-info/SOURCES.txt'
+[1.554s] reading manifest file '../../build/wr_can_comms/wr_can_comms.egg-info/SOURCES.txt'
+[1.555s] writing manifest file '../../build/wr_can_comms/wr_can_comms.egg-info/SOURCES.txt'
+[1.555s] running build
+[1.555s] running build_py
+[1.555s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build
+[1.555s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib
+[1.555s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms
+[1.555s] copying wr_can_comms/can_comms.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms
+[1.555s] copying wr_can_comms/__init__.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms
+[1.555s] running install
+[1.555s] running install_lib
+[1.556s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms
+[1.556s] copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms/can_comms.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms
+[1.556s] copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build/lib/wr_can_comms/__init__.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms
+[1.557s] byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms/can_comms.py to can_comms.cpython-310.pyc
+[1.583s] Sorry: IndentationError: expected an indented block after 'with' statement on line 73 (can_comms.py, line 74)
+[1.583s] byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms/__init__.py to __init__.cpython-310.pyc
+[1.583s] running install_data
+[1.583s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/ament_index
+[1.583s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/ament_index/resource_index
+[1.583s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/ament_index/resource_index/packages
+[1.584s] copying resource/wr_can_comms -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/ament_index/resource_index/packages
+[1.584s] copying package.xml -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/share/wr_can_comms
+[1.584s] running install_egg_info
+[1.597s] Copying ../../build/wr_can_comms/wr_can_comms.egg-info to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages/wr_can_comms-0.0.0-py3.10.egg-info
+[1.598s] running install_scripts
+[1.630s] Installing can_comms script to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/wr_can_comms
+[1.631s] writing list of installed files to '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/install.log'
+[1.797s] Invoked command in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_can_comms' returned '0': PYTHONPATH=/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_can_comms/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/wr_can_comms build --build-base /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/build install --record /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_can_comms/install.log --single-version-externally-managed install_data

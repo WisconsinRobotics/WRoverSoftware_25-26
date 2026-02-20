@@ -1,0 +1,14 @@
+LICENSE
+package.xml
+setup.cfg
+setup.py
+../../build/wr_swerve_motor/wr_swerve_motor.egg-info/PKG-INFO
+../../build/wr_swerve_motor/wr_swerve_motor.egg-info/SOURCES.txt
+../../build/wr_swerve_motor/wr_swerve_motor.egg-info/dependency_links.txt
+../../build/wr_swerve_motor/wr_swerve_motor.egg-info/entry_points.txt
+../../build/wr_swerve_motor/wr_swerve_motor.egg-info/requires.txt
+../../build/wr_swerve_motor/wr_swerve_motor.egg-info/top_level.txt
+../../build/wr_swerve_motor/wr_swerve_motor.egg-info/zip-safe
+resource/wr_swerve_motor
+wr_swerve_motor/__init__.py
+wr_swerve_motor/swerve_motor.py

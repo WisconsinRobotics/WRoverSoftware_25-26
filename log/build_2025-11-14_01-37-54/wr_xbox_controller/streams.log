@@ -1,0 +1,45 @@
+[0.577s] Invoking command in '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/src/wr_xbox_controller': PYTHONPATH=/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/wr_xbox_controller build --build-base /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build install --record /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/install.log --single-version-externally-managed install_data
+[0.774s] running egg_info
+[0.774s] creating ../../build/wr_xbox_controller/wr_xbox_controller.egg-info
+[0.774s] writing ../../build/wr_xbox_controller/wr_xbox_controller.egg-info/PKG-INFO
+[0.775s] writing dependency_links to ../../build/wr_xbox_controller/wr_xbox_controller.egg-info/dependency_links.txt
+[0.775s] writing entry points to ../../build/wr_xbox_controller/wr_xbox_controller.egg-info/entry_points.txt
+[0.775s] writing requirements to ../../build/wr_xbox_controller/wr_xbox_controller.egg-info/requires.txt
+[0.775s] writing top-level names to ../../build/wr_xbox_controller/wr_xbox_controller.egg-info/top_level.txt
+[0.775s] writing manifest file '../../build/wr_xbox_controller/wr_xbox_controller.egg-info/SOURCES.txt'
+[0.777s] reading manifest file '../../build/wr_xbox_controller/wr_xbox_controller.egg-info/SOURCES.txt'
+[0.777s] adding license file 'LICENSE'
+[0.777s] writing manifest file '../../build/wr_xbox_controller/wr_xbox_controller.egg-info/SOURCES.txt'
+[0.778s] running build
+[0.778s] running build_py
+[0.778s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build
+[0.778s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib
+[0.779s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller
+[0.779s] copying wr_xbox_controller/xbox_controller.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller
+[0.779s] copying wr_xbox_controller/arm_xbox.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller
+[0.779s] copying wr_xbox_controller/__init__.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller
+[0.779s] copying wr_xbox_controller/old_xbox_controller.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller
+[0.780s] running install
+[0.780s] running install_lib
+[0.780s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller
+[0.781s] copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller/xbox_controller.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller
+[0.781s] copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller/arm_xbox.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller
+[0.782s] copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller/__init__.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller
+[0.782s] copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/build/lib/wr_xbox_controller/old_xbox_controller.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller
+[0.783s] byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller/xbox_controller.py to xbox_controller.cpython-310.pyc
+[0.785s] byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller/arm_xbox.py to arm_xbox.cpython-310.pyc
+[0.786s] byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller/__init__.py to __init__.cpython-310.pyc
+[0.786s] byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller/old_xbox_controller.py to old_xbox_controller.cpython-310.pyc
+[0.787s] running install_data
+[0.787s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/share/ament_index
+[0.787s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/share/ament_index/resource_index
+[0.787s] creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/share/ament_index/resource_index/packages
+[0.787s] copying resource/wr_xbox_controller -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/share/ament_index/resource_index/packages
+[0.787s] copying package.xml -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/share/wr_xbox_controller
+[0.787s] running install_egg_info
+[0.790s] Copying ../../build/wr_xbox_controller/wr_xbox_controller.egg-info to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/python3.10/site-packages/wr_xbox_controller-0.0.0-py3.10.egg-info
+[0.790s] running install_scripts
+[0.806s] Installing arm_xbox_control script to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/wr_xbox_controller
+[0.807s] Installing old_xbox_controller script to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/wr_xbox_controller
+[0.807s] Installing xbox_controller script to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_xbox_controller/lib/wr_xbox_controller
+[0.807s] writing list of installed files to '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_xbox_controller/install.log'

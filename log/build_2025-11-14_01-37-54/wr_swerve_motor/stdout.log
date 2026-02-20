@@ -1,0 +1,36 @@
+running egg_info
+creating ../../build/wr_swerve_motor/wr_swerve_motor.egg-info
+writing ../../build/wr_swerve_motor/wr_swerve_motor.egg-info/PKG-INFO
+writing dependency_links to ../../build/wr_swerve_motor/wr_swerve_motor.egg-info/dependency_links.txt
+writing entry points to ../../build/wr_swerve_motor/wr_swerve_motor.egg-info/entry_points.txt
+writing requirements to ../../build/wr_swerve_motor/wr_swerve_motor.egg-info/requires.txt
+writing top-level names to ../../build/wr_swerve_motor/wr_swerve_motor.egg-info/top_level.txt
+writing manifest file '../../build/wr_swerve_motor/wr_swerve_motor.egg-info/SOURCES.txt'
+reading manifest file '../../build/wr_swerve_motor/wr_swerve_motor.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file '../../build/wr_swerve_motor/wr_swerve_motor.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor/build
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor/build/lib
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor/build/lib/wr_swerve_motor
+copying wr_swerve_motor/swerve_motor.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor/build/lib/wr_swerve_motor
+copying wr_swerve_motor/__init__.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor/build/lib/wr_swerve_motor
+running install
+running install_lib
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/lib/python3.10/site-packages/wr_swerve_motor
+copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor/build/lib/wr_swerve_motor/swerve_motor.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/lib/python3.10/site-packages/wr_swerve_motor
+copying /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor/build/lib/wr_swerve_motor/__init__.py -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/lib/python3.10/site-packages/wr_swerve_motor
+byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/lib/python3.10/site-packages/wr_swerve_motor/swerve_motor.py to swerve_motor.cpython-310.pyc
+byte-compiling /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/lib/python3.10/site-packages/wr_swerve_motor/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/share/ament_index
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/share/ament_index/resource_index
+creating /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/share/ament_index/resource_index/packages
+copying resource/wr_swerve_motor -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/share/ament_index/resource_index/packages
+copying package.xml -> /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/share/wr_swerve_motor
+running install_egg_info
+Copying ../../build/wr_swerve_motor/wr_swerve_motor.egg-info to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/lib/python3.10/site-packages/wr_swerve_motor-0.0.0-py3.10.egg-info
+running install_scripts
+Installing swerve_motor script to /home/wizk/Desktop/Robotics/WRoverSoftware_25-26/install/wr_swerve_motor/lib/wr_swerve_motor
+writing list of installed files to '/home/wizk/Desktop/Robotics/WRoverSoftware_25-26/build/wr_swerve_motor/install.log'
