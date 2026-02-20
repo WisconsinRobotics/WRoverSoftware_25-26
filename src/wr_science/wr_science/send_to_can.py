@@ -9,9 +9,9 @@ class SwerveControlSubsrciber(Node):
     def __init__(self):
         super().__init__('swerve_control')
         #TODO:CHANGE IDS
-        self.vesc_ids = {"CAROUSEL":["79"],
-                         "AUGER":["80"],
-                         "INSERT":["78"]
+        self.vesc_ids = {"CAROUSEL":["83"],
+                         "AUGER":["84"],
+                         "INSERT":["80"]
                         }
         self.max_rpm = 6000
         self.limit_rotation = 0
@@ -41,8 +41,8 @@ class SwerveControlSubsrciber(Node):
     def listener_carousel(self, msg):
         can_msg_rpm = String()
 
-        rpm = msg.data * self.max_rpm * 1.5
-        can_msg_rpm.data = self.vesc_ids["CAROUSEL"][0] + " CAN_PACKET_SET_RPM " + str(rpm) + " float"
+        rpm = msg.data * 0.05
+        can_msg_rpm.data = self.vesc_ids["CAROUSEL"][0] + " CAN_PACKET_SET_DUTY " + str(rpm) + " float"
         self.publisher_.publish(can_msg_rpm)
 
 
