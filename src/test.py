@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import time
 import math
+import zmq
 
 import rclpy
 from rclpy.node import Node
@@ -51,6 +52,12 @@ class IMUNode(Node):
 
 
 class SectorDepthClassifier():
+    def __init__(self):
+        # This sets up the code to broadcast video to the network
+        context = zmq.Context()
+        self.socket = context.socket(zmq.PUB)
+        self.socket.bind("tcp://*:5555")  # Binds to port 5555
+        print("Video Streamer initialized on port 5555")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
@@ -232,9 +239,16 @@ class SectorDepthClassifier():
             depth_full = cv2.rectangle(depth_full, start_point, end_point, color, -1)
 
 
+            try:
+                # Compress to jpg to save bandwidth
+                ret, buffer = cv2.imencode('.jpg', depth_full, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
+                if ret:
+                    self.socket.send(buffer)
+            except Exception as e:
+                print(f"Stream Error: {e}")
 
-            cv2.imshow("obstacle avoidance", depth_full)
-            cv2.waitKey(1)
+            # cv2.imshow("obstacle avoidance", depth_full)
+            # cv2.waitKey(1)
         
         end_time = time.time() - start_time
         print("time :",end_time)
