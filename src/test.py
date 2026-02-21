@@ -56,8 +56,8 @@ class SectorDepthClassifier():
         # This sets up the code to broadcast video to the network
         context = zmq.Context()
         self.socket = context.socket(zmq.PUB)
-        self.socket.bind("tcp://*:5555")  # Binds to port 5555
-        print("Video Streamer initialized on port 5555")
+        self.socket.bind("tcp://*:8000")  # Binds to port 5555
+        print("Video Streamer initialized on port 8000")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
@@ -340,8 +340,8 @@ def quaternion_to_yaw(rv_x, rv_y, rv_z, rv_w):
 
 
 with dai.Pipeline() as pipeline:
-    monoLeft = pipeline.create(dai.node.MonoCamera).build(dai.CameraBoardSocket.CAM_B)
-    monoRight = pipeline.create(dai.node.MonoCamera).build(dai.CameraBoardSocket.CAM_C)
+    monoLeft = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
+    monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
     stereo = pipeline.create(dai.node.StereoDepth)
 
     stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.ROBOTICS)
@@ -418,8 +418,8 @@ with dai.Pipeline() as pipeline:
 
         swerve_node.send(swerve_cmd)
 
-        if cv2.waitKey(1) == ord('q'):
-            break
+        # if cv2.waitKey(1) == ord('q'):
+        #     break
         
 
     pipeline.stop()
