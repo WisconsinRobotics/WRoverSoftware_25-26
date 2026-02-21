@@ -4,6 +4,7 @@ import numpy as np
 import time
 import math
 import zmq
+import base64
 
 import rclpy
 from rclpy.node import Node
@@ -54,8 +55,9 @@ class IMUNode(Node):
 class SectorDepthClassifier():
     def __init__(self):
         # This sets up the code to broadcast video to the network
-        context = zmq.Context()
-        self.socket = context.socket(zmq.PUB)
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.PUB)
+        self.socket.setsockopt(zmq.CONFLATE, 1)
         self.socket.bind("tcp://*:8000")  # Binds to port 5555
         print("Video Streamer initialized on port 8000")
 
@@ -241,9 +243,14 @@ class SectorDepthClassifier():
 
             try:
                 # Compress to jpg to save bandwidth
-                ret, buffer = cv2.imencode('.jpg', depth_full, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
+                ret, buffer = cv2.imencode('.jpg', depth_full, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
                 if ret:
-                    self.socket.send(buffer)
+                    # 2. Convert to Base64 (This is what the receiver expects)
+                    jpg_as_text = base64.b64encode(buffer.tobytes())
+
+                    # 3. Send as a single message (Receiver uses recv(), not recv_multipart())
+                    self.socket.send(jpg_as_text)
+                    print("--------------------------sent frame -----------------------------")
             except Exception as e:
                 print(f"Stream Error: {e}")
 
