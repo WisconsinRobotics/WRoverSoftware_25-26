@@ -114,7 +114,7 @@ class ArmLogic(Node):
             self.modifier = .3
         else:
             self.modifier = 1
-        self.get_logger().info('I heard: "%s"' % self.modifier)
+        #self.get_logger().info('I heard: "%s"' % self.modifier)
         if up == 1:
             self.msg_wrist_right.data = WRIST_SPEED_VALUE*self.modifier
             self.msg_wrist_left.data = WRIST_SPEED_VALUE*self.modifier
