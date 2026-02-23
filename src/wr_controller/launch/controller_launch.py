@@ -4,17 +4,27 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     return LaunchDescription([
+        # Node(
+        #     package='wr_arm',
+        #     executable='velocity_control',
+        #     name='velocity_control'
+        # ),
         Node(
             package='wr_arm',
-            executable='velocity_control',
-            name='velocity_control'
+            executable='position_control',
+            name='position_control'
+        ),
+        Node(
+            package='wr_arm',
+            executable='send_to_can_position',
+            name='send_to_can_position'
         ),
         
-        Node(
-            package='wr_arm',
-            executable='send_to_can',
-            name='send_to_can'
-        ),
+        # Node(
+        #     package='wr_arm',
+        #     executable='send_to_can',
+        #     name='send_to_can'
+        # ),
         
         #Control with xbox
         Node(
