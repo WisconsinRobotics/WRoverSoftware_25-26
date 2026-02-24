@@ -60,7 +60,7 @@ navsat_transform:
     frequency: 30.0
     # MAGNETIC DECLINATION: You MUST search Google for your city's value!
     # Example: New York is roughly -0.22 radians. 0.0 assumes True North = Magnetic North.
-    magnetic_declination_radians: 0.0 
+    magnetic_declination_radians: 0.04712 
     yaw_offset: 0.0
     zero_altitude: true
     broadcast_utm_transform: true
