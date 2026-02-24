@@ -8,6 +8,7 @@ _pycache_/*
 *.pyc
 *.pyo
 *.pyd
+__pycache__/*
 
 # Colcon
 .colcon/*
