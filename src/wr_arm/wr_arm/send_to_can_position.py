@@ -83,12 +83,9 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_differential_left(self, msg):
         can_msg_angle = String()
-        speed_amount = msg.data * 5000
-        if(speed_amount == 0.0):
-            can_msg_angle.data = self.vesc_ids["differential_left"][0] + " CAN_PACKET_SET_CURRENT_HANDBRAKE_REL " + str(BREAK_REL) +" float"
-        else:
-            can_msg_angle.data = self.vesc_ids["differential_left"][0] + " CAN_PACKET_SET_RPM " + str(speed_amount) +" float"
-        
+        turn_amount = (msg.data)
+       
+        can_msg_angle.data = self.vesc_ids["differential_left"][0] + " CAN_PACKET_SET_POS " + str(turn_amount) +" float"
         #74 is id; CAN_PACKET_SET_POS is command; turn_amount is angle to turn to divide by 4; float is value to convert to
         self.publisher_.publish(can_msg_angle)
         #self.get_logger().info('Publishing Angle WRIST_LEFT: "%s"' % can_msg_angle)
@@ -96,15 +93,12 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_differential_right(self, msg):
         can_msg_angle = String()
-        speed_amount = msg.data * self.max_rpm 
-        if(speed_amount == 0.0):
-            can_msg_angle.data = self.vesc_ids["differential_right"][0] + " CAN_PACKET_SET_CURRENT_HANDBRAKE_REL " + str(BREAK_REL) +" float"
-        else:
-            can_msg_angle.data = self.vesc_ids["differential_right"][0] + " CAN_PACKET_SET_RPM " + str(speed_amount) +" float"
+        turn_amount = (msg.data)
         
+        can_msg_angle.data = self.vesc_ids["differential_right"][0] + " CAN_PACKET_SET_POS " + str(turn_amount) +" float"
         #74 is id; CAN_PACKET_SET_POS is command; turn_amount is angle to turn to divide by 4; float is value to convert to
         self.publisher_.publish(can_msg_angle)
-        #self.get_logger().info('Publishing Angle WRIST_LEFT: "%s"' % can_msg_angle)
+        #self.get_logger().info('Publishing Angle WRIST_RIGHT: "%s"' % can_msg_angle)
 
     def arm_listener_gripper(self, msg):
         can_msg_rpm = String()

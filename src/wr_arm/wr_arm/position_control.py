@@ -39,7 +39,7 @@ class ArmLogic(Node):
         self.timer_wrist = self.create_timer(timer_period, self.timer_update_wrist)
 
         #Define Postion of left and right position of wrist
-        self.kohler_shift = 135
+        self.kohler_shift = 135.0
         self.D_PAD = [0,0,0,0,0,0] #Array to keep track of which buttons are pressed
         self.absolute_wrist = self.kohler_shift#Start at zero
         self.wrist_positions = [0.0 + self.absolute_wrist ,0.0 + self.absolute_wrist] #[lef,right]
@@ -56,10 +56,10 @@ class ArmLogic(Node):
         self.msg_forwards_and_backwards.data = 0.0
 
         self.msg_wrist_left = Float64()
-        self.msg_wrist_left.data = 0.0
+        self.msg_wrist_left.data = self.absolute_wrist 
 
         self.msg_wrist_right = Float64()
-        self.msg_wrist_right.data = 0.0
+        self.msg_wrist_right.data = self.absolute_wrist 
 
         self.msg_gripper = Float64()
         self.msg_gripper.data = 0.
@@ -90,28 +90,36 @@ class ArmLogic(Node):
         
         if self.absolute_wrist >= 0 + self.kohler_shift and self.absolute_wrist <= 100 + self.kohler_shift and 1 in self.D_PAD:
             #self.get_logger().info(str(self.absolute_wrist))
-            self.get_wrist_position(self.D_PAD[0],self.D_PAD[1],self.D_PAD[2],self.D_PAD[3])
-            self.msg_wrist.left_position = float(self.wrist_positions[0])
-            self.msg_wrist.right_position = float(self.wrist_positions[1])
+            self.get_wrist_position(self.D_PAD[0],self.D_PAD[1],self.D_PAD[2],self.D_PAD[3], self.D_PAD[4], self.D_PAD[5])
+            self.msg_wrist_right.data = float(self.wrist_positions[0])
+            self.msg_wrist_left.data = float(self.wrist_positions[1])
 
 
-    def get_wrist_position(self, up, down, left, right) -> Float32MultiArray:
+    def get_wrist_position(self, up, down, left, right,x,y) -> Float32MultiArray:
+        if(x==1):
+            self.modifier = 1
+        elif(y==1):
+            self.modifier = 1
+        else:
+            self.modifier = 1
         if up == 1:
-            self.wrist_positions[0] += -WRIST_SPEED_VALUE
-            self.wrist_positions[1] += -WRIST_SPEED_VALUE
+            self.wrist_positions[0] += WRIST_SPEED_VALUE*self.modifier
+            self.wrist_positions[1] += WRIST_SPEED_VALUE*self.modifier
             #if self.absolute_wrist >= 0 + self.kohler_shift + 1:
             #    self.absolute_wrist += -WRIST_SPEED_VALUE #COMMENTED OUT LIMITS, can zero from bottom
         elif down == 1:
-            self.wrist_positions[0] += WRIST_SPEED_VALUE
-            self.wrist_positions[1] += WRIST_SPEED_VALUE
+            self.wrist_positions[0] += -WRIST_SPEED_VALUE*self.modifier
+            self.wrist_positions[1] += -WRIST_SPEED_VALUE*self.modifier
             #if self.absolute_wrist <= 100 + self.kohler_shift - 1:
             #    self.absolute_wrist += WRIST_SPEED_VALUE
         elif left == 1:
-            self.wrist_positions[0] += WRIST_SPEED_VALUE
-            self.wrist_positions[1] += -WRIST_SPEED_VALUE
+            self.wrist_positions[0] += WRIST_SPEED_VALUE*self.modifier
+            self.wrist_positions[1] += -WRIST_SPEED_VALUE*self.modifier
         elif right == 1:
-            self.wrist_positions[0] += -WRIST_SPEED_VALUE
-            self.wrist_positions[1] += WRIST_SPEED_VALUE
+            self.wrist_positions[0] += -WRIST_SPEED_VALUE*self.modifier
+            self.wrist_positions[1] += WRIST_SPEED_VALUE*self.modifier
+    
+     
     
     def get_gripper_speed(self, a, b) -> float:
         if a == 1:
@@ -132,7 +140,7 @@ class ArmLogic(Node):
         self.msg_up_and_down.data = motion[0]
 
         #Expecting (right y joystick)
-        self.msg_forwards_and_backwards.data = motion[1]  
+        self.msg_forwards_and_backwards.data = -motion[1]  
 
         #Publishing
         self.msg_side_to_side.data = linear_rail_speed
