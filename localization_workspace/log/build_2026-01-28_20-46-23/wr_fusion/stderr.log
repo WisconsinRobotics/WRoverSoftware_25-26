@@ -1,5 +1,0 @@
-  File "/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/install/wr_fusion/lib/python3.10/site-packages/wr_fusion/fusion.py", line 278
-    		)
-    		^
-SyntaxError: unmatched ')'
-

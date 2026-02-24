@@ -1,7 +1,0 @@
-[01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:7:10:[m[K [01;31m[Kfatal error: [m[Kctre/phoenix6/Pigeon2.hpp: No such file or directory
-    7 | #include [01;31m[K"ctre/phoenix6/Pigeon2.hpp"[m[K
-      |          [01;31m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
-compilation terminated.
-gmake[2]: *** [CMakeFiles/compass_node.dir/build.make:76: CMakeFiles/compass_node.dir/src/compass.cpp.o] Error 1
-gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/compass_node.dir/all] Error 2
-gmake: *** [Makefile:146: all] Error 2

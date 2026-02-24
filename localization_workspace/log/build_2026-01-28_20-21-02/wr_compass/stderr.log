@@ -1,7 +1,0 @@
-[01m[K/home/wiscrobo/workspace/WRoverSoftware_25-26/localization_workspace/src/wr_compass/src/compass.cpp:8:10:[m[K [01;31m[Kfatal error: [m[Ksensor_msgs/msg/imu.hpp: No such file or directory
-    8 | #include [01;31m[K"sensor_msgs/msg/imu.hpp"[m[K
-      |          [01;31m[K^~~~~~~~~~~~~~~~~~~~~~~~~[m[K
-compilation terminated.
-gmake[2]: *** [CMakeFiles/compass.dir/build.make:76: CMakeFiles/compass.dir/src/compass.cpp.o] Error 1
-gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/compass.dir/all] Error 2
-gmake: *** [Makefile:146: all] Error 2

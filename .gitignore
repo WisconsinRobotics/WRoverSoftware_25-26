@@ -1,0 +1,36 @@
+# ROS2 build directories
+build/
+install/
+log/
+
+# Python cache
+_pycache_/
+*.pyc
+*.pyo
+*.pyd
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Colcon
+.colcon/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Python venvs
+*env*/
+.env/
+
+# ROS2 launch logs
+*.launch.pyc

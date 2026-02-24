@@ -1,3 +1,0 @@
-[console_scripts]
-fusion = wr_fusion.fusion:main
-
