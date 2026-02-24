@@ -30,6 +30,16 @@ ament_target_dependencies(compass
 install(TARGETS compass
   DESTINATION lib/${PROJECT_NAME})
 
+# Install config directory
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Install launch directory
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

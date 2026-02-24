@@ -31,6 +31,7 @@ class CompassDataPublisher : public rclcpp::Node {
             
             message.header.stamp = this->get_clock()->now();
             
+            message.header.frame_id = "imu_link"; 
             //Get Signals
             auto &q_w = pigeon2imu.GetQuatW();
             auto &q_x = pigeon2imu.GetQuatX();
