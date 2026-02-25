@@ -47,7 +47,7 @@ class IMUNode(Node):
 
         self.latest_imu = 0.0
 
-        self.create_subscription(Imu, "/imu/data", self.imu_cb, 10)
+        self.create_subscription(Float64, "compass_data_topic", self.imu_cb, 10)
         
     def imu_cb(self, msg):
         self.latest_imu = msg.orientation
@@ -59,8 +59,8 @@ class SectorDepthClassifier():
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
         self.socket.setsockopt(zmq.CONFLATE, 1)
-        self.socket.bind("tcp://*:8000")  # Binds to port 5555
-        print("Video Streamer initialized on port 8000")
+        self.socket.bind("tcp://*:6000")  # Binds to port 5555
+        print("Video Streamer initialized on port 6000")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
@@ -403,15 +403,15 @@ with dai.Pipeline() as pipeline:
         #     current_heading = (current_heading + 270) % 360
         #     print("current heeading relative to north = ", current_heading)
         ## --- Depth Data Processing ---
-        msg = imu_node.latest_imu
+        # msg = imu_node.latest_imu
 
-        q_x = msg.x
-        q_y = msg.y
-        q_z = msg.z
-        q_w = msg.w
+        # q_x = msg.x
+        # q_y = msg.y
+        # q_z = msg.z
+        # q_w = msg.w
 
-        current_heading = quaternion_to_yaw(q_x, q_y, q_z, q_w)
-        print("uncorrected heeading relative to north = ", current_heading)
+        # current_heading = quaternion_to_yaw(q_x, q_y, q_z, q_w)
+        # print("uncorrected heeading relative to north = ", current_heading)
 
         final_heading = verifier.get_corrected_heading(
              current_imu=imu_node.latest_imu, 
