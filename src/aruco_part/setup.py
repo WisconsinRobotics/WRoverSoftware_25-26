@@ -31,6 +31,8 @@ setup(
             'camera_info = aruco_part.camera_info:main',
             'finding_tag = aruco_part.finding_tag:main',
             'combined = aruco_part.combined:main',
+            'combined_2 = aruco_part.combined_2:main',
+            'keyboard = aruco_part.keyboard:main',
         ],
     },
 )
