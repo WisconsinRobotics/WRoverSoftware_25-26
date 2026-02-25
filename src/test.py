@@ -263,7 +263,7 @@ class SectorDepthClassifier():
         error = math.degrees(best_theta)
         print("error :", error)
         kP = 0.02  # Tune this: higher = faster turns, lower = smoother
-        min_speed = 0.2
+        min_speed = 0.17
         max_speed = 1.0
         
         speed = error * kP
@@ -394,10 +394,6 @@ with dai.Pipeline() as pipeline:
         rclpy.spin_once(swerve_node, timeout_sec=0.0)
         rclpy.spin_once(imu_node, timeout_sec=0.0)
 
-        # final_heading = verifier.get_corrected_heading(
-        #     current_imu=imu_node.latest_imu, 
-        #     current_gps=gps_node.latest_gps
-        # )
 
         # imuData = imuQueue.tryGet()
         # if imuData:
@@ -415,10 +411,17 @@ with dai.Pipeline() as pipeline:
         q_w = msg.w
 
         current_heading = quaternion_to_yaw(q_x, q_y, q_z, q_w)
-        print("current heeading relative to north = ", current_heading)
+        print("uncorrected heeading relative to north = ", current_heading)
+
+        final_heading = verifier.get_corrected_heading(
+             current_imu=imu_node.latest_imu, 
+             current_gps=gps_node.latest_gps
+        )
+
+        current_heading = final_heading
 
         stereoFrame = stereoOut.get()
-
+        print("corrected heeading relative to north = ", current_heading)
         assert stereoFrame.validateTransformations()
         
         # Get frame and convert to meters
