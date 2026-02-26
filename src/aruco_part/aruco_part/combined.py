@@ -426,7 +426,15 @@ def go_to_tag(x_offset, distance, linear_velocity):
     # Check if we need orientation correction:
     max_error = 500
     error = abs(x_offset - x_center)
-    if x_offset > x_center + 20:
+    if x_offset > x_center + 200:
+        angular_vel = 1.0
+        linear_vel = 0
+        return linear_vel, angular_vel
+    elif x_offset < x_center - 200:
+        angular_vel = -1.0
+        linear_vel = 0
+        return linear_vel, angular_vel
+    elif x_offset > x_center + 20:
         angular_vel = 1.0*(error/max_error)
         return linear_vel, angular_vel
     elif x_offset < x_center - 20:
