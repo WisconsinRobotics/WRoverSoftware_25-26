@@ -60,13 +60,14 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_side_to_side(self, msg):
         can_msg_rpm = String()
-        rpm = msg.data * self.max_rpm
+        rpm = msg.data * self.max_rpm * 1.5 #set max to 9000 rpm
         can_msg_rpm.data = self.vesc_ids["side_to_side"][0] + " CAN_PACKET_SET_RPM " + str(rpm) + " float"
         self.publisher_.publish(can_msg_rpm)
         #self.get_logger().info('Publishing RPM FL: "%s"' % can_msg_rpm)
 
     def arm_listener_up_and_down(self, msg):
         can_msg_rpm = String()
+        
         rpm = msg.data * self.max_rpm
         can_msg_rpm.data = self.vesc_ids["up_and_down"][0] + " CAN_PACKET_SET_RPM " + str(rpm) + " float"
         self.publisher_.publish(can_msg_rpm)

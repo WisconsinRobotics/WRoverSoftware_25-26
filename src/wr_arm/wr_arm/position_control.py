@@ -9,7 +9,7 @@ import math
 
 
 WRIST_SPEED_VALUE = .5
-GRIPPER_SPEED_VALUE = .5
+GRIPPER_SPEED_VALUE = .8
 class ArmLogic(Node):
 
     def __init__(self):
@@ -39,7 +39,7 @@ class ArmLogic(Node):
         self.timer_wrist = self.create_timer(timer_period, self.timer_update_wrist)
 
         #Define Postion of left and right position of wrist
-        self.kohler_shift = 135.0
+        self.kohler_shift = 225.0
         self.D_PAD = [0,0,0,0,0,0] #Array to keep track of which buttons are pressed
         self.absolute_wrist = self.kohler_shift#Start at zero
         self.wrist_positions = [0.0 + self.absolute_wrist ,0.0 + self.absolute_wrist] #[lef,right]
@@ -97,11 +97,11 @@ class ArmLogic(Node):
 
     def get_wrist_position(self, up, down, left, right,x,y) -> Float32MultiArray:
         if(x==1):
-            self.modifier = 1
+            self.modifier = 0.2
         elif(y==1):
             self.modifier = 1
         else:
-            self.modifier = 1
+            self.modifier = .5
         if up == 1:
             self.wrist_positions[0] += WRIST_SPEED_VALUE*self.modifier
             self.wrist_positions[1] += WRIST_SPEED_VALUE*self.modifier
@@ -123,9 +123,9 @@ class ArmLogic(Node):
     
     def get_gripper_speed(self, a, b) -> float:
         if a == 1:
-            return GRIPPER_SPEED_VALUE
-        elif b == 1:
             return -GRIPPER_SPEED_VALUE
+        elif b == 1:
+            return GRIPPER_SPEED_VALUE
         else:
             return 0
 
@@ -137,10 +137,10 @@ class ArmLogic(Node):
         linear_rail_speed = self.get_linear_rail_speed(motion[3], motion[2])
 
         #Expecting (left y joystick)
-        self.msg_up_and_down.data = motion[0]
+        self.msg_up_and_down.data = motion[1]
 
         #Expecting (right y joystick)
-        self.msg_forwards_and_backwards.data = -motion[1]  
+        self.msg_forwards_and_backwards.data = -motion[0]  
 
         #Publishing
         self.msg_side_to_side.data = linear_rail_speed
