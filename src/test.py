@@ -55,36 +55,36 @@ class IMUNode(Node):
 
 class SectorDepthClassifier():
     def __init__(self):
+        self.debug = False
         # This sets up the code to broadcast video to the network
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.PUB)
-        self.socket.setsockopt(zmq.CONFLATE, 1)
-        self.socket.bind("tcp://*:6000")  # Binds to port 5555
-        print("Video Streamer initialized on port 6000")
+        if self.debug:
+            self.context = zmq.Context()
+            self.socket = self.context.socket(zmq.PUB)
+            self.socket.setsockopt(zmq.CONFLATE, 1)
+            self.socket.bind("tcp://*:6000")  # Binds to port 5555
+            print("Video Streamer initialized on port 6000")
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
-    GAP_THRESHOLD = np.float32(1.9) # The minimum distance between two obstacles such that the rover can fit.
+    GAP_THRESHOLD = np.float32(1.5) # The minimum distance between two obstacles such that the rover can fit.
     DEPTH_THRESH = np.float32(2.85)
-    SAFETY_BUFFER = 0.4   
+    SAFETY_BUFFER = 0.7   
         
     ## CHANGED: Added 'compass_angle' as an argument
-    def cb(self, depth_full, compass_angle, rover_gps, debug_img=False):
+    def cb(self, depth_full, compass_angle, rover_gps):
         start_time = time.time()
-        # Decode and crop depth image
-      
         mask = (depth_full == 0) | np.isnan(depth_full)
         depth_full[mask] = 10.0
         H,W = depth_full.shape        
-        
+
         # start_col = 35
         # end_col = W - 35
 
         # # Perform the crop using NumPy slicing:
         # # [All Rows, Start Column : End Column]
         # depth_full = depth_full[:, start_col:end_col]
-        
+
 
         rows = (self.Y_PIXEL_OFFSET - np.arange(depth_full.shape[0], dtype=np.float32)) / self.FOCAL_LENGTH
         # maybe constant optimize? ^^^
@@ -93,14 +93,14 @@ class SectorDepthClassifier():
 
         # list of all min values of each vertical sector. values are in m
         min_list = np.percentile(depth_full, 8, axis=0)
-        
+
         # newmask = (depth_full == np.nan)
         # depth_full[newmask] = np.float32(10)
 
         # list of where objects are
         gap_list = (min_list <= self.DEPTH_THRESH).astype(int)
 
-        
+
         d = np.diff(gap_list)
 
         starts = np.nonzero(d == -1)[0]
@@ -115,136 +115,103 @@ class SectorDepthClassifier():
 
 
         # code is optimized till here
-
-        thetas = []
-        distance_monitor_list = []
-        for gap in gaps:
-            ux1_raw = gap[0]
-            ux2_raw = gap[1]
-            
-            # --- CHANGE 1: EDGE HANDLING (VIRTUAL EXTENSION) ---
-            # If the gap touches the edge of the image, we pretend it is 500 pixels wider.
-            # This allows the 'median' of the gap to shift toward the target even if 
-            # the target is currently off-screen.
-            ux1 = -500 if ux1_raw <= 5 else ux1_raw
-            ux2 = (W + 500) if ux2_raw >= (W - 5) else ux2_raw
-
-            theta1 = np.arctan((ux1 - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH) 
-            theta2 = np.arctan((ux2 - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
-
-            d1 = min_list[ux1_raw]/np.cos(theta1)
-            d2 = min_list[ux2_raw]/np.cos(theta2)
-            
-            d = min(d2,d1) # changed to finding parrelel disctance to optical plane isntead of straightline distnace between edge of objects
-            # Calculating t\\\\\eta for each gap
-            
-            theta = theta2 - theta1
-            thetas.append(theta)
-            gap_distance = np.sqrt(d**2 + d**2 - (2*d*d*np.cos(theta)))
-            distance_monitor_list.append(gap_distance)
-        
         # formatted_list = [round(float(x), 2) for x in min_list]
         # print(formatted_list)
         # print("angles====================\n", (np.array(thetas)*180)/3.14) # These are the angles of each gap.
         # print("list of gaps =====================\n",gaps)        
         # print("list of distance between gaps =================================\n", distance_monitor_list, "\n\n\n")
-        
-        valid_gaps = []
-        checked = []
-# --- CHANGE 2: IMPROVED SAFETY BUFFER & DISCARD LOGIC ---
-        for i, dist in enumerate(distance_monitor_list):
-            # Only consider gaps wider than our minimum threshold
-            if dist >= self.GAP_THRESHOLD:
-                oldStart = gaps[i][0]
-                oldEnd = gaps[i][1]
-                z = min(min_list[oldStart], min_list[oldEnd])
-                
-                # Convert pixel edges to physical meters (X-axis)
-                xStart = (z * (oldStart - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
-                xEnd = (z * (oldEnd - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
-                
-                # Apply the safety buffer (moving the target points inward)
-                newStart_phys = xStart + self.SAFETY_BUFFER
-                newEnd_phys = xEnd - self.SAFETY_BUFFER
-                
-                # Convert back to pixel coordinates
-                newStart = ((newStart_phys) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
-                newEnd = ((newEnd_phys) * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
-                
-                # If newStart < newEnd, the gap is still wide enough for the rover
-                if newStart < newEnd:
-                    valid_gaps.append((round(newStart), round(newEnd)))
-                    checked.append(True)
-                else:
-                    # Gap was too small after adding safety buffers. Discard it!
-                    continue 
 
         ## --- START: IMU Target Angle Implementation ---
         ## CHANGED: This block now uses the live 'compass_angle'
-        
+
         # compass_angle: angle from North to heading in the clockwise direction (0-360)
         # This is now passed into the function.
-        
+
         # ** You must update these with your live GPS data **
         rover_gps = (43.073107912662266, -89.41245993537561)
         target_gps = (43.0724831900561, -89.41245993537561)
 
         # compute_bearing: angle from North to target in the clockwise direction
         bearing_to_target = self.compute_bearing(rover_gps , target_gps)
-        
+        bearing_to_target = 90 # always moves
         # Calculate the relative angle the rover needs to turn to
+        # diff: how many degrees we need to turn from current heading to hit bearing
         target_angle_deg = (360 - (compass_angle - bearing_to_target)) % 360
         if target_angle_deg > 180:
             target_angle_deg = target_angle_deg - 360  
-        # target_angle_deg is currently -ve for right of camera and +ve for left of camera
-        # print("target angle= ", -1 * target_angle_deg)
-        # Convert target angle from degrees to radians for comparison with arctan result
-        target_angle = -1 * math.radians(target_angle_deg) # flip signs
-                                                                                                                                                                                                          
-        # Check for the angles
-        try:
-            gap_to_move_to = valid_gaps[0]
-        except IndexError:
-            print("no valid gaps u have crashed!!!!!! :)")
-            return [-0.3, 0.0, -1.0, -1.0]
-            gap_to_move_to = (0,0)
-        # Optional: Uncomment to debug your angles
-        # print(f"Heading: {compass_angle:.1f} | Bearing: {bearing_to_target:.1f} | Target Angle: {target_angle_deg:.1f}")
-        
+        target_angle_rad = math.radians(target_angle_deg) 
+        print("target angle = ", target_angle_deg)
+        # 5. Process Gaps and find Best Steering Angle
+        valid_gaps = []
         best_theta = 999.0
-        # Now, loop through all gaps and find the one closest to our target_angle
-        for (start, end) in valid_gaps:
-            median = start + (end - start) // 2 
-            theta = np.arctan((median - self.X_PIXEL_OFFSET)/self.FOCAL_LENGTH)
+        gap_to_move_to = (0, 0)
 
-            if abs(target_angle - theta) < abs(target_angle - best_theta):
-                gap_to_move_to = (start, end)
-                best_theta = theta 
-
-        # print("chosen pixel: ", chosen)            
-        # print("chosen angle to drive to: ", math.degrees(best_theta))
+        for gap in gaps:
+            ux1, ux2 = gap[0], gap[1]
             
-        if debug_img:
-            depth_full = cv2.normalize(depth_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-            depth_full = cv2.cvtColor(depth_full, cv2.COLOR_GRAY2BGR)
+            # Pessimistic Width Logic
+            z = min(min_list[ux1], min_list[min(ux2, W-1)])
+            theta_raw1 = np.arctan((ux1 - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH) 
+            theta_raw2 = np.arctan((ux2 - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
+            
+            # Law of Cosines for pessimistic width
+            d1 = min_list[ux1]/np.cos(theta_raw1)
+            d2 = min_list[ux2]/np.cos(theta_raw2)
 
-            depth_full[ground_mask] = (255, 0, 0)
+            d = min(d2,d1)
+            width = np.sqrt(2 * (d**2) * (1 - np.cos(abs(theta_raw2 - theta_raw1))))
 
+            if width >= self.GAP_THRESHOLD:
+                # Apply Safety Buffers (Physical meters -> Pixel space)
+                xStart = (z * (ux1 - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
+                xEnd = (z * (ux2 - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
+                
+                safe_xStart = xStart + self.SAFETY_BUFFER
+                safe_xEnd = xEnd - self.SAFETY_BUFFER
+                
+                safe_px_start = (safe_xStart * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
+                safe_px_end = (safe_xEnd * self.FOCAL_LENGTH / z) + self.X_PIXEL_OFFSET
+
+                if safe_px_start < safe_px_end:
+                    valid_gaps.append((round(safe_px_start), round(safe_px_end)))
+                    
+                    # Find best point in this gap
+                    theta_safe1 = np.arctan((safe_px_start - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
+                    theta_safe2 = np.arctan((safe_px_end - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)
+                    
+                    # Target Clamping (Replaces your pixel loop)
+                    clamped_theta = max(theta_safe1, min(target_angle_rad, theta_safe2))
+
+                    if abs(target_angle_rad - clamped_theta) < abs(target_angle_rad - best_theta):
+                        best_theta = clamped_theta
+                        gap_to_move_to = (round(safe_px_start), round(safe_px_end))
+
+        # 6. Visualization Block
+        if True:
+            depth_vis = cv2.normalize(depth_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+            depth_vis = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
+
+            # Paint Ground Blue
+            depth_vis[ground_mask] = (255, 0, 0)
+
+            # Paint Valid Gaps Green
             for gap in valid_gaps:
-                start_point, end_point = (gap[0], 0), (gap[1], 719)
-                color = (0, 255, 0)
-                depth_full = cv2.rectangle(depth_full, start_point, end_point, color, -1)
+                cv2.rectangle(depth_vis, (int(gap[0]), 0), (int(gap[1]), H-1), (0, 255, 0), -1)
 
-                # Publish overlay
-
-            start_point, end_point = (gap_to_move_to[0], 0), (gap_to_move_to[1], 719)
-            color = (0, 255, 255)
-            depth_full = cv2.rectangle(depth_full, start_point, end_point, color, -1)
-
+            # Paint Chosen Gap Yellow (Drawn over green)
+            if best_theta != 999.0:
+                cv2.rectangle(depth_vis, (int(gap_to_move_to[0]), 0), (int(gap_to_move_to[1]), H-1), (0, 255, 255), -1)
+                
+                # Paint Chosen Pixel Column Red
+                chosen_pixel = int((math.tan(best_theta) * self.FOCAL_LENGTH) + self.X_PIXEL_OFFSET)
+                cv2.line(depth_vis, (chosen_pixel, 0), (chosen_pixel, H-1), (0, 0, 255), 3)
+            
+            cv2.imshow("Aasd", depth_vis)
+            cv2.waitKey(1)
 
             try:
                 # Compress to jpg to save bandwidth
-                ret, buffer = cv2.imencode('.jpg', depth_full, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
+                ret, buffer = cv2.imencode('.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
                 if ret:
                     # 2. Convert to Base64 (This is what the receiver expects)
                     jpg_as_text = base64.b64encode(buffer.tobytes())
@@ -253,23 +220,29 @@ class SectorDepthClassifier():
                     self.socket.send(jpg_as_text)
                     print("--------------------------sent frame -----------------------------")
             except Exception as e:
-                print(f"Stream Error: {e}")
+                print(f"")
 
             # cv2.imshow("obstacle avoidance", depth_full)
             # cv2.waitKey(1)
         
+        if best_theta == 999.0:
+            print("YOUR HAVE CRASHED NO VALID GAPSS S ---- :))))")
+            # Return a "Stop" command [Speed, Angle, LeftMotor, RightMotor]
+            print("error = not moving lol")
+            return [0.0, 0.0, -1.0, -1.0] 
+
         end_time = time.time() - start_time
-        print("time :",end_time)
+        # print("time :",end_time)
         error = math.degrees(best_theta)
         print("error :", error)
         kP = 0.02  # Tune this: higher = faster turns, lower = smoother
-        min_speed = 0.17
+        min_speed = 0.2
         max_speed = 1.0
         
         speed = error * kP
         
-        if abs(error) < 7.0: # range to move forward
-            return [0.7, 0.0, -1.0, -1.0] # Drive forward
+        if abs(error) < 3.7: # range to move forward
+            return [0.8, 0.0, -1.0, -1.0] # Drive forward
         else:
         # If speed is too low the robot won't move, so add a floor
             if speed < 0:
@@ -363,6 +336,8 @@ with dai.Pipeline() as pipeline:
     config.postProcessing.thresholdFilter.maxRange = 8000 # 8.0m
 
     config.setConfidenceThreshold(30)
+    config.setSubpixel(True)
+    config.setExtendedDisparity(True)
 
     monoLeftOut = monoLeft.requestOutput((1280, 720))
     monoRightOut = monoRight.requestOutput((1280, 720))
@@ -373,18 +348,18 @@ with dai.Pipeline() as pipeline:
     rightOut = monoRightOut.createOutputQueue()
     stereoOut = stereo.depth.createOutputQueue()
     
-    # imu = pipeline.create(dai.node.IMU)
-    # imu.enableIMUSensor(dai.IMUSensor.GAME_ROTATION_VECTOR, 100) # 100 Hz
-    # imu.setBatchReportThreshold(1)
-    # imu.setMaxBatchReports(10)
-    # imuQueue = imu.out.createOutputQueue(maxSize=10, blocking=False)
+    imu = pipeline.create(dai.node.IMU)
+    imu.enableIMUSensor(dai.IMUSensor.ARVR_STABILIZED_ROTATION_VECTOR, 100) # 100 Hz
+    imu.setBatchReportThreshold(1)
+    imu.setMaxBatchReports(10)
+    imuQueue = imu.out.createOutputQueue(maxSize=10, blocking=False)
 
     obj = SectorDepthClassifier()
 
     rclpy.init()
     gps_node = GPSNode()
     swerve_node = SwervePublisher()
-    imu_node = IMUNode()
+    # imu_node = IMUNode()
     #swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
     verifier = HeadingVerifier(min_move_dist=1.0, alpha=0.2)
     pipeline.start()
@@ -392,16 +367,16 @@ with dai.Pipeline() as pipeline:
     while pipeline.isRunning():
         rclpy.spin_once(gps_node, timeout_sec=0.0)
         rclpy.spin_once(swerve_node, timeout_sec=0.0)
-        rclpy.spin_once(imu_node, timeout_sec=0.0)
+        # rclpy.spin_once(imu_node, timeout_sec=0.0)
 
 
-        # imuData = imuQueue.tryGet()
-        # if imuData:
-        #     imuPacket = imuData.packets[-1]
-        #     rv = imuPacket.rotationVector
-        #     current_heading = quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)
-        #     current_heading = (current_heading + 270) % 360
-        #     print("current heeading relative to north = ", current_heading)
+        imuData = imuQueue.tryGet()
+        if imuData:
+            imuPacket = imuData.packets[-1]
+            rv = imuPacket.rotationVector
+            current_heading = quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)
+            current_heading = -1 * (current_heading) % 360
+            print("current heeading relative to north = ", current_heading)
         ## --- Depth Data Processing ---
         # msg = imu_node.latest_imu
 
@@ -413,15 +388,15 @@ with dai.Pipeline() as pipeline:
         # current_heading = quaternion_to_yaw(q_x, q_y, q_z, q_w)
         # print("uncorrected heeading relative to north = ", current_heading)
 
-        final_heading = verifier.get_corrected_heading(
-             current_imu=imu_node.latest_imu, 
-             current_gps=gps_node.latest_gps
-        )
+        # final_heading = verifier.get_corrected_heading(
+        #      current_imu=imu_node.latest_imu, 
+        #      current_gps=gps_node.latest_gps
+        # )
 
-        current_heading = final_heading
+        # current_heading = final_heading
 
         stereoFrame = stereoOut.get()
-        print("corrected heeading relative to north = ", current_heading)
+        # print("corrected heeading relative to north = ", current_heading)
         assert stereoFrame.validateTransformations()
         
         # Get frame and convert to meters
