@@ -12,8 +12,6 @@ import rclpy
 from rclpy.node import Node
 import cv_bridge
 from std_msgs.msg import Float32MultiArray
-from custom_msgs_srvs.srv import LED
-
 
 CAMERA_WIDTH = 1280
 CAMERA_HEIGHT = 720
@@ -124,6 +122,9 @@ def detect_aruco(img: np.ndarray):
 tags_detected = []
 tags_fs_detected = []
 tags = {}
+
+
+
 
 
 
@@ -425,7 +426,15 @@ def go_to_tag(x_offset, distance, linear_velocity):
     # Check if we need orientation correction:
     max_error = 500
     error = abs(x_offset - x_center)
-    if x_offset > x_center + 20:
+    if x_offset > x_center + 200:
+        angular_vel = 1.0
+        linear_vel = 0
+        return linear_vel, angular_vel
+    elif x_offset < x_center - 200:
+        angular_vel = -1.0
+        linear_vel = 0
+        return linear_vel, angular_vel
+    elif x_offset > x_center + 20:
         angular_vel = 1.0*(error/max_error)
         return linear_vel, angular_vel
     elif x_offset < x_center - 20:
@@ -550,12 +559,9 @@ class DriveLogic(Node):
         self.previous_dis = 0.0
         self.previous_time = 0.0
 
-        self.led_client = self.model.create_client(LED, 'change_LED')
-
         self.aruco_msg = None
         self.localization_msg = None
         self.imu_msg = None
-        
 
         
 
@@ -815,6 +821,8 @@ class DriveLogic(Node):
         
     
     def final_aruco_info(self):
+
+
         videoIn = self.videoQueue.get()
         assert isinstance(videoIn, dai.ImgFrame)
         frame = videoIn.getCvFrame()  # pass as the img param to the detect aruco function
@@ -880,43 +888,7 @@ class DriveLogic(Node):
 
             print(f"No aruco tags detected")
             return [target_id, x, dis]
-    
-    def blinkLightColor(self,color):
-        if self.led_mode == "real":
-            while not self.led_cli.wait_for_service(timeout_sec=1.0):
-                self.model.get_logger().info('service not available, waiting again...')
-            self.flashing = not self.flashing
-            if color == "RED":
-                self.led_req.red = 255
-                self.led_req.green = 0
-                self.led_req.blue = 0
-            elif color == "GREEN":
-                self.led_req.red = 0
-                if (self.flashing):
-                    self.led_req.green = 255
-                else:
-                    self.led_req.green = 0
-                self.led_req.blue = 0
-            elif color == "BLUE":
-                self.led_req.red = 0
-                self.led_req.green = 0
-                self.led_req.blue = 255
-            else:
-                self.led_req.red = 0
-                self.led_req.green = 0
-                self.led_req.blue = 0
-            return self.led_cli.call_async(self.led_req)
-        else:
-            if color == "RED":
-                self.model.get_logger().info('Blinked LED Red')
 
-            elif color == "GREEN":
-                self.model.get_logger().info('Blinked LED Green')
-
-            elif color == "BLUE":
-                self.model.get_logger().info('Blinked LED Blue')
-            else:
-                self.model.get_logger().info('Turned off LED')
 
 
 
