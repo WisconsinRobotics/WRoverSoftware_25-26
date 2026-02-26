@@ -4,13 +4,13 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='wr_arm',
-            executable='velocity_control',
-            name='velocity_control'
+            package='wr_science',
+            executable='science_control',
+            name='science_control'
         ),
         
         Node(
-            package='wr_arm',
+            package='wr_science',
             executable='send_to_can',
             name='send_to_can'
         ),
