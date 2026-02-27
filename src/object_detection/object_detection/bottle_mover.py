@@ -523,6 +523,14 @@ class DriveLogic(Node):
         self.sc_num = 1
         self.semicircle = circles[f"{self.circle}_circle"][f"semicircle_{self.sc_num}"]
 
+        self.led_pub = self.create_publisher(Float32MultiArray, 'led', 1)
+        self.led_msg = Float32MultiArray()
+        self.flashing = True
+        self.led_mode = "real"
+        if (self.led_mode == "real"):
+            self.blinkLightColor("RED")
+
+
         self.reference_point = []
         self.initial_re_point = []
         self.difference_x_pos = 0
@@ -659,6 +667,8 @@ class DriveLogic(Node):
             lin_x = 0.0
             ang_pos = -angular_vel
             ang_neg = angular_vel
+            if(lin_y == 0):
+                self.blinkLightColor("GREEN")
             sw_msg.data = [lin_y, lin_x, ang_pos, ang_neg]
 
         elif tag_found_but_not_being_detected:
@@ -760,6 +770,36 @@ class DriveLogic(Node):
             return [target_id, x, dis]
 
 
+    def blinkLightColor(self,color):
+        if self.led_mode == "real":
+            self.flashing = not self.flashing
+            if color == "RED":
+                self.led_msg.data = [255.0, 0.0, 0.0]
+   
+            elif color == "GREEN":
+                if (self.flashing):
+                    self.led_msg.data = [0.0, 255.0, 0.0]
+                else:
+                    self.led_msg.data = [0.0, 0.0, 0.0]
+            elif color == "BLUE":
+                    self.led_msg.data = [0.0, 0.0, 255.0]
+
+            else:
+                     self.led_msg.data = [0.0, 0.0, 0.0]
+
+            #PUBLISH HERE
+            self.led_pub.publish(self.led_msg)
+        else:
+            if color == "RED":
+                self.model.get_logger().info('Blinked LED Red')
+
+            elif color == "GREEN":
+                self.model.get_logger().info('Blinked LED Green')
+
+            elif color == "BLUE":
+                self.model.get_logger().info('Blinked LED Blue')
+            else:
+                self.model.get_logger().info('Turned off LED')
 
 
 def main(args=None):
