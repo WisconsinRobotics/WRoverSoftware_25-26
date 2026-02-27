@@ -1,5 +1,7 @@
-# TODO Test using rover camera and actual keyboard
+# TODO Test using rover camera and actual keyboard by adding a depth AI pipeline to start
+# TODO Combine my node with obstacle avoidance
 # TODO Give to state machine team to let them implement task
+# TODO
 # Basically detects the 4 aruco markers on the K552 keyboard and figures out where
 # all the keys are so the arm can type on them. Publishes the homography
 # and a key positions topic so whatever controls the arm can just ask
