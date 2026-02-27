@@ -29,7 +29,8 @@ setup(
         'console_scripts': [
             'bottle = object_detection.bottle:main',
             'mallet = object_detection.mallet:main',
-            'hammer = object_detection.hammer:main', 
+            'hammer = object_detection.hammer:main',
+            'bottle_mover = object_detection.bottle_mover:main'  
         ],
     },
 )

@@ -119,7 +119,17 @@ class BottleDetector(Node):
                     # Convert to image message and publish
                     image = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
                     self.image_publisher.publish(image)
-                    
+            else:
+                msg = Detection()
+                
+                msg.x1 = float(0.0)
+                msg.y1 = float(0.0)
+                msg.x2 = float(0.0)
+                msg.y2 = float(0.0)
+                msg.conf = float(best_conf)
+                msg.distance = 0.0
+                
+                self.detection_publisher.publish(msg)
 
             
 def main(args=None):
