@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<sdf version = "1.9">
+    <model name = "rover">
+        <include>
+            <uri>model://rover/rover_parts/main_body</uri>
+            <pose relative_to = "__model__"> 1 0 1 0 0 0</pose>
+        </include>
+        <include>
+            <name>swerve_right</name>
+            <uri>model://rover/rover_parts/right_drive</uri>
+            <pose relative_to = "__model__"> 1 0 1 0 0 0</pose>
+        </include>
+    </model>
+</sdf>

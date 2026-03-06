@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<sdf version = "1.9">
+    <model name = "main_body">
+        <link name = "body">
+            <inertial>
+                <!-- 21.426 lbs -> -->
+                <mass>9.71867012</mass> 
+                <inertia>
+                    <ixx>1.6728561425</ixx>
+                    <ixy>0.3394488292</ixy>
+                    <ixz>-0.0452145823</ixz>
+                    <iyy>0.4110454615</iyy>
+                    <iyz>0.1025131338</iyz>
+                    <izz>1.9902414051</izz>
+                </inertia> 
+            </inertial>
+
+            <visual name = "visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://meshes/mainChasis/main_body_visual.dae</uri>
+                    </mesh>
+                </geometry>
+            </visual>
+
+            <collision name="collision">
+                <geometry>
+                    <mesh>
+                        <uri>model://meshes/mainChasis/main_body_collision.stl</uri>
+                    </mesh>
+                </geometry>
+            </collision>
+        </link>
+    </model>
+</sdf>
