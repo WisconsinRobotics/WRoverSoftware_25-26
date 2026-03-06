@@ -17,8 +17,9 @@ running these commands with start the Gazebo simulation in a world with the rove
 as of right now, making the model includes going into the team's Onshape and manually exporting models.
 
 The process goes like this:
-1) Chose a section of the rover to export (this should be a singular link between any joints)
-    - Export this as a low poly model
-    - use the scripts to downscale a version of the model for collision purposes
-2) Manually enter in the mass and inertial values from onshape into the SDF file
-3) Define all links, joints, and scripts in a singular SDF part isolated to that link or group of links
+1) Choose a section of the rover to export (this should be a singular link between any joints)
+    - Export this as a low poly model for visuals
+2) for each link, define a loose hitbox using the gazebo builting primitive geometries. Position and scale these primitives base off of the position and length values shown in OnShape.
+    - These hitbox's dont need to be super precise
+3) Manually enter in the mass and inertial values from onshape into the SDF file
+4) Define all links, joints, and scripts in a singular SDF part isolated to that link or group of links
