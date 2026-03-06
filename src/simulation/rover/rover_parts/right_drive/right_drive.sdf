@@ -36,12 +36,29 @@
             </visual>
 
             <collision name="collision">
+                <pose>0.292 -.574 -0.25 -1.5707 0 0</pose>
                 <geometry>
-                    <mesh>
-                        <uri>model://meshes/drive/wheel_swivel/wheel_left_collision.stl</uri>
-                    </mesh>
+                    <cylinder>
+                        <radius>0.11</radius>
+                        <length>0.2</length>
+                    </cylinder>
                 </geometry>
             </collision>
+
+            <visual name = "collision_visual">
+                <pose>0.292 -.574 -0.25 -1.5707 0 0</pose>
+                <geometry>
+                    <cylinder>
+                        <radius>0.11</radius>
+                        <length>0.2</length>
+                    </cylinder>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 0.0 0.6</ambient>
+                    <diffuse>0.0 1.0 0.0 0.6</diffuse>
+                    <specular>0.1 0.1 0.1 0.6</specular>
+                </material>
+            </visual>
         </link>
         <link name = "chasis">
             <inertial>
@@ -58,7 +75,7 @@
                 </inertia> 
             </inertial>
             
-            <visual name = "chasis_visual">
+            <visual name = "visual">
                 <geometry>
                     <mesh>
                         <uri>model://meshes/drive/drive_chasis/right_drive_chasis.stl</uri>
@@ -71,13 +88,28 @@
                 </material>
             </visual>
 
-            <collision name="chasis_collision">
+            <collision name="collision">
+                <pose>0.292 -0.115 -0.0125 0 0 0 </pose>
                 <geometry>
-                    <mesh>
-                        <uri>model://meshes/drive/drive_chasis/right_drive_chasis.stl</uri>
-                    </mesh>
+                    <box>
+                        <size>0.044 1.1 0.25</size>
+                    </box>
                 </geometry>
             </collision>
+
+            <visual name = "collision_visual">
+                <pose>0.292 -0.115 -0.0125 0 0 0 </pose>
+                <geometry>
+                    <box>
+                        <size>0.044 1.1 0.25</size>
+                    </box>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 0.0 0.6</ambient>
+                    <diffuse>0.0 1.0 0.0 0.6</diffuse>
+                    <specular>0.1 0.1 0.1 0.6</specular>
+                </material>
+            </visual>
         </link>
         <link name = "right_wheel_swivel">
         <inertial>
@@ -109,23 +141,27 @@
             </visual>
 
             <collision name="collision">
-                <geometry>
-                    <mesh>
-                        <uri>model://meshes/drive/wheel_swivel/wheel_right_collision.stl</uri>
-                    </mesh>
-                </geometry>
-            </collision>
-        </link>
-
-        <link name = "test">
-            <visual name = "test">
-                <pose relative_to = "right_wheel_swivel">0 0 -0.125 -1.5707 0 0</pose>
+                <pose>0.292 .344 -0.25 -1.5707 0 0</pose>
                 <geometry>
                     <cylinder>
-                        <radius>0.1</radius>
-                        <length>0.1</length>
+                        <radius>0.11</radius>
+                        <length>0.2</length>
                     </cylinder>
                 </geometry>
+            </collision>
+            <visual name = "collision_visual">
+                <pose>0.292 .344 -0.25 -1.5707 0 0</pose>
+                <geometry>
+                    <cylinder>
+                        <radius>0.11</radius>
+                        <length>0.2</length>
+                    </cylinder>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 0.0 0.6</ambient>
+                    <diffuse>0.0 1.0 0.0 0.6</diffuse>
+                    <specular>0.1 0.1 0.1 0.6</specular>
+                </material>
             </visual>
         </link>
 

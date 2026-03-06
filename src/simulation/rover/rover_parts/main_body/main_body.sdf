@@ -19,18 +19,39 @@
             <visual name = "visual">
                 <geometry>
                     <mesh>
-                        <uri>model://meshes/mainChasis/main_body_visual.dae</uri>
+                        <uri>model://meshes/mainChasis/Chassis_Rough.stl</uri>
                     </mesh>
                 </geometry>
+                <material>
+                    <ambient>1.0 0.0 0.0 1</ambient>
+                    <diffuse>1.0 0.0 0.0 1</diffuse>
+                    <specular>0.1 0.1 0.1 1</specular>
+                </material>
             </visual>
 
             <collision name="collision">
+                <pose>0 -0.1 0.093 0 0 0</pose>
                 <geometry>
-                    <mesh>
-                        <uri>model://meshes/mainChasis/main_body_collision.stl</uri>
-                    </mesh>
+                    <box>
+                        <size>0.507 0.686 0.2</size>
+                    </box>
                 </geometry>
             </collision>
+
+            <visual name="collision_visual">
+                <pose>0 -0.1 0.093 0 0 0</pose>
+                <geometry>
+                    <box>
+                        <size>0.507 0.686 0.2</size>
+                    </box>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 0.0 0.6</ambient>
+                    <diffuse>0.0 1.0 0.0 0.6</diffuse>
+                    <specular>0.1 0.1 0.1 0.6</specular>
+                </material>
+            </visual>
         </link>
+
     </model>
 </sdf>
