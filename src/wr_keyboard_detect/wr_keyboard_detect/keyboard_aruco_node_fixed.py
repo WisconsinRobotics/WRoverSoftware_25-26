@@ -105,7 +105,7 @@ class KeyboardArucoNode(Node):
         super().__init__("keyboard_aruco")
 
         self.homography_pub = self.create_publisher(Float64MultiArray, "keyboard_plane_homography", 10)
-        self.key_positions_pub = self.create_publisher(String, "keyboard_key_positions", 10)
+        self.key_positions_pub = self.create_publisher(Float64MultiArray, "keyboard_key_positions", 10)
 
         # OpenCV camera
         self.cap = cv2.VideoCapture(0)
@@ -207,9 +207,8 @@ class KeyboardArucoNode(Node):
         if H is not None:
             draw_keyboard_overlay(frame, H)
         self.homography_pub.publish(Float64MultiArray(data=H.flatten().tolist()))
-        center_msg = {
-            "center_px": [cx, cy]
-        }
+        center_msg = Float64MultiArray()
+        center_msg.data = [cx, cy]
 
         self.key_positions_pub.publish(String(data=json.dumps(center_msg)))
 
