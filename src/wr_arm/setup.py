@@ -31,6 +31,7 @@ setup(
             'velocity_control = wr_arm.velocity_control:main',
             'send_to_can = wr_arm.send_to_can:main',
             'send_to_can_position = wr_arm.send_to_can_position:main',
+            'autonomous_control = wr_arm.autonomous_control:main',
         ],
     },
 )
