@@ -1,163 +1,383 @@
-#!/usr/bin/env python3
-# keyboard_aruco_laptop_test.py
-#
-# Drop-in test version of keyboard_aruco_node.py that uses a laptop webcam
-# instead of a ROS image topic. No DepthAI needed. No ROS needed.
-#
-# Run: python3 keyboard_aruco_laptop_test.py
-# Press Q to quit.
-#
-# When all 4 markers (IDs 0,1,2,3) are visible, the homography is computed
-# and printed — same logic as the real node. Green overlay = detected,
-# blue dot = marker center, red text = mm coordinates on keyboard plane.
-
+# Laptop webcam test for keyboard detection. Uses 4 ArUco markers
+# at the corners of a Redragon keyboard to get homography and vizualize
+# key positions onto the camera feed while also publishing the needed
+# movements to the arm. Hit L then type in the key.
+# Just for testing not implemented with ros2 yet
 import cv2
 import numpy as np
-
-# ── Keyboard dimensions (mm) ─────────────────────────────────────────────────
-KEYBOARD_WIDTH_MM  = 354.0
-KEYBOARD_DEPTH_MM  = 123.0
-
-# Marker corner positions in keyboard space (mm). Origin = top-left.
-# 0=top-left, 1=top-right, 2=bottom-right, 3=bottom-left
-KEYBOARD_MARKER_POSITIONS_MM = {
-    0: (0.0,               0.0),
-    1: (KEYBOARD_WIDTH_MM, 0.0),
-    2: (KEYBOARD_WIDTH_MM, KEYBOARD_DEPTH_MM),
-    3: (0.0,               KEYBOARD_DEPTH_MM),
+import time
+# Redgragon K552 setup
+KEYBOARD_WIDTH_MM = 354.0
+KEYBOARD_DEPTH_MM = 123.0
+KEY_PITCH = 19.05  # standard 1u key spacing
+KEY_H = KEY_PITCH
+ROW_Y = {
+    'fn':   6.5,
+    'num':  25.55,
+    'tab':  44.60,
+    'caps': 63.65,
+    'shft': 82.70,
+    'spc':  101.75,
 }
+# mx4(label, cx_mm, cy_mm, width_mm)
+KEY_LAYOUT = []
+def u(n):
+    return n * KEY_PITCH
+def add_row(keys, y, start_x):
+    x = start_x
+    for label, width_units in keys:
+        w = u(width_units)
+        KEY_LAYOUT.append((label, x + w / 2.0, y, w))
+        x += w
+# function row
+KEY_LAYOUT.append(('Esc', u(0.0) + 4.5 + u(0.5), ROW_Y['fn'], u(1.0)))
+fx = u(2.1) + 4.5
+for i, name in enumerate(['F1', 'F2', 'F3', 'F4']):
+    KEY_LAYOUT.append((name, fx + i * u(1.0) + u(0.5), ROW_Y['fn'], u(1.0)))
+fx2 = fx + 4 * u(1.0) + u(0.25)
+for i, name in enumerate(['F5', 'F6', 'F7', 'F8']):
+    KEY_LAYOUT.append((name, fx2 + i * u(1.0) + u(0.5), ROW_Y['fn'], u(1.0)))
+fx3 = fx2 + 4 * u(1.0) + u(0.25)
+for i, name in enumerate(['F9', 'F10', 'F11', 'F12']):
+    KEY_LAYOUT.append((name, fx3 + i * u(1.0) + u(0.5), ROW_Y['fn'], u(1.0)))
+fx4 = fx3 + 4 * u(1.0) + u(0.5)
+for i, name in enumerate(['PrtSc', 'ScrLk', 'Pause']):
+    KEY_LAYOUT.append((name, fx4 + i * u(1.0) + u(0.5), ROW_Y['fn'], u(1.0)))
+# number row
+add_row([
+    ('`',1), ('1',1), ('2',1), ('3',1), ('4',1), ('5',1),
+    ('6',1), ('7',1), ('8',1), ('9',1), ('0',1), ('-',1),
+    ('=',1), ('Bksp',2),
+], ROW_Y['num'], 4.5)
+for i, name in enumerate(['Ins', 'Home', 'PgUp']):
+    KEY_LAYOUT.append((name, u(14.75) + 4.5 + i * u(1.0) + u(0.5), ROW_Y['num'], u(1.0)))
+# QWERTY row
+add_row([
+    ('Tab',1.5), ('Q',1), ('W',1), ('E',1), ('R',1), ('T',1),
+    ('Y',1), ('U',1), ('I',1), ('O',1), ('P',1),
+    ('[',1), (']',1), ('\\',1.5),
+], ROW_Y['tab'], 4.5)
+for i, name in enumerate(['Del', 'End', 'PgDn']):
+    KEY_LAYOUT.append((name, u(14.75) + 4.5 + i * u(1.0) + u(0.5), ROW_Y['tab'], u(1.0)))
+# home row
+add_row([
+    ('Caps',1.75), ('A',1), ('S',1), ('D',1), ('F',1), ('G',1),
+    ('H',1), ('J',1), ('K',1), ('L',1), (';',1), ("'",1),
+    ('Enter',2.25),
+], ROW_Y['caps'], 4.5)
+# shift row
+add_row([
+    ('LShft',2.25), ('Z',1), ('X',1), ('C',1), ('V',1), ('B',1),
+    ('N',1), ('M',1), (',',1), ('.',1), ('/',1), ('RShft',2.75),
+], ROW_Y['shft'], 4.5)
+KEY_LAYOUT.append(('Up', u(14.75) + 4.5 + u(1.5), ROW_Y['shft'], u(1.0)))
+# bottom row
+add_row([
+    ('LCtrl',1.25), ('LWin',1.25), ('LAlt',1.25), ('Space',6.25),
+    ('RAlt',1.25), ('Fn',1.25), ('RCtrl',1.25),
+], ROW_Y['spc'], 4.5)
+KEY_LAYOUT.append(('Left',  u(14.75) + 4.5 + u(0.5), ROW_Y['spc'], u(1.0)))
+KEY_LAYOUT.append(('Down',  u(14.75) + 4.5 + u(1.5), ROW_Y['spc'], u(1.0)))
+KEY_LAYOUT.append(('Right', u(14.75) + 4.5 + u(2.5), ROW_Y['spc'], u(1.0)))
+# dict for quick lookups
+KEY_MAP = {}
+for lbl, cx, cy, w in KEY_LAYOUT:
+    KEY_MAP[lbl] = {'cx_mm': cx, 'cy_mm': cy, 'w_mm': w, 'h_mm': KEY_H}
+# center of the keyboard (arm home position)
+KB_CENTER_X = KEYBOARD_WIDTH_MM / 2.0
+KB_CENTER_Y = KEYBOARD_DEPTH_MM / 2.0
+# Class that tracks the word being displayed as vectors to eventually give back to
+# arm
+class LaunchpadState:
+    def __init__(self):
+        self.active = False
+        self.word = ""
+        self.keys = []
+        self.current_idx = 0
+        self.start_time = 0.0
+        self.hold_time = 2.5  # TODO dont know how long arm take to type
 
-# ── Camera intrinsics (DepthAI OAK — swap for your laptop if you have them) ──
-# For laptop testing the distortion barely matters for homography, so
-# we leave undistortion optional (set UNDISTORT = False to skip).
-UNDISTORT = False
+    def start(self, word, keys):
+        self.active = True
+        self.word = word
+        self.keys = keys
+        self.current_idx = 0
+        self.start_time = time.time()
 
-K = np.array([
-    [569.7166137695312, 0.0,              622.4732666015625],
-    [0.0,              569.48486328125,   367.3853454589844],
-    [0.0,              0.0,              1.0],
+    def tick(self):
+        #returns key to map vector to
+        if not self.active:
+            return None
+        if len(self.keys) == 0:
+            self.active = False
+            return None
+        #tracks time to tick forward if needed
+        elapsed = time.time() - self.start_time
+        if elapsed >= self.hold_time:
+            self.current_idx += 1
+            self.start_time = time.time()
+            if self.current_idx >= len(self.keys):
+                self.active = False
+                print("Sequence done.")
+                return None
+
+        return self.keys[self.current_idx]
+
+    def get_progress_text(self):
+        if not self.active:
+            return ""
+        return f"[{self.current_idx + 1}/{len(self.keys)}] {self.word} -> '{self.keys[self.current_idx]}'"
+
+launchpad = LaunchpadState()
+
+
+# ====camera stuff (not needed in test but needed for ros2)====
+USE_UNDISTORT = False
+CAMERA_MATRIX = np.array([
+    [569.7166137695312, 0.0, 622.4732666015625],
+    [0.0, 569.48486328125, 367.3853454589844],
+    [0.0, 0.0, 1.0],
 ], dtype=np.float64)
-
-DISTORTION = np.array([
+DIST_COEFFS = np.array([
     2.9425814151763916, 0.7698521018028259, -3.687290518428199e-05,
     0.00017509849567431957, 0.00862385705113411, 3.298475503921509,
     1.6266201734542847, 0.09254294633865356,
-    0.0, 0.0, 0.0, 0.0,
-    -0.0020870917942374945, 0.004025725182145834,
+    0.0, 0.0, 0.0, 0.0, -0.0020870917942374945, 0.004025725182145834,
 ], dtype=np.float64)
-
-# ── ArUco setup ───────────────────────────────────────────────────────────────
-ARUCO_DICT   = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 ARUCO_PARAMS = cv2.aruco.DetectorParameters()
+# corners in mm space (TL, TR, BR, BL)
+KEYBOARD_CORNERS_MM = np.array([
+    [0.0, 0.0],
+    [KEYBOARD_WIDTH_MM, 0.0],
+    [KEYBOARD_WIDTH_MM, KEYBOARD_DEPTH_MM],
+    [0.0, KEYBOARD_DEPTH_MM],
+], dtype=np.float32)
 
 
-def marker_center(corners_one):
-    """Return (cx, cy) float32 for one marker's corners array."""
-    pts = corners_one.reshape((4, 2))
+# ====helper func====
+
+def get_marker_center(corner):
+    pts = corner.reshape((4, 2))
     return np.array([pts[:, 0].mean(), pts[:, 1].mean()], dtype=np.float32)
 
+def sort_corners(centers):
+    #geometrically sort four arucos
+    pts = np.array(centers, dtype=np.float32)
+    sorted_by_y = np.argsort(pts[:, 1])
+    top_two = pts[sorted_by_y[:2]]
+    bot_two = pts[sorted_by_y[2:]]
+    tl = top_two[np.argmin(top_two[:, 0])]
+    tr = top_two[np.argmax(top_two[:, 0])]
+    bl = bot_two[np.argmin(bot_two[:, 0])]
+    br = bot_two[np.argmax(bot_two[:, 0])]
+    return np.array([tl, tr, br, bl], dtype=np.float32)
 
-def pixel_to_keyboard_mm(H, u, v):
-    """Map pixel (u,v) → (x_mm, y_mm) on keyboard using homography H."""
-    pt  = np.array([[[u, v]]], dtype=np.float32)
-    out = cv2.perspectiveTransform(pt, H)
-    return float(out[0, 0, 0]), float(out[0, 0, 1])
+def find_homography(corners, ids):
+    #returns homography and source points
+    if ids is None or len(ids) < 4:
+        return None, None
+    centers = [get_marker_center(corners[i]) for i in range(min(4, len(corners)))]
+    src = sort_corners(centers)
+    H, _ = cv2.findHomography(src, KEYBOARD_CORNERS_MM)
+    return H, src
+
+def mm_to_px(H_inv, x_mm, y_mm):
+    pt = np.array([[[x_mm, y_mm]]], dtype=np.float32)
+    result = cv2.perspectiveTransform(pt, H_inv)
+    return (int(result[0, 0, 0]), int(result[0, 0, 1]))
+
+def char_to_key_label(ch):
+    """maps a typed char to KEY_MAP label. returns None if not found."""
+    upper = ch.upper()
+    if upper in KEY_MAP:
+        return upper
+    special = {' ': 'Space', '\n': 'Enter', '\t': 'Tab'}
+    if ch in special and special[ch] in KEY_MAP:
+        return special[ch]
+    return None
 
 
-def compute_homography(corners, ids):
-    """
-    Given detected corners + ids, try to compute the pixel→keyboard homography.
-    Returns H (3x3) if all 4 markers found, else None.
-    """
-    if ids is None or len(ids) == 0:
-        return None
+# --- drawing ---
 
-    ids_flat = ids.flatten()
-    id_to_pt = {}
-    for i, mid in enumerate(ids_flat):
-        mid = int(mid)
-        if mid in KEYBOARD_MARKER_POSITIONS_MM:
-            id_to_pt[mid] = marker_center(corners[i])
+def draw_all_keys(frame, H_inv):
+    h, w = frame.shape[:2]
+    for label, info in KEY_MAP.items():
+        cx, cy = info['cx_mm'], info['cy_mm']
+        hw, hh = info['w_mm'] / 2.0, info['h_mm'] / 2.0
 
-    if set(id_to_pt.keys()) != {0, 1, 2, 3}:
-        return None
+        cx_px, cy_px = mm_to_px(H_inv, cx, cy)
+        x1, y1 = mm_to_px(H_inv, cx - hw, cy - hh)
+        x2, y2 = mm_to_px(H_inv, cx + hw, cy + hh)
 
-    src = np.array([id_to_pt[i] for i in range(4)], dtype=np.float32)
-    dst = np.array([KEYBOARD_MARKER_POSITIONS_MM[i] for i in range(4)], dtype=np.float32)
+        if x2 < 0 or y2 < 0 or x1 > w or y1 > h:
+            continue
 
-    H, _ = cv2.findHomography(src, dst)
-    return H
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 165, 0), 1)
+        cv2.circle(frame, (cx_px, cy_px), 2, (0, 255, 255), -1)
 
+        key_w_px = abs(x2 - x1)
+        if key_w_px > 12:
+            fs = max(0.25, min(0.38, key_w_px / 65.0))
+            cv2.putText(frame, label, (x1 + 2, y1 + 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, fs, (255, 165, 0), 1)
 
-def draw_overlay(frame, corners, ids, H):
-    """Draw detection overlay and, if H is valid, show mm coords."""
+def draw_vector_arrow(frame, H_inv, key_label):
+    if key_label not in KEY_MAP:
+        return
+    info = KEY_MAP[key_label]
+    #draw
+    start = mm_to_px(H_inv, KB_CENTER_X, KB_CENTER_Y)
+    end = mm_to_px(H_inv, info['cx_mm'], info['cy_mm'])
+    cv2.arrowedLine(frame, start, end, (0, 0, 255), 3, tipLength=0.04)
+    cv2.circle(frame, start, 6, (0, 255, 255), -1)
+    # box around target key cause it looks cool
+    hw, hh = info['w_mm'] / 2.0, info['h_mm'] / 2.0
+    tl = mm_to_px(H_inv, info['cx_mm'] - hw, info['cy_mm'] - hh)
+    br = mm_to_px(H_inv, info['cx_mm'] + hw, info['cy_mm'] + hh)
+    cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
+    cv2.putText(frame, f"-> {key_label}", (end[0] + 10, end[1] - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+def draw_markers(frame, corners, ids, sorted_pts):
     if ids is None:
         return
-
-    ids_flat = ids.flatten()
-    for i, mid in enumerate(ids_flat):
+    corner_names = ["TL", "TR", "BR", "BL"]
+    for i in range(len(ids)):
         pts = corners[i].reshape((4, 2)).astype(np.int32)
-        cv2.polylines(frame, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
+        cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
+        center = get_marker_center(corners[i])
+        cv2.circle(frame, (int(center[0]), int(center[1])), 5, (255, 0, 0), -1)
+        cv2.putText(frame, f"ID {int(ids[i][0])}", (pts[0][0], pts[0][1] - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    if sorted_pts is not None:
+        for pt, name in zip(sorted_pts, corner_names):
+            cv2.putText(frame, name, (int(pt[0]) + 8, int(pt[1]) + 8),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
 
-        cx, cy = marker_center(corners[i])
-        cv2.circle(frame, (int(cx), int(cy)), 5, (255, 0, 0), -1)
+# --- word input ---
 
-        label = f"ID {int(mid)}"
-        if H is not None and int(mid) in KEYBOARD_MARKER_POSITIONS_MM:
-            xmm, ymm = pixel_to_keyboard_mm(H, cx, cy)
-            label += f"  ({xmm:.1f}, {ymm:.1f}) mm"
+def prompt_for_word():
+    raw = input("\nEnter a word (up to 5 letters, e.g. ROVER): ").strip()
+    if not raw:
+        return None, None
+    if len(raw) > 5:
+        print(f"Trimming to first 5 chars.")
+        raw = raw[:5]
+    key_labels = []
+    valid_chars = []
+    for ch in raw:
+        label = char_to_key_label(ch)
+        if label is not None:
+            key_labels.append(label)
+            valid_chars.append(ch.upper())
+        else:
+            print(f"  skipping '{ch}' (not on keyboard)")
+    if not key_labels:
+        print("No valid keys.")
+        return None, None
+    word_str = ''.join(valid_chars)
+    print(f"Sequence: {word_str} -> {key_labels}")
+    return word_str, key_labels
 
-        cv2.putText(frame, label,
-                    (pts[0][0], pts[0][1] - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0), 2)
+def print_key_info():
+    print(f"\nK552 key positions ({len(KEY_MAP)} keys):")
+    for lbl, info in KEY_MAP.items():
+        print(f"  {lbl:8s} cx={info['cx_mm']:6.1f} cy={info['cy_mm']:6.1f} "
+              f"w={info['w_mm']:5.1f} h={info['h_mm']:5.1f}")
 
+
+# --- main ---
 
 def main():
+    #setup and get keys
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("Could not open webcam at index 0. Try changing to 1 or 2.")
+        print("Couldn't open webcam. Try index 1 or 2.")
         return
 
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  1280)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-    print("Keyboard ArUco laptop test — press Q to quit")
-    print(f"Looking for marker IDs: 0, 1, 2, 3  (DICT_4X4_50)")
-    print(f"Keyboard plane: {KEYBOARD_WIDTH_MM} x {KEYBOARD_DEPTH_MM} mm")
+    print(f"Keyboard ArUco test - {len(KEY_MAP)} keys mapped")
+    print("Q=quit  L=launch word  P=print keys  R=reset tracking")
+    print("Place 4 ArUco markers (DICT_4X4_50) at the keyboard corners.\n")
+
+    tracking = False
+    cached_H_inv = None  # last good homography, persists until manual reset
 
     while True:
         ret, frame = cap.read()
         if not ret:
-            print("Failed to grab frame.")
             break
 
         img = frame.copy()
-        if UNDISTORT:
-            img = cv2.undistort(img, K, DISTORTION)
+        if USE_UNDISTORT:
+            img = cv2.undistort(img, CAMERA_MATRIX, DIST_COEFFS)
 
         corners, ids, _ = cv2.aruco.detectMarkers(img, ARUCO_DICT, parameters=ARUCO_PARAMS)
 
-        H = compute_homography(corners, ids)
+        H, sorted_src = find_homography(corners, ids)
+        H_inv = None
 
         if H is not None:
-            status = "HOMOGRAPHY OK — all 4 markers visible"
-            color  = (0, 255, 0)
-            # Print to terminal (mirrors what the ROS node logs)
-            print(f"Homography:\n{H}")
+            try:
+                H_inv = np.linalg.inv(H)
+            except np.linalg.LinAlgError:
+                H_inv = None
+
+        # update cache when we get a fresh good homography
+        if H_inv is not None:
+            cached_H_inv = H_inv
+        # otherwise fall back to cached
         else:
-            found = [] if ids is None else [int(x) for x in ids.flatten()
-                                             if int(x) in KEYBOARD_MARKER_POSITIONS_MM]
-            missing = [i for i in range(4) if i not in found]
-            status = f"Waiting for markers — missing IDs: {missing}"
-            color  = (0, 0, 255)
+            H_inv = cached_H_inv
 
-        draw_overlay(img, corners, ids, H)
+        if H_inv is not None:
+            draw_all_keys(img, H_inv)
+            if H is not None:
+                status = f"TRACKING | {len(KEY_MAP)} keys"
+                status_color = (0, 255, 0)
+            else:
+                status = f"LOCKED (cached) | {len(KEY_MAP)} keys"
+                status_color = (0, 200, 255)
+            if not tracking:
+                print("Tracking locked. L and P are now available.")
+                tracking = True
+        else:
+            n = 0 if ids is None else len(ids)
+            status = f"Need 4 markers (found {n})"
+            status_color = (0, 0, 255)
+
+        draw_markers(img, corners, ids, sorted_src)
+
+        # launchpad animation
+        if launchpad.active and H_inv is not None:
+            current_key = launchpad.tick()
+            if current_key is not None:
+                draw_vector_arrow(img, H_inv, current_key)
+                cv2.putText(img, launchpad.get_progress_text(), (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                cv2.putText(img, f"Word: {launchpad.word}", (10, 90),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+
         cv2.putText(img, status, (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.65, status_color, 2)
+        cv2.imshow("Keyboard ArUco Test", img)
 
-        cv2.imshow("Keyboard ArUco Test (laptop cam)", img)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
             break
+        elif key == ord('p') and H_inv is not None:
+            print_key_info()
+        elif key == ord('l') and H_inv is not None:
+            word, keys = prompt_for_word()
+            if word is not None and keys is not None:
+                launchpad.start(word, keys)
+        elif key == ord('r'):
+            cached_H_inv = None
+            tracking = False
+            print("Tracking reset. Redetecting markers...")
 
     cap.release()
     cv2.destroyAllWindows()
