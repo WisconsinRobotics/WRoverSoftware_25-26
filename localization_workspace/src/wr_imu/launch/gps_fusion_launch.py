@@ -17,14 +17,23 @@ def generate_launch_description():
 
     return LaunchDescription([
         
-        # 1. STATIC TRANSFORM (The "Link Stuff")
         # Connects 'base_link' (robot center) to 'imu_link' (sensor)
         # Arguments: x y z yaw pitch roll parent child
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
             name='static_tf_pub_imu',
-            arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'imu_link']
+            arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'imu_link'] #need to change to real thing
+        ),
+
+        # 2. GPS Transform (CRITICAL FOR NAVSAT TRANSFORM)
+        # Adjust '0 0 0' to the actual offset of your GPS antenna
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_tf_pub_gps',
+            arguments=['0', '0', '0', '0', '0', '0', 'base_link',
+             'gps_link'] 
         ),
 
         # 2. Local EKF (Odom Frame)

@@ -63,6 +63,9 @@ class SectorDepthClassifier():
         self.socket.setsockopt(zmq.CONFLATE, 1)
         self.socket.bind("tcp://*:9876")  # Binds to port 5555
         print("Video Streamer initialized on port 6000")
+        self.previous_best_theta = None
+        self.candidate_theta = None
+        self.persistence_counter = 0
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
@@ -233,27 +236,80 @@ class SectorDepthClassifier():
 
         end_time = time.time() - start_time
         # print("time :",end_time)
-        error = math.degrees(best_theta)
+        ALPHA = 0.35 
+        HYSTERESIS_THRESHOLD = math.radians(20) # ~0.35 rad (When to trigger checks)
+        IMPROVEMENT_THRESHOLD = 0.20 # rad (Massive shortcut threshold)
+        REQUIRED_FRAMES = 3 # How long a minor shift must persist
+
+        if self.previous_best_theta is not None:
+            angle_diff = abs(best_theta - self.previous_best_theta)
+
+            # If the raw logic wants to steer significantly away from our current path
+            if angle_diff > HYSTERESIS_THRESHOLD:
+                
+                old_error = abs(target_angle_rad - self.previous_best_theta)
+                new_error = abs(target_angle_rad - best_theta)
+
+                # RULE 1: The "Massive Shortcut" (Accept Immediately)
+                if new_error < (old_error - IMPROVEMENT_THRESHOLD):
+                    self.persistence_counter = 0  # Reset counter
+                    self.candidate_theta = None
+                    # best_theta is accepted as-is
+                
+                # RULE 2: Wait for Persistence
+                else:
+                    # Check if this new angle is stable (within a 5-degree noise margin of the candidate)
+                    if self.candidate_theta is not None and abs(best_theta - self.candidate_theta) < math.radians(5):
+                        self.persistence_counter += 1
+                    else:
+                        # It's a brand new angle, start counting
+                        self.candidate_theta = best_theta
+                        self.persistence_counter = 1
+
+                    # Has it survived for 3 frames?
+                    if self.persistence_counter >= REQUIRED_FRAMES:
+                        # It's a real obstacle! Accept the new path.
+                        self.persistence_counter = 0
+                        self.candidate_theta = None
+                        # best_theta is accepted as-is
+                    else:
+                        # It hasn't proven itself yet. Reject it and stick to the old path.
+                        best_theta = self.previous_best_theta
+            
+            else:
+                # We are tracking the same general gap. Reset persistence tracking.
+                self.persistence_counter = 0
+                self.candidate_theta = None
+
+        # 3. Apply the Esmoothing filter
+        if self.previous_best_theta is None:
+            smoothed_theta = best_theta
+        else:
+            smoothed_theta = (ALPHA * best_theta) + ((1.0 - ALPHA) * self.previous_best_theta)
+
+        self.previous_best_theta = smoothed_theta
+        error = math.degrees(smoothed_theta)
         print("error :", error)
         kP = 0.02  # Tune this: higher = faster turns, lower = smoother
         min_speed = 0.2
         max_speed = 1.0
         
         speed = error * kP
-        
+        if abs(speed) < min_speed: 
+            speed = math.copysign(min_speed, speed)
+        if abs(speed) > max_speed:
+            speed = math.copysign(max_speed, speed)
+
+
         if abs(error) < 3.7: # range to move forward
             return [0.8, 0.0, -1.0, -1.0] # Drive forward
         else:
-        # If speed is too low the robot won't move, so add a floor
             if speed < 0:
                 speed = abs(speed)
-                if abs(speed) < min_speed: 
-                    speed = math.copysign(min_speed, speed)
-                return [0.0, 0.0, speed, -1.0] 
+                return [0.0, 0.0, speed, -1.0] # turn left
             else:
-                if abs(speed) < min_speed: 
-                    speed = math.copysign(min_speed, speed)
-                return [0.0, 0.0, -1.0, speed] 
+
+                return [0.0, 0.0, -1.0, speed] # turn right
 
     @staticmethod
     def compute_bearing(p1, p2):

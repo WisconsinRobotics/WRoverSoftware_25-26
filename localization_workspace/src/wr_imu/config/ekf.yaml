@@ -18,7 +18,7 @@ ekf_filter_node_odom:
                   true,  true,  true,
                   false, false, false,
                   true,  true,  true,
-                  true,  true,  true]
+                  False,  False,  False]
     imu0_differential: false
     imu0_remove_gravitational_acceleration: true
 
@@ -40,7 +40,7 @@ ekf_filter_node_map:
                   true,  true,  true,
                   false, false, false,
                   true,  true,  true,
-                  true,  true,  true]
+                  False,  False,  False]
     imu0_differential: false
     imu0_remove_gravitational_acceleration: true
 
