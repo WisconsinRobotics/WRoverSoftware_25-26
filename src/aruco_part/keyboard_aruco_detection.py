@@ -3,13 +3,13 @@
 # arm_response topic triggers next key in sequence
 # L for launch word Q to quit P to print
 #TODO add hardcoded movement vectors
-#TODO add in path correction
+#TODO add in path correction, eyeball global offset first and try to use that, otherwise tuning and transforming
 
-#Path idea 1: The main issue is the offsets instead of the actual keyboard. So could have a tuning run where
-# we type in a few keys and measure how far away the keypress is from the actual key, then add an
-#offset based on this. However, if its due to random error accumulation instead of an offset this
-# would just mess it up more. Could just measure ourselves for this or if we have single key detection
-#working we might be able to detect it and automatically apply the offset needed.
+#Path idea 1: add a global offset if the arm misses in one direction consistently.
+#Path idea 2: Use a per region correction tuning step if the accuracy changes at the edges for example.
+#Press 4-5 keys across board, measure error, and then add affine transformation?
+#Path idea 3: Pynput but I would only measure error on a diff key but would close state machine loop but dont think
+# will be usable in comp so prolly not
 
 import cv2
 import numpy as np
