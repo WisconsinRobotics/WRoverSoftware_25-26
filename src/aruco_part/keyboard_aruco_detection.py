@@ -1,241 +1,407 @@
-# Keyboard ArUco node. Uses DepthAI cam + 4 markers on K552 to publish homography and key positions.
-# Topics only (no actions/services). arm just subscribes and uses the data when it needs to type.
+# keyboard aruco detection node
+# 4 ArUco markers on K552 corners -> homography -> publish movement vectors to arm
+# arm_response topic triggers next key in sequence
+# L for launch word Q to quit P to print
+#TODO add hardcoded movement vectors
+#TODO add in path correction
 
-import json
-import threading
-import numpy as np
+#Path idea 1: The main issue is the offsets instead of the actual keyboard. So could have a tuning run where
+# we type in a few keys and measure how far away the keypress is from the actual key, then add an
+#offset based on this. However, if its due to random error accumulation instead of an offset this
+# would just mess it up more. Could just measure ourselves for this or if we have single key detection
+#working we might be able to detect it and automatically apply the offset needed.
+
 import cv2
+import numpy as np
+import json
+import time
+import threading
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float64MultiArray, String
+from std_msgs.msg import String
 
-import depthai as dai
+# K552 dimensions
 
-# K552 physical size (mm). Homography maps image -> this plane.
-KEYBOARD_WIDTH_MM = 354.0
-KEYBOARD_DEPTH_MM = 123.0
-PITCH = 19.05  # 1u key spacing
-H_KEY = PITCH
-ROW_Y = {'fn': 6.5, 'num': 25.55, 'tab': 44.60, 'caps': 63.65, 'shft': 82.70, 'spc': 101.75}
+KEYBOARD_W = 354.0
+KEYBOARD_D = 123.0
+PITCH = 19.05  # standard 1u key spacing
+KB_CX = KEYBOARD_W / 2.0  # arm home position
+KB_CY = KEYBOARD_D / 2.0
+Z_MM = 10.0  # default press depth need to be tuned
+
+# Movement vectors TODO measure and hard code
+# dx+ is right, dy+ is up.
+
+MOVES = {
+    'A': (0.0, 0.0),
+    'B': (0.0, 0.0),
+    'C': (0.0, 0.0),
+    'D': (0.0, 0.0),
+    'E': (0.0, 0.0),
+    'F': (0.0, 0.0),
+    'G': (0.0, 0.0),
+    'H': (0.0, 0.0),
+    'I': (0.0, 0.0),
+    'J': (0.0, 0.0),
+    'K': (0.0, 0.0),
+    'L': (0.0, 0.0),
+    'M': (0.0, 0.0),
+    'N': (0.0, 0.0),
+    'O': (0.0, 0.0),
+    'P': (0.0, 0.0),
+    'Q': (0.0, 0.0),
+    'R': (0.0, 0.0),
+    'S': (0.0, 0.0),
+    'T': (0.0, 0.0),
+    'U': (0.0, 0.0),
+    'V': (0.0, 0.0),
+    'W': (0.0, 0.0),
+    'X': (0.0, 0.0),
+    'Y': (0.0, 0.0),
+    'Z': (0.0, 0.0),
+    '0': (0.0, 0.0),
+    '1': (0.0, 0.0),
+    '2': (0.0, 0.0),
+    '3': (0.0, 0.0),
+    '4': (0.0, 0.0),
+    '5': (0.0, 0.0),
+    '6': (0.0, 0.0),
+    '7': (0.0, 0.0),
+    '8': (0.0, 0.0),
+    '9': (0.0, 0.0),
+    'Space': (0.0, 0.0),
+    'Enter': (0.0, 0.0),
+}
+
+# overlay needs absolute positions, so convert back from center-relative
+WIDTHS = {
+    'Space': PITCH * 6.25,
+    'Enter': PITCH * 2.25,
+    'Bksp':  PITCH * 2.0,
+    'Tab':   PITCH * 1.5,
+}
+#Use for abs positioning for debugging
+KEYS = {}
+for label, (dx, dy) in MOVES.items():
+    KEYS[label] = {
+        'cx_mm': KB_CX + dx,
+        'cy_mm': KB_CY + dy,
+        'w_mm': WIDTHS.get(label, PITCH),
+        'h_mm': PITCH,
+    }
+
+
+#aruco setup
 ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 ARUCO_PARAMS = cv2.aruco.DetectorParameters()
-# Keyboard corners in mm: TL, TR, BR, BL (must match order from sort_corners_geometric)
-DST_PTS = np.array([
-    [0.0, 0.0], [KEYBOARD_WIDTH_MM, 0.0],
-    [KEYBOARD_WIDTH_MM, KEYBOARD_DEPTH_MM], [0.0, KEYBOARD_DEPTH_MM],
+# dst for homography
+KB_CORNERS_MM = np.array([
+    [0.0, 0.0],
+    [KEYBOARD_W, 0.0],
+    [KEYBOARD_W, KEYBOARD_D],
+    [0.0, KEYBOARD_D],
 ], dtype=np.float32)
 
-# Key layout: (label, cx_mm, cy_mm, w_mm) per key. Matches keyboard_aruco_laptop_test.
-KEY_LAYOUT = []
 
+#aruco detection helpers
+#average to center pixel
+def marker_center(one_corner):
+    pts = one_corner.reshape(4, 2)
+    return pts.mean(axis=0).astype(np.float32)
 
-def u(n):
-    """Units to mm (1u = PITCH)."""
-    return n * PITCH
+#inside vertex for h
+def inside_corner(one_corner, all_centers):
+    pts = one_corner.reshape(4, 2)
+    centroid = np.mean(all_centers, axis=0)
+    dists = np.linalg.norm(pts - centroid, axis=1)
+    return pts[np.argmin(dists)].astype(np.float32)
 
-
-def add_row(keys, y, start_x):
-    """Append a row of keys to KEY_LAYOUT. keys = [(label, width_units), ...]."""
-    x = start_x
-    for label, w in keys:
-        w_mm = u(w)
-        KEY_LAYOUT.append((label, x + w_mm / 2, y, w_mm))
-        x += w_mm
-# function row
-KEY_LAYOUT.append(('Esc', u(0.0) + 4.5 + u(0.5), ROW_Y['fn'], u(1.0)))
-fx = u(2.1) + 4.5
-for i, name in enumerate(['F1', 'F2', 'F3', 'F4']):
-    KEY_LAYOUT.append((name, fx + i * u(1.0) + u(0.5), ROW_Y['fn'], u(1.0)))
-fx2 = fx + 4 * u(1.0) + u(0.25)
-for i, name in enumerate(['F5', 'F6', 'F7', 'F8']):
-    KEY_LAYOUT.append((name, fx2 + i * u(1.0) + u(0.5), ROW_Y['fn'], u(1.0)))
-fx3 = fx2 + 4 * u(1.0) + u(0.25)
-for i, name in enumerate(['F9', 'F10', 'F11', 'F12']):
-    KEY_LAYOUT.append((name, fx3 + i * u(1.0) + u(0.5), ROW_Y['fn'], u(1.0)))
-fx4 = fx3 + 4 * u(1.0) + u(0.5)
-for i, name in enumerate(['PrtSc', 'ScrLk', 'Pause']):
-    KEY_LAYOUT.append((name, fx4 + i * u(1.0) + u(0.5), ROW_Y['fn'], u(1.0)))
-# number row
-add_row([('`',1),('1',1),('2',1),('3',1),('4',1),('5',1),('6',1),('7',1),('8',1),('9',1),('0',1),('-',1),('=',1),('Bksp',2)], ROW_Y['num'], 4.5)
-for i, lbl in enumerate(['Ins','Home','PgUp']): KEY_LAYOUT.append((lbl, u(14.75)+4.5+i*u(1)+u(0.5), ROW_Y['num'], u(1)))
-# QWERTY row
-add_row([('Tab',1.5),('Q',1),('W',1),('E',1),('R',1),('T',1),('Y',1),('U',1),('I',1),('O',1),('P',1),('[',1),(']',1),('\\',1.5)], ROW_Y['tab'], 4.5)
-for i, lbl in enumerate(['Del','End','PgDn']): KEY_LAYOUT.append((lbl, u(14.75)+4.5+i*u(1)+u(0.5), ROW_Y['tab'], u(1)))
-# home row
-add_row([('Caps',1.75),('A',1),('S',1),('D',1),('F',1),('G',1),('H',1),('J',1),('K',1),('L',1),(';',1),("'",1),('Enter',2.25)], ROW_Y['caps'], 4.5)
-# shift row
-add_row([('LShft',2.25),('Z',1),('X',1),('C',1),('V',1),('B',1),('N',1),('M',1),(',',1),('.',1),('/',1),('RShft',2.75)], ROW_Y['shft'], 4.5)
-KEY_LAYOUT.append(('Up', u(14.75)+4.5+u(1.5), ROW_Y['shft'], u(1)))
-# bottom row
-add_row([('LCtrl',1.25),('LWin',1.25),('LAlt',1.25),('Space',6.25),('RAlt',1.25),('Fn',1.25),('RCtrl',1.25)], ROW_Y['spc'], 4.5)
-KEY_LAYOUT.append(('Left', u(14.75)+4.5+u(0.5), ROW_Y['spc'], u(1)))
-KEY_LAYOUT.append(('Down', u(14.75)+4.5+u(1.5), ROW_Y['spc'], u(1)))
-KEY_LAYOUT.append(('Right', u(14.75)+4.5+u(2.5), ROW_Y['spc'], u(1)))
-KEY_MAP = {lbl: {'cx_mm': cx, 'cy_mm': cy, 'w_mm': w, 'h_mm': H_KEY} for lbl, cx, cy, w in KEY_LAYOUT}
-KB_CENTER_X = KEYBOARD_WIDTH_MM / 2.0
-KB_CENTER_Y = KEYBOARD_DEPTH_MM / 2.0
-Z_MM = 10.0  # height above keyboard plane for key press (mm)
-
-
-def char_to_key_label(ch):
-    """Map typed char to KEY_MAP label. Returns None if not found."""
-    upper = ch.upper()
-    if upper in KEY_MAP:
-        return upper
-    special = {" ": "Space", "\n": "Enter", "\t": "Tab"}
-    return special.get(ch)
-
-
-def marker_center(corners_one):
-    """Center of one ArUco marker (4 corners -> single point)."""
-    pts = corners_one.reshape((4, 2))
-    return np.array([pts[:, 0].mean(), pts[:, 1].mean()], dtype=np.float32)
-
-
-def inside_corner(corners_one, all_centers):
-    """Vertex of marker closest to centroid of all centers (keyboard center)."""
-    pts = corners_one.reshape((4, 2))
-    center = np.mean(all_centers, axis=0)
-    dists = np.linalg.norm(pts - center, axis=1)
-    return np.array(pts[np.argmin(dists)], dtype=np.float32)
-
-
-def sort_corners_geometric(centers):
-    """Order 4 marker centers as TL, TR, BR, BL for homography."""
+#Decide which arucos are what
+def sort_four_corners(centers):
     pts = np.array(centers, dtype=np.float32)
-    top = pts[np.argsort(pts[:, 1])[:2]]
-    bottom = pts[np.argsort(pts[:, 1])[2:]]
-    return np.array([
-        top[np.argmin(top[:, 0])], top[np.argmax(top[:, 0])],
-        bottom[np.argmax(bottom[:, 0])], bottom[np.argmin(bottom[:, 0])]
+    by_y = np.argsort(pts[:, 1])
+    top, bot = by_y[:2], by_y[2:]
+    tl = top[np.argmin(pts[top, 0])]
+    tr = top[np.argmax(pts[top, 0])]
+    bl = bot[np.argmin(pts[bot, 0])]
+    br = bot[np.argmax(pts[bot, 0])]
+    return [tl, tr, br, bl]
+
+#detects, sorts, takes inside corners, then compute h with these
+def compute_homography(corners, ids):
+    """detect -> sort -> inside corners -> H matrix (pixels to mm)"""
+    if ids is None or len(corners) < 4:
+        return None, None
+    corners_v = list(corners[:4])
+    centers = [marker_center(c) for c in corners_v]
+    order = sort_four_corners(centers)
+    src = np.array([
+        inside_corner(corners_v[order[i]], centers)
+        for i in range(4)
     ], dtype=np.float32)
+    H, _ = cv2.findHomography(src, KB_CORNERS_MM)
+    return H, src
+
+#Keyboard mm to pixels
+def mm_to_px(H_inv, x_mm, y_mm):
+    pt = np.array([[[x_mm, y_mm]]], dtype=np.float32)
+    out = cv2.perspectiveTransform(pt, H_inv)
+    return int(out[0, 0, 0]), int(out[0, 0, 1])
+
+def char_to_label(ch):
+    up = ch.upper()
+    if up in MOVES:
+        return up
+    return {' ': 'Space', '\n': 'Enter', '\t': 'Tab'}.get(ch)
+
+#Drawing(only for debugging overlay, could remove in final)
+
+def draw_keys(frame, H_inv):
+    h, w = frame.shape[:2]
+    for label, k in KEYS.items():
+        cx, cy = k['cx_mm'], k['cy_mm']
+        hw, hh = k['w_mm'] / 2.0, k['h_mm'] / 2.0
+        cpx, cpy = mm_to_px(H_inv, cx, cy)
+        tl = mm_to_px(H_inv, cx - hw, cy - hh)
+        br = mm_to_px(H_inv, cx + hw, cy + hh)
+        if br[0] < 0 or br[1] < 0 or tl[0] > w or tl[1] > h:
+            continue
+        cv2.rectangle(frame, tl, br, (255, 165, 0), 1)
+        cv2.circle(frame, (cpx, cpy), 2, (0, 255, 255), -1)
+        key_w_px = abs(br[0] - tl[0])
+        if key_w_px > 12:
+            fs = max(0.25, min(0.38, key_w_px / 65.0))
+            cv2.putText(frame, label, (tl[0] + 2, tl[1] + 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, fs, (255, 165, 0), 1)
 
 
-class KeyboardArucoNode(Node):
-    """Publishes keyboard homography and key positions; types sequence from stdin, sends one movement per arm request."""
+def draw_arrow(frame, H_inv, key_label):
+    """red arrow from keyboard center to target key"""
+    if key_label not in KEYS:
+        return
+    k = KEYS[key_label]
+    start = mm_to_px(H_inv, KB_CX, KB_CY)
+    end = mm_to_px(H_inv, k['cx_mm'], k['cy_mm'])
+    cv2.arrowedLine(frame, start, end, (0, 0, 255), 3, tipLength=0.04)
+    cv2.circle(frame, start, 6, (0, 255, 255), -1)
+    hw, hh = k['w_mm'] / 2.0, k['h_mm'] / 2.0
+    tl = mm_to_px(H_inv, k['cx_mm'] - hw, k['cy_mm'] - hh)
+    br = mm_to_px(H_inv, k['cx_mm'] + hw, k['cy_mm'] + hh)
+    cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
+    cv2.putText(frame, f"-> {key_label}", (end[0] + 10, end[1] - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+
+
+def draw_markers(frame, corners, ids, sorted_src):
+    if ids is None:
+        return
+    for i in range(len(ids)):
+        mid = int(ids[i][0])
+        pts = corners[i].reshape(4, 2).astype(np.int32)
+        cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
+        c = marker_center(corners[i])
+        cv2.circle(frame, (int(c[0]), int(c[1])), 5, (255, 0, 0), -1)
+        cv2.putText(frame, f"ID {mid}", (pts[0][0], pts[0][1] - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    # red dots at the inside corners used for homography
+    if sorted_src is not None:
+        for pt, name in zip(sorted_src, ['TL', 'TR', 'BR', 'BL']):
+            cv2.circle(frame, (int(pt[0]), int(pt[1])), 6, (0, 0, 255), -1)
+            cv2.putText(frame, name, (int(pt[0]) + 8, int(pt[1]) + 8),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
+
+
+# ROS2 node
+#publishes to keyboard_movement with key, dx_mm, dy_mm, z_mm
+#subscribes to arm_response with ANY message meaning send next key
+
+class KeyboardNode(Node):
 
     def __init__(self):
-        super().__init__("keyboard_aruco")
-        # Publishers: homography (9 floats), key map (JSON), movement vector (JSON)
-        self.homography_pub = self.create_publisher(Float64MultiArray, "keyboard_plane_homography", 10)
-        self.key_positions_pub = self.create_publisher(String, "keyboard_key_positions", 10)
-        self.movement_pub = self.create_publisher(String, "keyboard_movement_vector", 10)
-        self.create_subscription(String, "keyboard_key_request", self._on_key_request, 10)
-        self._launchpad_keys = []
-        self._launchpad_idx = 0
-        self._launchpad_lock = threading.Lock()
+        super().__init__('keyboard_aruco')
+        self.movement_pub = self.create_publisher(String, 'keyboard_movement', 10)
+        # Need to store sub to protect against not get garbage collected
+        self._arm_sub = self.create_subscription(String, 'arm_response', self._on_arm_response, 10)
+        self._keys = []
+        self._idx = 0
+        self._waiting = False  # sent command, waiting for arm
+        self._lock = threading.Lock()  # spin thread writes, main thread reads
+        self.get_logger().info(f"keyboard_aruco has {len(MOVES)} keys")
 
-        # DepthAI camera, 1280x720
-        pipeline = dai.Pipeline()
-        cam = pipeline.create(dai.node.Camera).build()
-        self._video_queue = cam.requestOutput((1280, 720)).createOutputQueue()
-        pipeline.start()
-        self._pipeline = pipeline
-
-        self._latest_frame = None
-        self._lock = threading.Lock()
-        self._running = True
-        self._last_log_time = 0.0
-        threading.Thread(target=self._capture_loop, daemon=True).start()
-        threading.Thread(target=self._input_loop, daemon=True).start()
-        self.create_timer(1.0 / 30.0, self._on_timer)  # 30 Hz detect + publish
-        self.get_logger().info(f"keyboard_aruco: DepthAI 1280x720, {len(KEY_MAP)} keys. Type a sequence and press Enter, then arm requests trigger each key.")
-
-    def _input_loop(self):
-        """Background thread: prompt for sequence string, update _launchpad_keys on Enter."""
-        while self._running:
-            try:
-                line = input("Sequence: ").strip()
-                if not line:
-                    continue
-                keys = []
-                for ch in line:
-                    label = char_to_key_label(ch)
-                    if label is not None:
-                        keys.append(label)
-                with self._launchpad_lock:
-                    self._launchpad_keys = keys
-                    self._launchpad_idx = 0
-                self.get_logger().info(f"Sequence set: {len(keys)} keys")
-            except (EOFError, KeyboardInterrupt):
-                break
-
-    def _on_key_request(self, msg):
-        """On arm 'ready for next key': publish movement (dx_mm, dy_mm, z_mm) from keyboard center, advance index."""
-        with self._launchpad_lock:
-            if self._launchpad_idx >= len(self._launchpad_keys):
-                return
-            key = self._launchpad_keys[self._launchpad_idx]
-            self._launchpad_idx += 1
-        info = KEY_MAP[key]
-        dx_mm = info["cx_mm"] - KB_CENTER_X
-        dy_mm = info["cy_mm"] - KB_CENTER_Y
-        payload = {"key": key, "dx_mm": dx_mm, "dy_mm": dy_mm, "z_mm": Z_MM}
-        self.movement_pub.publish(String(data=json.dumps(payload)))
-
-    def _capture_loop(self):
-        """Background thread: pull frames from DepthAI into _latest_frame."""
-        while self._running:
-            try:
-                frame = self._video_queue.get().getCvFrame()
-                with self._lock:
-                    self._latest_frame = frame
-            except Exception:
-                break
-
-    def _on_timer(self):
-        """30 Hz: detect 4 ArUco markers, compute homography, publish homography + key_positions or invalid sentinel."""
+    def start_sequence(self, word, keys):
         with self._lock:
-            frame = self._latest_frame
-        if frame is None:
-            self.homography_pub.publish(Float64MultiArray(data=[0.0] * 9))  # invalid sentinel
-            return
-        corners, ids, _ = cv2.aruco.detectMarkers(frame, ARUCO_DICT, parameters=ARUCO_PARAMS)
-        if ids is None or len(corners) < 4:
-            self.homography_pub.publish(Float64MultiArray(data=[0.0] * 9))
-            return
-        # Pick 4 geometric corners (TL, TR, BR, BL) from all detected markers
-        centers = [marker_center(c) for c in corners]
-        pts = np.array(centers, dtype=np.float32)
-        sorted_by_y = pts[np.argsort(pts[:, 1])]
-        top2 = sorted_by_y[:2]
-        bottom2 = sorted_by_y[-2:]
-        tl = top2[np.argmin(top2[:, 0])]
-        tr = top2[np.argmax(top2[:, 0])]
-        bl = bottom2[np.argmin(bottom2[:, 0])]
-        br = bottom2[np.argmax(bottom2[:, 0])]
-        corner_centers = np.array([tl, tr, br, bl], dtype=np.float32)
-        corner_indices = [
-            np.argmin([np.linalg.norm(c - p) for c in centers])
-            for p in corner_centers
-        ]
-        if len(set(corner_indices)) != 4:
-            self.homography_pub.publish(Float64MultiArray(data=[0.0] * 9))
-            return
-        # Homography from image (marker inside-corners) to keyboard mm
-        src = np.array([
-            inside_corner(corners[corner_indices[k]], corner_centers)
-            for k in range(4)
-        ], dtype=np.float32)
-        H, _ = cv2.findHomography(src, DST_PTS)
-        if H is None:
-            self.homography_pub.publish(Float64MultiArray(data=[0.0] * 9))
-            return
-        self.homography_pub.publish(Float64MultiArray(data=H.flatten().tolist()))  # 3x3 row-major
-        self.key_positions_pub.publish(String(data=json.dumps(KEY_MAP)))
-        now = self.get_clock().now().nanoseconds / 1e9
-        if now - self._last_log_time >= 1.0:
-            self._last_log_time = now
-            self.get_logger().info("keyboard locked")
+            self._keys = keys
+            self._idx = 0
+            self._waiting = False
+        self.get_logger().info(f"Sequence should be {word} -> {keys}")
+        self._publish_current()
+
+    def _publish_current(self):
+        with self._lock:
+            if self._idx >= len(self._keys):
+                self.get_logger().info("Done.")
+                return
+            label = self._keys[self._idx]
+            self._waiting = True
+        dx, dy = MOVES[label]
+        msg = String()
+        msg.data = json.dumps({
+            'key': label,
+            'dx_mm': dx,
+            'dy_mm': dy,
+            'z_mm': Z_MM,
+        })
+        self.movement_pub.publish(msg)
+        self.get_logger().info(f"Sent: {label} dx={dx:.1f} dy={dy:.1f}")
+    #When arm done publish next
+    def _on_arm_response(self, msg):
+        with self._lock:
+            if not self._waiting or self._idx >= len(self._keys):
+                return
+            self._waiting = False
+            self._idx += 1
+        self._publish_current()
+
+    @property
+    def current_key(self):
+        with self._lock:
+            if self._idx < len(self._keys):
+                return self._keys[self._idx]
+        return None
+
+    @property
+    def active(self):
+        with self._lock:
+            return len(self._keys) > 0 and self._idx < len(self._keys)
 
 
-def main(args=None):
-    """Run keyboard_aruco node (DepthAI + ArUco, homography, sequence from stdin, movement on request)."""
-    rclpy.init(args=args)
-    node = KeyboardArucoNode()
-    rclpy.spin(node)
+# ── Main ───────────────────────────────────────────────────────────────────
+
+def prompt_word():
+    raw = input("\nEnter launchkey: ").strip()
+    if not raw:
+        return None, None
+    raw = raw[:5]
+    labels, chars = [], []
+    for ch in raw:
+        lbl = char_to_label(ch)
+        if lbl:
+            labels.append(lbl)
+            chars.append(ch.upper())
+        else:
+            print(f"  skipping '{ch}'")
+    if not labels:
+        return None, None
+    word = ''.join(chars)
+    print(f"Sequence: {word} -> {labels}")
+    return word, labels
+
+
+def main():
+    rclpy.init()
+    node = KeyboardNode()
+
+    cap = cv2.VideoCapture(1)
+    if not cap.isOpened():
+        node.get_logger().error("Couldn't open webcam index 1")
+        node.destroy_node()
+        rclpy.shutdown()
+        return
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+    # spin ros2 in background so arm_response callback fires
+    spin_thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
+    spin_thread.start()
+
+    # cache last good homography for 5s so hand blocking a marker doesnt kill tracking
+    cached_H_inv = None
+    cached_src = None
+    last_good = 0.0
+    LOCK_TIMEOUT = 5.0
+
+    print(f"Keyboard node with {len(MOVES)} keys")
+    print("Q=quit  L=launchkey  P=print\n")
+
+    while rclpy.ok():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        img = frame.copy()
+        corners, ids, _ = cv2.aruco.detectMarkers(img, ARUCO_DICT, parameters=ARUCO_PARAMS)
+        H, src_pts = compute_homography(corners, ids)
+
+        # invert H (pixels->mm) to get H_inv (mm->pixels) for drawing
+        H_inv = None
+        if H is not None and src_pts is not None:
+            try:
+                H_inv = np.linalg.inv(H)
+            except np.linalg.LinAlgError:
+                pass
+
+        # update or use cache
+        if H_inv is not None:
+            cached_H_inv = H_inv
+            cached_src = src_pts
+            last_good = time.time()
+        elif cached_H_inv is not None and (time.time() - last_good) < LOCK_TIMEOUT:
+            H_inv = cached_H_inv
+            src_pts = cached_src
+        else:
+            cached_H_inv = None
+
+        if H_inv is not None:
+            draw_keys(img, H_inv)
+            age = time.time() - last_good
+            if age < 0.1:
+                status = f"TRACKING (LIVE) | {len(KEYS)} keys"
+            else:
+                status = f"TRACKING (LOCKED {age:.1f}s) | {len(KEYS)} keys"
+            color = (0, 255, 0)
+        else:
+            n = 0 if ids is None else len(ids)
+            if n >= 4:
+                status = f"4 markers found but homography failed (bad angle?)"
+            else:
+                status = f"Need 4 markers (found {n})"
+            color = (0, 0, 255)
+
+        draw_markers(img, corners, ids, src_pts)
+
+        # show arrow to current target key during a sequence
+        if node.active and H_inv is not None:
+            current = node.current_key
+            if current:
+                draw_arrow(img, H_inv, current)
+                cv2.putText(img, f"Typing: {current}", (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+        cv2.putText(img, status, (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
+        cv2.imshow("Keyboard ArUco", img)
+
+        k = cv2.waitKey(1) & 0xFF
+        if k == ord('q'):
+            break
+        elif k == ord('p'):
+            for lbl, (dx, dy) in MOVES.items():
+                print(f"  {lbl:8s} dx={dx:7.1f} dy={dy:7.1f}")
+        elif k == ord('l'):
+            if H_inv is None:
+                print("No tracking - need 4 markers visible")
+            else:
+                word, keys = prompt_word()
+                if word and keys:
+                    node.start_sequence(word, keys)
+
+    cap.release()
+    cv2.destroyAllWindows()
     node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.shutdown()
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":
