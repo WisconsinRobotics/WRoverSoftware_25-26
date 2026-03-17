@@ -1,5 +1,10 @@
 # simulation docs
 
+# TODO List
+1) Remake the swivel links to include wheels and wheel joints
+2) add ros2 script that controls the direction of the wheels and the speed
+3) implement arm...
+
 # Install
 Gazebo Robot Fortress:
 [https://gazebosim.org/docs/fortress/install_ubuntu/](Gazebo Fortress Install)

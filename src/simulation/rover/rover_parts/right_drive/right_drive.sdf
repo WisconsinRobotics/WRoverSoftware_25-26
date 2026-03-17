@@ -168,7 +168,7 @@
         <!-- Joints -->
         <!-- ______ -->
         <joint name = "left_wheel_swivel_to_chasis" type="revolute">
-            <pose relative_to="left_wheel_swivel"></pose>
+            <pose>0.292 -0.574 -0.165 0 0 0</pose> 
             <parent>chasis</parent>
             <child>left_wheel_swivel</child>
             <axis>
@@ -177,31 +177,41 @@
                     <lower>-1e9</lower>
                     <upper>1e9</upper>
                 </limit>
+                <dynamics>
+                    <damping>0.5</damping>
+                    <friction>0.1</friction>
+                </dynamics>
             </axis>
         </joint>
         <joint name = "right_wheel_swivel_to_chasis" type="revolute">
-            <pose relative_to="right_wheel_swivel"></pose>
+            <pose>0.292 0.343 -0.211 0 0 0</pose> 
             <parent>chasis</parent>
             <child>right_wheel_swivel</child>
             <axis>
                 <xyz expressed_in="__model__">0 0 1</xyz>
                 <limit>
-                    <lower>-1.76769e+308</lower>
-                    <upper>1.79769e+308</upper>
+                    <lower>-1e9</lower>
+                    <upper>1e9</upper>
                 </limit>
+                <dynamics>
+                    <damping>0.5</damping>
+                    <friction>0.1</friction>
+                </dynamics>
             </axis>
         </joint>
 
-        <plugin filename="gz-sim-triggered-publisher-system"
-        name="gz::sim::systems::TriggeredPublisher">
-    <input type="gz.msgs.Clock" topic="/clock">
-        <match field="sim_time.sec">1</match>
-    </input>
-    <output type="gz.msgs.Double"
-            topic="/model/right_drive/joint/left_wheel_swivel_to_chasis/cmd_vel">
-        <msg>data: 1.0</msg>
-    </output>
-</plugin>
-
+        <!-- ______ -->
+        <!-- plugins -->
+        <!-- ______ -->
+        <plugin filename="gz-sim-joint-controller-system"
+        name="gz::sim::systems::JointController">
+            <joint_name>left_wheel_swivel_to_chasis</joint_name>
+            <initial_velocity>1.0</initial_velocity>
+        </plugin>
+        <plugin filename="gz-sim-joint-controller-system"
+        name="gz::sim::systems::JointController">
+            <joint_name>right_wheel_swivel_to_chasis</joint_name>
+            <initial_velocity>1.0</initial_velocity>
+        </plugin>
     </model>
 </sdf>
