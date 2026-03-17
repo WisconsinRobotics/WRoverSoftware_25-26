@@ -8,14 +8,28 @@
 # Install
 Gazebo Robot Fortress:
 [https://gazebosim.org/docs/fortress/install_ubuntu/](Gazebo Fortress Install)
+ros_gz_bridge:
+```sudo apt install ros-humble-ros-gz-bridge```
 
 # Running simulation
 First source ros2 humble:
 ```source /opt/ros/humble/setup.sh```
+
+## Gazebo
 Run Gazebo via the command:
 ```ign gazebo world.sdf```
 running these commands with start the Gazebo simulation in a world with the rover
 
+## ros_gz_bridge
+this is the link that gets ROS2 packets to communicated with gazebo packages. For each ROS2 node you have that wants to communicate with gazebo, you need to run this command:
+
+[https://docs.ros.org/en/humble/p/ros_gz_bridge/](rosr_gz_bridge docs)
+[https://index.ros.org/p/ros_gz_bridge/](ros index info)
+
+
+```ros2 run ros_gz_bridge parameter_bridge /{INSERT_TOPIC}@{ROS2_MESSAGE_TYPE}@{GAZEBO_MESSAGE_TYPE}```
+example:
+```ros2 run ros_gz_bridge parameter_bridge /joint_pos@std_msgs/msg/Float64@ignition.msgs.Double```
 
 # Simulation Framework
 ## Rover model
