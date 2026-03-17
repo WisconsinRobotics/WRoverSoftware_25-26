@@ -1,0 +1,3 @@
+[console_scripts]
+battery_data_sender = telemetry.battery_data_sender:main
+

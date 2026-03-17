@@ -27,16 +27,6 @@
                 </limit>
             </axis>
         </joint>
-        <joint name = "main_body_to_left_chasis" type="revolute">
-            <parent>main_body::body</parent>
-            <child>swerve_left::chasis</child>
-            <axis>
-                <xyz expressed_in="__model__">0 0 1</xyz>
-                <limit>
-                    <lower>-1.76769e+308</lower>
-                    <upper>1.79769e+308</upper>
-                </limit>
-            </axis>
-        </joint>
+        
     </model>
 </sdf>

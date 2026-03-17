@@ -1,0 +1,24 @@
+[0.256s] Invoking command in '/home/teggatz/documents/WRoverSoftware_25-26/src/telemetry': PYTHONPATH=/home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/teggatz/documents/WRoverSoftware_25-26/install/telemetry/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/telemetry build --build-base /home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/build install --record /home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/install.log --single-version-externally-managed install_data
+[0.349s] running egg_info
+[0.349s] writing ../../build/telemetry/telemetry.egg-info/PKG-INFO
+[0.349s] writing dependency_links to ../../build/telemetry/telemetry.egg-info/dependency_links.txt
+[0.349s] writing entry points to ../../build/telemetry/telemetry.egg-info/entry_points.txt
+[0.349s] writing requirements to ../../build/telemetry/telemetry.egg-info/requires.txt
+[0.350s] writing top-level names to ../../build/telemetry/telemetry.egg-info/top_level.txt
+[0.350s] reading manifest file '../../build/telemetry/telemetry.egg-info/SOURCES.txt'
+[0.351s] writing manifest file '../../build/telemetry/telemetry.egg-info/SOURCES.txt'
+[0.351s] running build
+[0.351s] running build_py
+[0.351s] copying telemetry/battery_data_publisher.py -> /home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/build/lib/telemetry
+[0.351s] running install
+[0.351s] running install_lib
+[0.352s] copying /home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/build/lib/telemetry/battery_data_publisher.py -> /home/teggatz/documents/WRoverSoftware_25-26/install/telemetry/lib/python3.10/site-packages/telemetry
+[0.352s] byte-compiling /home/teggatz/documents/WRoverSoftware_25-26/install/telemetry/lib/python3.10/site-packages/telemetry/battery_data_publisher.py to battery_data_publisher.cpython-310.pyc
+[0.353s] running install_data
+[0.353s] running install_egg_info
+[0.354s] removing '/home/teggatz/documents/WRoverSoftware_25-26/install/telemetry/lib/python3.10/site-packages/telemetry-0.0.0-py3.10.egg-info' (and everything under it)
+[0.354s] Copying ../../build/telemetry/telemetry.egg-info to /home/teggatz/documents/WRoverSoftware_25-26/install/telemetry/lib/python3.10/site-packages/telemetry-0.0.0-py3.10.egg-info
+[0.354s] running install_scripts
+[0.365s] Installing battery_data_publisher script to /home/teggatz/documents/WRoverSoftware_25-26/install/telemetry/lib/telemetry
+[0.365s] writing list of installed files to '/home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/install.log'
+[0.377s] Invoked command in '/home/teggatz/documents/WRoverSoftware_25-26/src/telemetry' returned '0': PYTHONPATH=/home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/teggatz/documents/WRoverSoftware_25-26/install/telemetry/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/telemetry build --build-base /home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/build install --record /home/teggatz/documents/WRoverSoftware_25-26/build/telemetry/install.log --single-version-externally-managed install_data
