@@ -1,7 +1,8 @@
 # simulation docs
 
 # TODO List
-1) Remake the swivel links to include wheels and wheel joints
+1) Remake the swivel links to include wheels and wheel joints [IN PROGRESS]
+2) Fix the wheel Inertial values. It only has the inertials for a singular wheel! Needs to account for the both wheels and the rod
 2) add ros2 script that controls the direction of the wheels and the speed
 3) implement arm...
 
