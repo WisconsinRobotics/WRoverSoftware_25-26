@@ -2,7 +2,7 @@
 /home/teggatz/Documents/code/WRoverSoftware_25-26/install/simulation/lib/python3.10/site-packages/simulation/__pycache__/__init__.cpython-310.pyc
 /home/teggatz/Documents/code/WRoverSoftware_25-26/install/simulation/share/ament_index/resource_index/packages/simulation
 /home/teggatz/Documents/code/WRoverSoftware_25-26/install/simulation/share/simulation/package.xml
-/home/teggatz/Documents/code/WRoverSoftware_25-26/install/simulation/share/simulation/launch/launch.py
+/home/teggatz/Documents/code/WRoverSoftware_25-26/install/simulation/share/simulation/launch/simulation.launch.py
 /home/teggatz/Documents/code/WRoverSoftware_25-26/install/simulation/share/simulation/models/world.sdf
 /home/teggatz/Documents/code/WRoverSoftware_25-26/install/simulation/share/simulation/models/rover/rover.sdf
 /home/teggatz/Documents/code/WRoverSoftware_25-26/install/simulation/share/simulation/models/rover/model.config
