@@ -1,0 +1,55 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Install_Dependencies",
+            "type": "shell",
+            "command": "source /opt/ros/humble/setup.sh && source install/setup.sh && sudo apt-get update && rosdep install --from-path src",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+			"options": {
+                "shell": {
+                    "executable": "/bin/bash",
+                    "args": ["--login", "-i", "-c"]  // --login loads your ~/.bashrc
+                }
+            },
+            "problemMatcher": []
+        },
+		{
+            "label": "Build",
+            "type": "shell",
+            "command": "echo '---- building -----' && source /opt/ros/humble/setup.sh && source install/setup.sh && colcon build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+			"options": {
+                "shell": {
+                    "executable": "/bin/bash",
+                    "args": ["--login", "-i", "-c"]  // --login loads your ~/.bashrc
+                }
+            },
+            "problemMatcher": []
+        },
+		{
+            "label": "Run_Simulation",
+            "type": "shell",
+            "command": "echo '----- running simulation -----'source ~/.bashrc && source /opt/ros/humble/setup.sh && source install/setup.sh && ros2 launch simulation simulation.launch.py",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": ["Build"],
+			"options": {
+                "shell": {
+                    "executable": "/bin/bash",
+                    "args": ["--login", "-i", "-c"]  // --login loads your ~/.bashrc
+                }
+            },
+            "problemMatcher": []
+        }
+
+    ]
+}
