@@ -41,9 +41,9 @@ class ObjectDetection(Node):
         self.pipeline = dai.Pipeline()
         
         # Camera
-        cam = self.pipeline.create(dai.node.Camera).build() # Create Camera node
+        cam = self.pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_A) # Create Camera node using camera A
         cam_output = cam.requestOutput((1280, 720), type=dai.ImgFrame.Type.BGR888p) # Set video resolution to 720p 3 channel BGR format
-        
+            
         # ImageManip
         manip = self.pipeline.create(dai.node.ImageManip) # Create ImageManip node
         manip.initialConfig.addCrop(320, 40, 640, 640) # Crop the image to a centered 640 x 640 square
@@ -92,33 +92,24 @@ class ObjectDetection(Node):
         
         
         
-    # Calculate bottle distance using camera focal length and bounding box height
-    # TODO: replace with pixel-based depth calculation
-    def calculate_bottle_distance(self, y1, y2):
-        REAL_BOTTLE_HEIGHT = 0.20 #in meters
-        
-        # Approx 930 for OAK-D @ 1280x720 resolution
+    # Calculate distance using camera focal length and bounding box height
+    def calculate_distance(self, x1, y1, x2, y2):
+        # Get the height of the object irl
+        if self.get_parameter('model').value == "bottle":
+            real_height = 0.203
+        elif self.get_parameter('model').value == "hammer":
+            real_height = 0.292
+        else:
+            real_height = 0.3398
+            
         # If your distance is consistently too SHORT, INCREASE this number.
         # If your distance is consistently too LONG, DECREASE this number.
-        FOCAL_LENGTH_PIXELS = 931.0 
-        
-        # The crop is 640x640, but the pixels are 1:1 from the 1280x720 feed.
-        # So we use the frame_height of the CROP (640) to convert normalized coords.
-        FRAME_HEIGHT_PIXELS = 640.0 
+        focal_length = 600.0
 
-        # --- CALCULATION ---
-        # 1. Get height of box in pixels (y1, y2 are 0.0 to 1.0)
-        pixel_height = abs(y2 - y1) * FRAME_HEIGHT_PIXELS
+        pixel_height = max(abs(x2 - x1), abs(y2 - y1)) * 640
         
-        # 2. Prevent division by zero errors
-        if pixel_height < 5.0: 
-            return 0.0
-        
-        # 3. Pinhole Camera Formula
-        # Distance = (Real_Size * Focal_Length) / Pixel_Size
-        dist = (REAL_BOTTLE_HEIGHT * FOCAL_LENGTH_PIXELS) / pixel_height
-        
-        return dist
+        # Distance = (real_height * focal_length) / pixel_height
+        return real_height * focal_length / pixel_height
         
         
         
@@ -231,8 +222,8 @@ class ObjectDetection(Node):
             
             # If valid detection
             if conf > 0.5:
-                # TODO: replace with generalized pixel-based distance calculation
-                distance = self.calculate_bottle_distance(box[1], box[3])
+                # Calculate the distance
+                distance = self.calculate_distance(box[0], box[1], box[2], box[3])
                 
                 # Calculate linear and angular velocity
                 linear_vel, angular_vel = self.calculate_vel(center_x, distance, 1.5)
