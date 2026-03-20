@@ -6,12 +6,16 @@ Official Wisconsin Robotics software repository for the 2026 University Rover Ch
 
 ## 1. Install Dependencies
 starting from the root of the wisconsin robotics directory do:
-```sudo apt-get update```
-```rosdep install --from-path src```
+```
+sudo apt-get update
+rosdep install --from-path src
+```
 
 ## 2. build project
 ```colcon build```
 
 ## 3. Run Simulation
-```source install/setup.sh```
-```ros2 launch simulation simulation.launch.py``` 
+```
+source install/setup.sh
+ros2 launch simulation simulation.launch.py
+``` 
