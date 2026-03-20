@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<sdf version = "1.9">
+    <model name = "rover">
+        <pose> 1 0 1 0 0 0</pose>
+        <gravity> false </gravity>
+        <include>
+            <uri>model://rover/rover_parts/main_body</uri>
+        </include>
+        <include>
+            <name>swerve_right</name>
+            <uri>model://rover/rover_parts/right_drive</uri>
+        </include>
+        
+        <include>
+            <name>swerve_left</name>
+            <pose>-0.584 0 0 0 0 0</pose>
+            <uri>model://rover/rover_parts/right_drive</uri>
+        </include>
+    
+
+        <joint name = "main_body_to_right_chasis" type="revolute">
+            <parent>main_body::body</parent>
+            <child>swerve_right::chasis</child>
+            <axis>
+                <xyz expressed_in="__model__">1 0 0</xyz>
+                <limit>
+                    <effort>1e6</effort>
+                    <lower>-1e9</lower>
+                    <upper>1e9</upper>
+                </limit>
+            </axis>
+            <dynamics>
+                    <damping>0.5</damping>
+                    <friction>0.1</friction>
+            </dynamics>
+        </joint>
+
+        
+        <joint name = "main_body_to_left_chasis" type="revolute">
+            <parent>main_body::body</parent>
+            <child>swerve_left::chasis</child>
+            <axis>
+                <xyz expressed_in="__model__">1 0 0</xyz>
+                <limit>
+                    <effort>1e6</effort>
+                    <lower>-1e9</lower>
+                    <upper>1e9</upper>
+                </limit>
+            </axis>
+            <dynamics>
+                    <damping>0.5</damping>
+                    <friction>0.1</friction>
+            </dynamics>
+        </joint>   
+    </model>
+</sdf>

@@ -1,0 +1,325 @@
+<?xml version="1.0"?>
+
+<!-- 
+From Chris:    
+These Links and Joints are DOGSHIT!!!!
+Not to shit on my own work, but the inertial value and mass is just wrong
+it needs tuning!!!
+
+The hitboxes also need to change
+-->
+
+
+<sdf version = "1.9">
+    <model name = "right_drive">
+        <!-- _____ -->
+        <!-- Links -->
+        <!-- _____ -->
+        <link name = "chasis">
+            <inertial>
+                <!-- Metric pulled from onshape -> -->
+                <mass>6.019</mass> 
+                <pose>0.292 -0.115 -0.004 0 0 0 </pose>
+                <inertia>
+                    <ixx>0.919</ixx>
+                    <ixy>-0.00008998</ixy>
+                    <ixz>0.000008095</ixz>
+                    <iyy>0.024</iyy>
+                    <iyz>-0.00001027</iyz>
+                    <izz>0.898</izz>
+                </inertia> 
+            </inertial>
+            
+            <visual name = "visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://meshes/drive/drive_chasis/right_drive_chasis.stl</uri>
+                    </mesh>
+                </geometry>
+                <material>
+                    <ambient>0.0 0.0 1.0 1</ambient>
+                    <diffuse>0.0 0.0 1.0 1</diffuse>
+                    <specular>0.0 0.0 1.0 1</specular>
+                </material>
+            </visual>
+
+            <collision name="collision">
+                <pose>0.292 -0.115 -0.0125 0 0 0 </pose>
+                <geometry>
+                    <box>
+                        <size>0.044 1.1 0.25</size>
+                    </box>
+                </geometry>
+            </collision>
+
+            <visual name = "collision_visual">
+                <pose>0.292 -0.115 -0.0125 0 0 0 </pose>
+                <geometry>
+                    <box>
+                        <size>0.044 1.1 0.25</size>
+                    </box>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 0.0 0.6</ambient>
+                    <diffuse>0.0 1.0 0.0 0.6</diffuse>
+                    <specular>0.1 0.1 0.1 0.6</specular>
+                </material>
+            </visual>
+        </link>
+        <link name = "back_swivel">
+            <inertial>
+                <mass>0.227</mass> 
+                <!-- center of mass -> -->
+                <pose>0.292 0.343 -0.211 0 0 0</pose>
+                <inertia>
+                    <ixx>08.402e-5</ixx>
+                    <ixy>4.130e-6</ixy>
+                    <ixz>2.454e-10</ixz>
+                    <iyy>7.958e-5</iyy>
+                    <iyz>-1.171e-11</iyz>
+                    <izz>1.523e-4</izz>
+                </inertia> 
+            </inertial> 
+
+            <visual name = "visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://meshes/drive/right_drive/Right_Drive_Back_Swivel.stl</uri>
+                    </mesh>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 1.0 1.0</ambient>
+                    <diffuse>0.0 1.0 1.0 1.0</diffuse>
+                    <specular>0.1 0.1 0.1 1.0</specular>
+                </material>
+            </visual>
+        </link>
+        <link name = "back_wheel">
+            <inertial>
+                    <mass>0.25</mass>
+                    <pose>0 0 0 0 0 0</pose>
+                    <inertia>
+                        <ixx>0.003701</ixx>
+                        <ixy>0</ixy>
+                        <ixz>0</ixz>
+                        <iyy>0.003701</iyy>
+                        <iyz>0</iyz>
+                        <izz>0.005832</izz>
+                    </inertia>
+            </inertial>
+
+            <collision name = "collision">
+                <pose>0.292 .344 -0.25 -1.5707 0 0</pose>
+                <geometry>
+                    <cylinder>
+                        <radius>0.11</radius>
+                        <length>0.2</length>
+                    </cylinder>
+                </geometry>
+            </collision>
+
+            <visual name = "visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://meshes/drive/right_drive/Right_Drive_Back_Wheel.stl</uri>
+                    </mesh>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 1.0 1.0</ambient>
+                    <diffuse>0.0 1.0 1.0 1.0</diffuse>
+                    <specular>0.1 0.1 0.1 1.0</specular>
+                </material>
+            </visual>
+
+            <visual name = "collision_visual">
+                <pose>0.292 .344 -0.25 -1.5707 0 0</pose>
+                <geometry>
+                    <cylinder>
+                        <radius>0.11</radius>
+                        <length>0.2</length>
+                    </cylinder>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 1.0 0.6</ambient>
+                    <diffuse>0.0 1.0 1.0 0.6</diffuse>
+                    <specular>0.1 0.1 0.1 0.6</specular>
+                </material>
+            </visual>
+        </link>
+        <link name = "front_swivel">
+            <inertial>
+                <mass>0.227</mass> 
+                <!-- center of mass -> -->
+                <pose>0.292 -0.574 -0.211 0 0 0</pose>
+                <inertia>
+                    <ixx>08.407e-5</ixx>
+                    <ixy>3.706e-6</ixy>
+                    <ixz>2.436e-10</ixz>
+                    <iyy>7.893e-5</iyy>
+                    <iyz>-3.206e-11</iyz>
+                    <izz>1.523e-4</izz>
+                </inertia> 
+            </inertial> 
+
+            <visual name = "visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://meshes/drive/right_drive/Right_Drive_Front_Swivel.stl</uri>
+                    </mesh>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 1.0 1.0</ambient>
+                    <diffuse>0.0 1.0 1.0 1.0</diffuse>
+                    <specular>0.1 0.1 0.1 1.0</specular>
+                </material>
+            </visual>
+        </link>
+        <link name = "front_wheel">
+           <inertial>
+                <mass>0.25</mass>
+                <pose>0 0 0 0 0 0</pose>
+                <inertia>
+                    <ixx>0.003701</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.003701</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.005832</izz>
+                </inertia>
+            </inertial>
+
+            <visual name = "visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://meshes/drive/right_drive/Right_Drive_Front_Wheel.stl</uri>
+                    </mesh>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 1.0 1.0</ambient>
+                    <diffuse>0.0 1.0 1.0 1.0</diffuse>
+                    <specular>0.1 0.1 0.1 1.0</specular>
+                </material>
+            </visual>
+
+            <collision name="collision">
+                <pose>0.292 -.574 -0.25 -1.5707 0 0</pose>
+                <geometry>
+                    <cylinder>
+                        <radius>0.11</radius>
+                        <length>0.2</length>
+                    </cylinder>
+                </geometry>
+            </collision>
+
+            <visual name = "collision_visual">
+                <pose>0.292 -.574 -0.25 -1.5707 0 0</pose>
+                <geometry>
+                    <cylinder>
+                        <radius>0.11</radius>
+                        <length>0.2</length>
+                    </cylinder>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 1.0 .6</ambient>
+                    <diffuse>0.0 1.0 1.0 .6</diffuse>
+                    <specular>0.1 0.1 0.1 .6</specular>
+                </material>
+            </visual> 
+        </link>
+
+        <!-- ______ -->
+        <!-- Joints -->
+        <!-- ______ -->
+
+        <joint name = "back_swivel_to_chasis" type="fixed">
+            <pose>0.292 0.343 -0.211 0 0 0</pose> 
+            <parent>chasis</parent>
+            <child>back_swivel</child>
+            <axis>
+                <xyz expressed_in="__model__">0 0 1</xyz>
+                <limit>
+                    <effort>1e9</effort>
+                    <lower>-1e9</lower>
+                    <upper>1e9</upper>
+                </limit>
+                <dynamics>
+                    <damping>0.5</damping>
+                    <friction>0.1</friction>
+                </dynamics>
+            </axis>
+        </joint>
+
+        <joint name = "back_wheel_to_swivel" type="revolute">
+            <pose>0.292 0.343 -0.250 0 0 0</pose> 
+            <parent>back_swivel</parent>
+            <child>back_wheel</child>
+            <axis>
+                <xyz expressed_in="__model__">0 1 0</xyz>
+                <limit>
+                    <lower>-1e9</lower>
+                    <upper>1e9</upper>
+                    <effort>1e12</effort>
+                    <velocity>10</velocity>
+                </limit>
+                <dynamics>
+                    <damping>0.5</damping>
+                    <friction>0.1</friction>
+                </dynamics>
+            </axis>
+        </joint>
+
+        <joint name = "front_swivel_to_chasis" type="fixed">
+            <pose>0.292 0.343 -0.211 0 0 0</pose> 
+            <parent>chasis</parent>
+            <child>front_swivel</child>
+            <axis>
+                <xyz expressed_in="__model__">0 0 1</xyz>
+                <limit>
+                    <effort>1e9</effort>
+                    <lower>-1e9</lower>
+                    <upper>1e9</upper>
+                </limit>
+                <dynamics>
+                    <damping>0.5</damping>
+                    <friction>0.1</friction>
+                </dynamics>
+            </axis>
+        </joint>
+
+        <joint name = "front_wheel_to_swivel" type="revolute">
+            <pose>0.292 0.343 -0.250 0 0 0</pose> 
+            <parent>front_swivel</parent>
+            <child>front_wheel</child>
+            <axis>
+                <xyz expressed_in="__model__">0 1 0</xyz>
+                <limit>
+                    <effort>1e9</effort>
+                    <lower>-1e9</lower>
+                    <upper>1e9</upper>
+                </limit>
+                <dynamics>
+                    <damping>0.5</damping>
+                    <friction>0.1</friction>
+                </dynamics>
+            </axis>
+        </joint>
+
+        
+    
+        <!-- ______ -->
+        <!-- plugins -->
+        <!-- ______ -->
+        <plugin filename="gz-sim-joint-controller-system"
+        name="gz::sim::systems::JointController">
+            <joint_name>back_wheel_to_swivel</joint_name>
+            <initial_velocity>1.0</initial_velocity>
+        </plugin>
+
+        <plugin filename="gz-sim-joint-controller-system"
+        name="gz::sim::systems::JointController">
+            <joint_name>front_wheel_to_swivel</joint_name>
+            <initial_velocity>-1.0</initial_velocity>
+        </plugin>
+
+    </model>
+</sdf>

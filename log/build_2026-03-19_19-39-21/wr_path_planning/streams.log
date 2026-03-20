@@ -1,0 +1,21 @@
+[1.153s] Invoking command in '/home/teggatz/documents/WRoverSoftware_25-26/src/wr_path_planning': PYTHONPATH=/home/teggatz/documents/WRoverSoftware_25-26/build/wr_path_planning/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/teggatz/documents/WRoverSoftware_25-26/install/wr_path_planning/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/wr_path_planning build --build-base /home/teggatz/documents/WRoverSoftware_25-26/build/wr_path_planning/build install --record /home/teggatz/documents/WRoverSoftware_25-26/build/wr_path_planning/install.log --single-version-externally-managed install_data
+[1.269s] running egg_info
+[1.270s] writing ../../build/wr_path_planning/wr_path_planning.egg-info/PKG-INFO
+[1.270s] writing dependency_links to ../../build/wr_path_planning/wr_path_planning.egg-info/dependency_links.txt
+[1.270s] writing entry points to ../../build/wr_path_planning/wr_path_planning.egg-info/entry_points.txt
+[1.270s] writing requirements to ../../build/wr_path_planning/wr_path_planning.egg-info/requires.txt
+[1.270s] writing top-level names to ../../build/wr_path_planning/wr_path_planning.egg-info/top_level.txt
+[1.276s] reading manifest file '../../build/wr_path_planning/wr_path_planning.egg-info/SOURCES.txt'
+[1.277s] adding license file 'LICENSE'
+[1.277s] writing manifest file '../../build/wr_path_planning/wr_path_planning.egg-info/SOURCES.txt'
+[1.278s] running build
+[1.278s] running build_py
+[1.278s] running install
+[1.278s] running install_lib
+[1.279s] running install_data
+[1.279s] running install_egg_info
+[1.280s] removing '/home/teggatz/documents/WRoverSoftware_25-26/install/wr_path_planning/lib/python3.10/site-packages/wr_path_planning-0.0.0-py3.10.egg-info' (and everything under it)
+[1.280s] Copying ../../build/wr_path_planning/wr_path_planning.egg-info to /home/teggatz/documents/WRoverSoftware_25-26/install/wr_path_planning/lib/python3.10/site-packages/wr_path_planning-0.0.0-py3.10.egg-info
+[1.281s] running install_scripts
+[1.300s] writing list of installed files to '/home/teggatz/documents/WRoverSoftware_25-26/build/wr_path_planning/install.log'
+[1.318s] Invoked command in '/home/teggatz/documents/WRoverSoftware_25-26/src/wr_path_planning' returned '0': PYTHONPATH=/home/teggatz/documents/WRoverSoftware_25-26/build/wr_path_planning/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/teggatz/documents/WRoverSoftware_25-26/install/wr_path_planning/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/wr_path_planning build --build-base /home/teggatz/documents/WRoverSoftware_25-26/build/wr_path_planning/build install --record /home/teggatz/documents/WRoverSoftware_25-26/build/wr_path_planning/install.log --single-version-externally-managed install_data

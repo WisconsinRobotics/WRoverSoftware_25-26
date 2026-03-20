@@ -1,0 +1,22 @@
+[1.158s] Invoking command in '/home/teggatz/documents/WRoverSoftware_25-26/src/simulation': PYTHONPATH=/home/teggatz/documents/WRoverSoftware_25-26/build/simulation/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/teggatz/documents/WRoverSoftware_25-26/install/simulation/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/simulation build --build-base /home/teggatz/documents/WRoverSoftware_25-26/build/simulation/build install --record /home/teggatz/documents/WRoverSoftware_25-26/build/simulation/install.log --single-version-externally-managed install_data
+[1.294s] running egg_info
+[1.296s] writing ../../build/simulation/simulation.egg-info/PKG-INFO
+[1.296s] writing dependency_links to ../../build/simulation/simulation.egg-info/dependency_links.txt
+[1.296s] writing entry points to ../../build/simulation/simulation.egg-info/entry_points.txt
+[1.296s] writing requirements to ../../build/simulation/simulation.egg-info/requires.txt
+[1.296s] writing top-level names to ../../build/simulation/simulation.egg-info/top_level.txt
+[1.296s] reading manifest file '../../build/simulation/simulation.egg-info/SOURCES.txt'
+[1.300s] adding license file 'LICENSE'
+[1.300s] writing manifest file '../../build/simulation/simulation.egg-info/SOURCES.txt'
+[1.300s] running build
+[1.300s] running build_py
+[1.300s] running install
+[1.303s] running install_lib
+[1.304s] running install_data
+[1.304s] copying package.xml -> /home/teggatz/documents/WRoverSoftware_25-26/install/simulation/share/simulation
+[1.304s] running install_egg_info
+[1.304s] removing '/home/teggatz/documents/WRoverSoftware_25-26/install/simulation/lib/python3.10/site-packages/simulation-0.0.0-py3.10.egg-info' (and everything under it)
+[1.304s] Copying ../../build/simulation/simulation.egg-info to /home/teggatz/documents/WRoverSoftware_25-26/install/simulation/lib/python3.10/site-packages/simulation-0.0.0-py3.10.egg-info
+[1.305s] running install_scripts
+[1.322s] writing list of installed files to '/home/teggatz/documents/WRoverSoftware_25-26/build/simulation/install.log'
+[1.351s] Invoked command in '/home/teggatz/documents/WRoverSoftware_25-26/src/simulation' returned '0': PYTHONPATH=/home/teggatz/documents/WRoverSoftware_25-26/build/simulation/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/teggatz/documents/WRoverSoftware_25-26/install/simulation/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/simulation build --build-base /home/teggatz/documents/WRoverSoftware_25-26/build/simulation/build install --record /home/teggatz/documents/WRoverSoftware_25-26/build/simulation/install.log --single-version-externally-managed install_data
