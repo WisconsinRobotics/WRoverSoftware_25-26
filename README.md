@@ -3,9 +3,7 @@ Official Wisconsin Robotics software repository for the 2026 University Rover Ch
 
 
 # How To Set Up Simulation
-
-## 1. Install Dependencies
-start from the root of the wisconsin robotics directory
+starting from the rot of the WiscRobo directory (where this readme is)
 
 ### Raw Commands
 ```
