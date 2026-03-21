@@ -7,34 +7,31 @@ Official Wisconsin Robotics software repository for the 2026 University Rover Ch
 ## 1. Install Dependencies
 start from the root of the wisconsin robotics directory
 
-Makefile shortcut:
+### Raw Commands
 ```
-make inst_dep
-```
-Raw Commands:
-```
+# Install package dependencies
+source /opt/ros/humble/setup.sh
 sudo apt-get update
 rosdep install --from-path src
-```
 
-## 2. build project
-Makefile shortcut:
-```
-make build
-```
-Raw Commands:
-```
+# Build projcet
 colcon build
-```
 
-## 3. Run Simulation
-Makefile shortcut:
-```
-source install/setup.sh
-make run
-```
-Raw Commands:
-```
+# Run Sim
 source install/setup.sh
 ros2 launch simulation simulation.launch.py
-``` 
+```
+
+### Make File Shortcuts
+```
+# Install package dependencies
+source /opt/ros/humble/setup.sh
+make inst_dep
+
+# Build Project
+make build
+
+# Run Projects
+source install/setup.sh
+ros2 launch simulation simulation.launch.py
+```
