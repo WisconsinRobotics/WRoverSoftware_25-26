@@ -178,20 +178,23 @@ class ArmLogic(Node):
         
         #Set to true if autonomous runs
         self.autonomous = True
-        if(x < close_enough and y < close_enough):
-            self.msg_forwards_and_backwards.data = 1
-        else:
-            self.msg_forwards_and_backwards.data = -1
+        if(self.autonomous == True):
+            if(abs(x) < close_enough and abs(y) < close_enough):
+                self.msg_forwards_and_backwards.data = 1.0
+                self.msg_side_to_side.data = 0.0
+                self.msg_up_and_down.data = 0.0
+            else:
+                self.msg_forwards_and_backwardsdata = -1.0
 
-            #Publishing
-            if(x < 0):
-                self.msg_side_to_side.data = 1
-            else:
-                self.msg_side_to_side.data = -1
-            if(y < 0):
-                self.msg_up_and_down.data = 1
-            else:
-                self.msg_up_and_down.data = -1
+                #Publishing
+                if(x < 0):
+                    self.msg_side_to_side.data = 1.0
+                else:
+                    self.msg_side_to_side.data = -1.0
+                if(y < 0):
+                    self.msg_up_and_down.data = 1.0
+                else:
+                    self.msg_up_and_down.data = -1.0
 
 
 def main(args=None):
