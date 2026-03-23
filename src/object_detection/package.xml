@@ -18,7 +18,6 @@
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
   <exec_depend>depthai</exec_depend>
-  <exec_depend>cv_bridge</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>

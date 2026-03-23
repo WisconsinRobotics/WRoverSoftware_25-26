@@ -4,9 +4,9 @@ import rclpy
 import numpy as np
 import depthai as dai
 from rclpy.node import Node
-from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float32MultiArray
+from sensor_msgs.msg import CompressedImage
 from object_detection_msgs.msg import Detection
 from ament_index_python.packages import get_package_share_directory
 
@@ -23,16 +23,13 @@ class ObjectDetection(Node):
         
         # Initialize publishers
         self.detection_publisher = self.create_publisher(Detection, 'detection_msg', 10)
-        self.image_publisher = self.create_publisher(Image, 'detection_image', 10)
+        self.image_publisher = self.create_publisher(CompressedImage, 'detection_image', 10)
         self.swerve_publisher = self.create_publisher(Float32MultiArray, 'swerve', 10)
         self.led_publisher = self.create_publisher(Float32MultiArray, 'led', 1)
         
         # Initialize LED
         self.flashing = True
         self.publish_led("RED")
-        
-        # Initialize cvbridge
-        self.bridge = CvBridge()
         
         # Find the model path
         model_path = os.path.join(get_package_share_directory('object_detection'), 'resource', self.get_parameter('model').value + '.blob')
@@ -173,11 +170,12 @@ class ObjectDetection(Node):
             cv2.putText(frame, f"Confidence: {conf:.2f}", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             cv2.putText(frame, f"Distance: {distance:.2f}m", (x1, y1-30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             
-            # Convert to image message and publish
-            image = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
+            # Convert to CompressedImage and publish
+            image = CompressedImage()
+            image.header.stamp = self.get_clock().now().to_msg()
+            image.format = "jpeg"
+            image.data = np.array(cv2.imencode('.jpg', frame)[1]).tobytes()
             self.image_publisher.publish(image)
-            
-            
             
     # Publish LED color info
     def publish_led(self, color):
