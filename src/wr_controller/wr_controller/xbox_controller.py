@@ -8,7 +8,7 @@ from std_msgs.msg import Int16MultiArray
 # NOTE: This might cause problems if called multiple times
 pygame.init()
 
-CONTROLLER = 1 # Choose controller for the arm TODO 
+CONTROLLER = 0 # Choose controller for the arm TODO 
 
 class XboxPublisher(Node):
 
@@ -34,7 +34,7 @@ class XboxPublisher(Node):
         #print(self.joysticks[0])
         if len(self.joysticks) > CONTROLLER:
             # Currently set up for bluetooth, might change later
-            self.motion = [-self.joysticks[CONTROLLER].get_axis(1), #Left stick up and down
+            self.motion = [self.joysticks[CONTROLLER].get_axis(1), #Left stick up and down
                         -self.joysticks[CONTROLLER].get_axis(4),  #Right stick up and down
                         self.joysticks[CONTROLLER].get_axis(2), #Right Trigger
                         self.joysticks[CONTROLLER].get_axis(5) ]# Left Trigger 
