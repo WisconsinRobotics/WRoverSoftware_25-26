@@ -1,0 +1,508 @@
+# keyboard aruco detection node
+# 4 ArUco markers on K552 corners -> homography -> publish movement vectors to arm
+# arm_response topic triggers next key in sequence
+# L for launch word Q to quit P to print
+#TODO add in path correction, eyeball global offset first and try to use that, otherwise tuning and transforming
+
+#Path idea 1: add a global offset if the arm misses in one direction consistently.
+#Path idea 2: Use a per region correction tuning step if the accuracy changes at the edges for example.
+#Press 4-5 keys across board, measure error, and then add affine transformation?
+#Path idea 3: Pynput but I would only measure error on a diff key but would close state machine loop but dont think
+# will be usable in comp so prolly not
+
+
+import cv2
+import numpy as np
+import json
+import time
+import threading
+import argparse
+
+try:
+    import rclpy
+    from rclpy.node import Node
+    from std_msgs.msg import String
+    HAS_ROS = True
+except ImportError:
+    HAS_ROS = False
+
+
+# ── keyboard physical layout (mm) ──────────────────────────────────────────────
+
+KEYBOARD_W = 354.0
+KEYBOARD_D = 123.0
+PITCH = 19.05  # 1u key spacing, standard across most mechs
+
+# where the arm rests in keyboard mm space (0,0 = top-left of board)
+KB_CX = 174.8
+KB_CY = 56.5
+Z_MM = 10.0  # press depth, needs tuning on real board
+
+# nudge every arm command if it consistently misses one direction
+# only affects what gets sent to the arm, overlay stays unchanged
+OFFSET_X = 0.0  # + = right
+OFFSET_Y = 0.0  # + = up (same convention as MOVES dy)
+
+# vectors from arm home to each key (dx+ right, dy+ up in arm frame)
+MOVES = {
+    'A': (-127.14, -10.18),
+    'B': (-41.41, -29.23),
+    'C': (-79.51, -29.23),
+    'D': (-89.04, -10.18),
+    'E': (-93.8, 8.88),
+    'F': (-69.99, -10.18),
+    'G': (-50.94, -10.18),
+    'H': (-31.89, -10.18),
+    'I': (1.45, 8.88),
+    'J': (-12.84, -10.18),
+    'K': (6.21, -10.18),
+    'L': (25.26, -10.18),
+    'M': (-3.31, -29.23),
+    'N': (-22.36, -29.23),
+    'O': (20.5, 8.88),
+    'P': (39.55, 8.88),
+    'Q': (-131.9, 8.88),
+    'R': (-74.75, 8.88),
+    'S': (-108.09, -10.18),
+    'T': (-55.7, 8.88),
+    'U': (-17.6, 8.88),
+    'V': (-60.46, -29.23),
+    'W': (-112.85, 8.88),
+    'X': (-98.56, -29.23),
+    'Y': (-36.65, 8.88),
+    'Z': (-117.61, -29.23),
+    '0': (0.0, 0.0),
+    '1': (0.0, 0.0),
+    '2': (0.0, 0.0),
+    '3': (0.0, 0.0),
+    '4': (0.0, 0.0),
+    '5': (0.0, 0.0),
+    '6': (0.0, 0.0),
+    '7': (0.0, 0.0),
+    '8': (0.0, 0.0),
+    '9': (0.0, 0.0),
+    'Space': (-39.03, -48.28),
+    'Enter': (94.32, -10.18),
+}
+
+# wider-than-1u keys for the overlay
+WIDTHS = {
+    'Space': PITCH * 6.25,
+    'Enter': PITCH * 2.25,
+    'Bksp':  PITCH * 2.0,
+    'Tab':   PITCH * 1.5,
+}
+
+# build absolute key positions from MOVES for the overlay
+# MOVES dy+ = up, but pixel y+ = down, so we negate dy
+KEYS = {}
+for label, (dx, dy) in MOVES.items():
+    KEYS[label] = {
+        'cx_mm': KB_CX + dx,
+        'cy_mm': KB_CY - dy,
+        'w_mm': WIDTHS.get(label, PITCH),
+        'h_mm': PITCH,
+    }
+
+
+# ── aruco config ───────────────────────────────────────────────────────────────
+
+ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+ARUCO_PARAMS = cv2.aruco.DetectorParameters()
+ARUCO_PARAMS.adaptiveThreshWinSizeMin = 5
+ARUCO_PARAMS.adaptiveThreshWinSizeMax = 21
+ARUCO_PARAMS.adaptiveThreshWinSizeStep = 4
+ARUCO_PARAMS.adaptiveThreshConstant = 7
+
+# the 4 inside corners of our markers should map to these keyboard corners
+KB_CORNERS_MM = np.array([
+    [0.0, 0.0],             # TL
+    [KEYBOARD_W, 0.0],      # TR
+    [KEYBOARD_W, KEYBOARD_D],  # BR
+    [0.0, KEYBOARD_D],      # BL
+], dtype=np.float32)
+
+# CLAHE helps even out glare/reflections before marker detection
+CLAHE = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+
+
+# ── aruco helpers ──────────────────────────────────────────────────────────────
+
+def preprocess_for_aruco(frame):
+    """grayscale + CLAHE so specular glare doesn't wash out markers"""
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    return CLAHE.apply(gray)
+
+
+def marker_center(one_corner):
+    """average of a marker's 4 vertices = its center"""
+    return one_corner.reshape(4, 2).mean(axis=0).astype(np.float32)
+
+
+def inside_corner(one_corner, all_centers):
+    """the vertex closest to the centroid of all markers is the inside corner,
+    i.e. the one pointing toward the middle of the keyboard"""
+    pts = one_corner.reshape(4, 2)
+    centroid = np.mean(all_centers, axis=0)
+    dists = np.linalg.norm(pts - centroid, axis=1)
+    return pts[np.argmin(dists)].astype(np.float32)
+
+
+def sort_four_corners(points):
+    """sort 4 points into TL, TR, BR, BL order by position"""
+    pts = np.array(points, dtype=np.float32)
+    by_y = np.argsort(pts[:, 1])
+    top, bot = by_y[:2], by_y[2:]
+    tl = top[np.argmin(pts[top, 0])]
+    tr = top[np.argmax(pts[top, 0])]
+    bl = bot[np.argmin(pts[bot, 0])]
+    br = bot[np.argmax(pts[bot, 0])]
+    return [tl, tr, br, bl]
+
+
+def compute_homography(corners, ids):
+    """from detected markers, get the pixel->mm homography matrix.
+    uses inside corners (not centers) so the mapping lines up with
+    the actual keyboard edges, not the middle of each marker."""
+    if ids is None or len(corners) < 4:
+        return None, None
+
+    corners_v = list(corners[:4])
+    all_centers = [marker_center(c) for c in corners_v]
+    inside_pts = [inside_corner(c, all_centers) for c in corners_v]
+
+    order = sort_four_corners(inside_pts)
+    src = np.array([inside_pts[order[i]] for i in range(4)], dtype=np.float32)
+
+    H, _ = cv2.findHomography(src, KB_CORNERS_MM)
+    return H, src
+
+
+def mm_to_px(H_inv, x_mm, y_mm):
+    """keyboard mm coords -> pixel coords using inverse homography"""
+    pt = np.array([[[x_mm, y_mm]]], dtype=np.float32)
+    out = cv2.perspectiveTransform(pt, H_inv)
+    return int(out[0, 0, 0]), int(out[0, 0, 1])
+
+
+def char_to_label(ch):
+    """turn a typed character into a MOVES key label"""
+    up = ch.upper()
+    if up in MOVES:
+        return up
+    return {' ': 'Space', '\n': 'Enter', '\t': 'Tab'}.get(ch)
+
+
+# ── debug overlay drawing ─────────────────────────────────────────────────────
+
+def draw_keys(frame, H_inv):
+    """draw all key outlines + labels on the camera frame"""
+    h, w = frame.shape[:2]
+    for label, k in KEYS.items():
+        cx, cy = k['cx_mm'], k['cy_mm']
+        hw, hh = k['w_mm'] / 2.0, k['h_mm'] / 2.0
+
+        cpx, cpy = mm_to_px(H_inv, cx, cy)
+        tl = mm_to_px(H_inv, cx - hw, cy - hh)
+        br = mm_to_px(H_inv, cx + hw, cy + hh)
+
+        # skip if off screen or too small to bother
+        if br[0] < 0 or br[1] < 0 or tl[0] > w or tl[1] > h:
+            continue
+        key_w_px = abs(br[0] - tl[0])
+        key_h_px = abs(br[1] - tl[1])
+        if key_w_px < 8 or key_h_px < 8:
+            continue
+
+        cv2.rectangle(frame, tl, br, (255, 165, 0), 1)
+        cv2.circle(frame, (cpx, cpy), 2, (0, 255, 255), -1)
+
+        if key_w_px > 14:
+            fs = max(0.3, min(0.5, key_w_px / 50.0))
+            (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, fs, 1)
+            cv2.putText(frame, label, (cpx - tw // 2, cpy + th // 2),
+                        cv2.FONT_HERSHEY_SIMPLEX, fs, (255, 165, 0), 1)
+
+
+def draw_arrow(frame, H_inv, key_label):
+    """red arrow from arm home to target key, green box around target"""
+    if key_label not in KEYS:
+        return
+    k = KEYS[key_label]
+    start = mm_to_px(H_inv, KB_CX, KB_CY)
+    end = mm_to_px(H_inv, k['cx_mm'], k['cy_mm'])
+    hw, hh = k['w_mm'] / 2.0, k['h_mm'] / 2.0
+    tl = mm_to_px(H_inv, k['cx_mm'] - hw, k['cy_mm'] - hh)
+    br = mm_to_px(H_inv, k['cx_mm'] + hw, k['cy_mm'] + hh)
+
+    cv2.arrowedLine(frame, start, end, (0, 0, 255), 3, tipLength=0.04)
+    cv2.circle(frame, start, 6, (0, 255, 255), -1)
+    cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
+    cv2.putText(frame, f"-> {key_label}", (end[0] + 10, end[1] - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+
+
+def draw_markers(frame, corners, ids, sorted_src):
+    """draw detected marker outlines, centers, and sorted corner labels"""
+    if ids is None:
+        return
+    for i in range(len(ids)):
+        mid = int(ids[i][0])
+        pts = corners[i].reshape(4, 2).astype(np.int32)
+        cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
+        c = marker_center(corners[i])
+        cv2.circle(frame, (int(c[0]), int(c[1])), 5, (255, 0, 0), -1)
+        cv2.putText(frame, f"ID {mid}", (pts[0][0], pts[0][1] - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    if sorted_src is not None:
+        for pt, name in zip(sorted_src, ['TL', 'TR', 'BR', 'BL']):
+            cv2.circle(frame, (int(pt[0]), int(pt[1])), 6, (0, 0, 255), -1)
+            cv2.putText(frame, name, (int(pt[0]) + 8, int(pt[1]) + 8),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
+
+
+# ── ROS2 node ──────────────────────────────────────────────────────────────────
+# publishes JSON to keyboard_movement: {key, dx_mm, dy_mm, z_mm}
+# waits for any message on arm_response before sending the next key
+
+if HAS_ROS:
+    class KeyboardNode(Node):
+
+        def __init__(self):
+            super().__init__('keyboard_aruco')
+            self.movement_pub = self.create_publisher(String, 'keyboard_movement', 10)
+            self._arm_sub = self.create_subscription(
+                String, 'arm_response', self._on_arm_response, 10)
+            self._keys = []
+            self._idx = 0
+            self._waiting = False
+            self._lock = threading.Lock()
+            self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
+
+        def start_sequence(self, word, keys):
+            """kick off a new typing sequence"""
+            with self._lock:
+                self._keys = keys
+                self._idx = 0
+                self._waiting = False
+            self.get_logger().info(f"Sequence: {word} -> {keys}")
+            self._publish_current()
+
+        def _publish_current(self):
+            """send the current key's move vector to the arm"""
+            with self._lock:
+                if self._idx >= len(self._keys):
+                    self.get_logger().info("Sequence done.")
+                    return
+                label = self._keys[self._idx]
+                self._waiting = True
+
+            dx, dy = MOVES[label]
+            msg = String()
+            msg.data = json.dumps({
+                'key': label,
+                'dx_mm': dx + OFFSET_X,
+                'dy_mm': dy + OFFSET_Y,
+                'z_mm': Z_MM,
+            })
+            self.movement_pub.publish(msg)
+            self.get_logger().info(f"Sent: {label}  dx={dx + OFFSET_X:.1f}  dy={dy + OFFSET_Y:.1f}")
+
+        def _on_arm_response(self, msg):
+            """arm says it finished a press, advance to next key"""
+            with self._lock:
+                if not self._waiting or self._idx >= len(self._keys):
+                    return
+                self._waiting = False
+                self._idx += 1
+            self._publish_current()
+
+        @property
+        def current_key(self):
+            with self._lock:
+                if self._idx < len(self._keys):
+                    return self._keys[self._idx]
+            return None
+
+        @property
+        def active(self):
+            with self._lock:
+                return len(self._keys) > 0 and self._idx < len(self._keys)
+
+
+# ── main loop ──────────────────────────────────────────────────────────────────
+
+def prompt_word():
+    """ask user for a word, convert to key labels (max 5 chars)"""
+    raw = input("\nEnter launchkey: ").strip()
+    if not raw:
+        return None, None
+    raw = raw[:5]
+    labels, chars = [], []
+    for ch in raw:
+        lbl = char_to_label(ch)
+        if lbl:
+            labels.append(lbl)
+            chars.append(ch.upper())
+        else:
+            print(f"  skipping '{ch}'")
+    if not labels:
+        return None, None
+    word = ''.join(chars)
+    print(f"Sequence: {word} -> {labels}")
+    return word, labels
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--no-ros', action='store_true')
+    args = parser.parse_args()
+
+    # start ROS node if available
+    node = None
+    if not args.no_ros:
+        rclpy.init()
+        node = KeyboardNode()
+
+    cap = cv2.VideoCapture(1)
+    if not cap.isOpened():
+        msg = "Couldn't open webcam index 1"
+        if node:
+            node.get_logger().error(msg)
+            node.destroy_node()
+            rclpy.shutdown()
+        else:
+            print(msg)
+        return
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+    # spin ROS in background so callbacks work while we run the cv loop
+    if node:
+        spin_thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
+        spin_thread.start()
+
+    # cache last good homography so hand blocking a marker doesn't kill tracking
+    cached_H_inv = None
+    cached_src = None
+    last_good = 0.0
+    LOCK_TIMEOUT = 5.0
+
+    print(f"Keyboard node with {len(MOVES)} keys")
+    print("Q=quit  L=launchkey  P=print\n")
+
+    while True:
+        if not args.no_ros and not rclpy.ok():
+            break
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        img = frame.copy()
+
+        # detect markers (CLAHE helps with glare on markers)
+        enhanced = preprocess_for_aruco(frame)
+        corners, ids, _ = cv2.aruco.detectMarkers(enhanced, ARUCO_DICT, parameters=ARUCO_PARAMS)
+
+        # throw out false positives from keycap icons / LED labels
+        if ids is not None:
+            MIN_AREA = 1500
+            MIN_ASPECT = 0.6
+            MAX_ASPECT = 1.4
+            mask = []
+            for i, c in enumerate(corners):
+                pts = c.reshape(4, 2)
+                area = cv2.contourArea(pts)
+                if area < MIN_AREA:
+                    continue
+                x, y, w, h = cv2.boundingRect(pts)
+                if h == 0:
+                    continue
+                aspect = w / h
+                if aspect < MIN_ASPECT or aspect > MAX_ASPECT:
+                    continue
+                mask.append(i)
+            corners = [corners[i] for i in mask]
+            ids = ids[mask] if len(mask) > 0 else None
+
+        # try to get a fresh homography
+        H, src_pts = compute_homography(corners, ids)
+        H_inv = None
+        if H is not None and src_pts is not None:
+            try:
+                H_inv = np.linalg.inv(H)
+            except np.linalg.LinAlgError:
+                pass
+
+        # use fresh if we got one, otherwise fall back to cache
+        if H_inv is not None:
+            cached_H_inv = H_inv
+            cached_src = src_pts
+            last_good = time.time()
+        elif cached_H_inv is not None and (time.time() - last_good) < LOCK_TIMEOUT:
+            H_inv = cached_H_inv
+            src_pts = cached_src
+        else:
+            cached_H_inv = None
+
+        # status bar
+        if H_inv is not None:
+            draw_keys(img, H_inv)
+            age = time.time() - last_good
+            if age < 0.1:
+                status = f"TRACKING (LIVE) | {len(KEYS)} keys"
+            else:
+                status = f"TRACKING (LOCKED {age:.1f}s) | {len(KEYS)} keys"
+            color = (0, 255, 0)
+        else:
+            n = 0 if ids is None else len(ids)
+            if n >= 4:
+                status = "4 markers found but homography failed (bad angle?)"
+            else:
+                status = f"Need 4 markers (found {n})"
+            color = (0, 0, 255)
+
+        draw_markers(img, corners, ids, src_pts)
+
+        # show arrow to current target key if we're mid-sequence
+        if node and node.active and H_inv is not None:
+            current = node.current_key
+            if current:
+                draw_arrow(img, H_inv, current)
+                cv2.putText(img, f"Typing: {current}", (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+        cv2.putText(img, status, (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
+        cv2.imshow("Keyboard ArUco", img)
+
+        # keyboard controls
+        k = cv2.waitKey(1) & 0xFF
+        if k == ord('q'):
+            break
+        elif k == ord('p'):
+            for lbl, (dx, dy) in MOVES.items():
+                print(f"  {lbl:8s} dx={dx:7.1f} dy={dy:7.1f}")
+        elif k == ord('l'):
+            if H_inv is None:
+                print("No tracking — need 4 markers visible")
+            elif node:
+                word, keys = prompt_word()
+                if word and keys:
+                    node.start_sequence(word, keys)
+            else:
+                print("ROS disabled, can't send sequence")
+
+    # cleanup
+    cap.release()
+    cv2.destroyAllWindows()
+    if node:
+        node.destroy_node()
+        try:
+            rclpy.shutdown()
+        except Exception:
+            pass
+
+
+if __name__ == "__main__":
+    main()

@@ -24,7 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-		'keyboard_detection = wr_keyboard.keyboard_detection:main'
+            'keyboard_test = wr_keyboard.keyboard_test:main'
         ],
     },
 )
