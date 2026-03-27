@@ -264,70 +264,185 @@ def draw_markers(frame, corners, ids, sorted_src):
 # ── ROS2 node ──────────────────────────────────────────────────────────────────
 # publishes JSON to keyboard_movement: {key, dx_mm, dy_mm, z_mm}
 # waits for any message on arm_response before sending the next key
+LOCK_TIMEOUT = 5.0
+class KeyboardNode(Node):
 
-if HAS_ROS:
-    class KeyboardNode(Node):
+    def __init__(self):
+        super().__init__('keyboard_aruco')
+        self.movement_pub = self.create_publisher(String, 'keyboard_movement', 10)
+        self._arm_sub = self.create_subscription(
+            String, 'arm_response', self._on_arm_response, 10)
+        self._keys = []
+        self._idx = 0
+        self._waiting = False
+        self._lock = threading.Lock()
+        self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
+        self.timer = self.create_timer(0.1, self._timer_callback)
+        self.cap = cv2.VideoCapture("/dev/video4")
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 12800)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 7200)
+        self.frame = None
+        self.cached_H_inv = None
+        self.last_good = 0.0
+        self.cached_H_inv = None
+        
+        threading.Thread(target=self._frame_grabber, daemon=True).start()
 
-        def __init__(self):
-            super().__init__('keyboard_aruco')
-            self.movement_pub = self.create_publisher(String, 'keyboard_movement', 10)
-            self._arm_sub = self.create_subscription(
-                String, 'arm_response', self._on_arm_response, 10)
-            self._keys = []
+    def _frame_grabber(self):
+        """Continuously grab frames from the camera."""
+        while True:
+            ret, frame = self.cap.read()
+            if ret:
+                self.frame = frame
+            time.sleep(0.001)  # small sleep to yield
+
+    def _timer_callback(self):
+        """periodic timer to resend current key if we're waiting for arm response"""
+       
+        if self.frame is None:
+            return
+        frame = self.frame.copy()
+    
+
+        img = frame.copy()
+
+        # detect markers (CLAHE helps with glare on markers)
+        enhanced = preprocess_for_aruco(frame)
+        corners, ids, _ = cv2.aruco.detectMarkers(enhanced, ARUCO_DICT, parameters=ARUCO_PARAMS)
+
+        # throw out false positives from keycap icons / LED labels
+        if ids is not None:
+            MIN_AREA = 500
+            MIN_ASPECT = 0.6
+            MAX_ASPECT = 1.4
+            mask = []
+            for i, c in enumerate(corners):
+                pts = c.reshape(4, 2)
+                area = cv2.contourArea(pts)
+                if area < MIN_AREA:
+                    continue
+                x, y, w, h = cv2.boundingRect(pts)
+                if h == 0:
+                    continue
+                aspect = w / h
+                if aspect < MIN_ASPECT or aspect > MAX_ASPECT:
+                    continue
+                mask.append(i)
+            corners = [corners[i] for i in mask]
+            ids = ids[mask] if len(mask) > 0 else None
+
+        # try to get a fresh homography
+        H, self.src_pts = compute_homography(corners, ids)
+        self.H_inv = None
+        if H is not None and self.src_pts is not None:
+            try:
+                self.H_inv = np.linalg.inv(H)
+            except np.linalg.LinAlgError:
+                pass
+
+        # use fresh if we got one, otherwise fall back to cache
+        if self.H_inv is not None:
+            self.cached_H_inv = self.H_inv
+            self.cached_src = self.src_pts
+            self.last_good = time.time()
+        elif self.cached_H_inv is not None and (time.time() - self.last_good) < LOCK_TIMEOUT:
+            self.H_inv = self.cached_H_inv
+            self.src_pts = self.cached_src
+        else:
+            self.cached_H_inv = None
+
+        # status bar
+        if self.H_inv is not None:
+            draw_keys(img, self.H_inv)
+            age = time.time() - self.last_good
+            if age < 0.1:
+                status = f"TRACKING (LIVE) | {len(KEYS)} keys"
+            else:
+                status = f"TRACKING (LOCKED {age:.1f}s) | {len(KEYS)} keys"
+            color = (0, 255, 0)
+        else:
+            n = 0 if ids is None else len(ids)
+            if n >= 4:
+                status = "4 markers found but homography failed (bad angle?)"
+            else:
+                status = f"Need 4 markers (found {n})"
+            color = (0, 0, 255)
+
+        draw_markers(img, corners, ids, self.src_pts)
+
+        # # show arrow to current target key if we're mid-sequence
+        # if node and node.active and H_inv is not None:
+        #     current = node.current_key
+        #     if current:
+        #         draw_arrow(img, H_inv, current)
+        #         cv2.putText(img, f"Typing: {current}", (10, 60),
+        #                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+        cv2.putText(img, status, (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
+        cv2.imshow("Keyboard ArUco", img)
+
+        # keyboard controls
+        k = cv2.waitKey(1) & 0xFF
+     
+        if k == ord('l'):
+            if self.H_inv is None:
+                print("No tracking — need 4 markers visible")
+            else:
+                word, keys = prompt_word()
+                if word and keys:
+                    self.start_sequence(word, keys)
+           
+
+    def start_sequence(self, word, keys):
+        """kick off a new typing sequence"""
+        with self._lock:
+            self._keys = keys
             self._idx = 0
             self._waiting = False
-            self._lock = threading.Lock()
-            self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
+        self.get_logger().info(f"Sequence: {word} -> {keys}")
+        self._publish_current()
 
-        def start_sequence(self, word, keys):
-            """kick off a new typing sequence"""
-            with self._lock:
-                self._keys = keys
-                self._idx = 0
-                self._waiting = False
-            self.get_logger().info(f"Sequence: {word} -> {keys}")
-            self._publish_current()
+    def _publish_current(self):
+        """send the current key's move vector to the arm"""
+        with self._lock:
+            if self._idx >= len(self._keys):
+                self.get_logger().info("Sequence done.")
+                return
+            label = self._keys[self._idx]
+            self._waiting = True
 
-        def _publish_current(self):
-            """send the current key's move vector to the arm"""
-            with self._lock:
-                if self._idx >= len(self._keys):
-                    self.get_logger().info("Sequence done.")
-                    return
-                label = self._keys[self._idx]
-                self._waiting = True
+        dx, dy = MOVES[label]
+        msg = String()
+        msg.data = json.dumps({
+            'key': label,
+            'dx_mm': dx + OFFSET_X,
+            'dy_mm': dy + OFFSET_Y,
+            'z_mm': Z_MM,
+        })
+        self.movement_pub.publish(msg)
+        self.get_logger().info(f"Sent: {label}  dx={dx + OFFSET_X:.1f}  dy={dy + OFFSET_Y:.1f}")
 
-            dx, dy = MOVES[label]
-            msg = String()
-            msg.data = json.dumps({
-                'key': label,
-                'dx_mm': dx + OFFSET_X,
-                'dy_mm': dy + OFFSET_Y,
-                'z_mm': Z_MM,
-            })
-            self.movement_pub.publish(msg)
-            self.get_logger().info(f"Sent: {label}  dx={dx + OFFSET_X:.1f}  dy={dy + OFFSET_Y:.1f}")
+    def _on_arm_response(self, msg):
+        """arm says it finished a press, advance to next key"""
+        with self._lock:
+            if not self._waiting or self._idx >= len(self._keys):
+                return
+            self._waiting = False
+            self._idx += 1
+        self._publish_current()
 
-        def _on_arm_response(self, msg):
-            """arm says it finished a press, advance to next key"""
-            with self._lock:
-                if not self._waiting or self._idx >= len(self._keys):
-                    return
-                self._waiting = False
-                self._idx += 1
-            self._publish_current()
+    @property
+    def current_key(self):
+        with self._lock:
+            if self._idx < len(self._keys):
+                return self._keys[self._idx]
+        return None
 
-        @property
-        def current_key(self):
-            with self._lock:
-                if self._idx < len(self._keys):
-                    return self._keys[self._idx]
-            return None
-
-        @property
-        def active(self):
-            with self._lock:
-                return len(self._keys) > 0 and self._idx < len(self._keys)
+    @property
+    def active(self):
+        with self._lock:
+            return len(self._keys) > 0 and self._idx < len(self._keys)
 
 
 # ── main loop ──────────────────────────────────────────────────────────────────
@@ -353,155 +468,33 @@ def prompt_word():
     return word, labels
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--no-ros', action='store_true')
-    args = parser.parse_args()
+def main(args=None):
+    # if not cap.isOpened():
+    #     msg = "Couldn't open webcam index 1"
+    #     if node:
+    #         node.get_logger().error(msg)
+    #         node.destroy_node()
+    #         rclpy.shutdown()
+    #     else:
+    #         print(msg)
+    #     return
+   
+    rclpy.init(args=args)
 
-    # start ROS node if available
-    node = None
-    if not args.no_ros:
-        rclpy.init()
-        node = KeyboardNode()
+    node = KeyboardNode()
+    rclpy.spin(node)
 
-    cap = cv2.VideoCapture(1)
-    if not cap.isOpened():
-        msg = "Couldn't open webcam index 1"
-        if node:
-            node.get_logger().error(msg)
-            node.destroy_node()
-            rclpy.shutdown()
-        else:
-            print(msg)
-        return
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-    # spin ROS in background so callbacks work while we run the cv loop
-    if node:
-        spin_thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
-        spin_thread.start()
-
-    # cache last good homography so hand blocking a marker doesn't kill tracking
-    cached_H_inv = None
-    cached_src = None
-    last_good = 0.0
-    LOCK_TIMEOUT = 5.0
+    # Destroy the node explicitly
+    # (optional - otherwise it will be done automatically
+    # when the garbage collector destroys the node object)
+    node.destroy_node()
+    rclpy.shutdown()
 
     print(f"Keyboard node with {len(MOVES)} keys")
     print("Q=quit  L=launchkey  P=print\n")
 
-    while True:
-        if not args.no_ros and not rclpy.ok():
-            break
-        ret, frame = cap.read()
-        if not ret:
-            break
 
-        img = frame.copy()
 
-        # detect markers (CLAHE helps with glare on markers)
-        enhanced = preprocess_for_aruco(frame)
-        corners, ids, _ = cv2.aruco.detectMarkers(enhanced, ARUCO_DICT, parameters=ARUCO_PARAMS)
-
-        # throw out false positives from keycap icons / LED labels
-        if ids is not None:
-            MIN_AREA = 1500
-            MIN_ASPECT = 0.6
-            MAX_ASPECT = 1.4
-            mask = []
-            for i, c in enumerate(corners):
-                pts = c.reshape(4, 2)
-                area = cv2.contourArea(pts)
-                if area < MIN_AREA:
-                    continue
-                x, y, w, h = cv2.boundingRect(pts)
-                if h == 0:
-                    continue
-                aspect = w / h
-                if aspect < MIN_ASPECT or aspect > MAX_ASPECT:
-                    continue
-                mask.append(i)
-            corners = [corners[i] for i in mask]
-            ids = ids[mask] if len(mask) > 0 else None
-
-        # try to get a fresh homography
-        H, src_pts = compute_homography(corners, ids)
-        H_inv = None
-        if H is not None and src_pts is not None:
-            try:
-                H_inv = np.linalg.inv(H)
-            except np.linalg.LinAlgError:
-                pass
-
-        # use fresh if we got one, otherwise fall back to cache
-        if H_inv is not None:
-            cached_H_inv = H_inv
-            cached_src = src_pts
-            last_good = time.time()
-        elif cached_H_inv is not None and (time.time() - last_good) < LOCK_TIMEOUT:
-            H_inv = cached_H_inv
-            src_pts = cached_src
-        else:
-            cached_H_inv = None
-
-        # status bar
-        if H_inv is not None:
-            draw_keys(img, H_inv)
-            age = time.time() - last_good
-            if age < 0.1:
-                status = f"TRACKING (LIVE) | {len(KEYS)} keys"
-            else:
-                status = f"TRACKING (LOCKED {age:.1f}s) | {len(KEYS)} keys"
-            color = (0, 255, 0)
-        else:
-            n = 0 if ids is None else len(ids)
-            if n >= 4:
-                status = "4 markers found but homography failed (bad angle?)"
-            else:
-                status = f"Need 4 markers (found {n})"
-            color = (0, 0, 255)
-
-        draw_markers(img, corners, ids, src_pts)
-
-        # show arrow to current target key if we're mid-sequence
-        if node and node.active and H_inv is not None:
-            current = node.current_key
-            if current:
-                draw_arrow(img, H_inv, current)
-                cv2.putText(img, f"Typing: {current}", (10, 60),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
-        cv2.putText(img, status, (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
-        cv2.imshow("Keyboard ArUco", img)
-
-        # keyboard controls
-        k = cv2.waitKey(1) & 0xFF
-        if k == ord('q'):
-            break
-        elif k == ord('p'):
-            for lbl, (dx, dy) in MOVES.items():
-                print(f"  {lbl:8s} dx={dx:7.1f} dy={dy:7.1f}")
-        elif k == ord('l'):
-            if H_inv is None:
-                print("No tracking — need 4 markers visible")
-            elif node:
-                word, keys = prompt_word()
-                if word and keys:
-                    node.start_sequence(word, keys)
-            else:
-                print("ROS disabled, can't send sequence")
-
-    # cleanup
-    cap.release()
-    cv2.destroyAllWindows()
-    if node:
-        node.destroy_node()
-        try:
-            rclpy.shutdown()
-        except Exception:
-            pass
 
 
 if __name__ == "__main__":
