@@ -22,9 +22,11 @@ try:
     import rclpy
     from rclpy.node import Node
     from std_msgs.msg import String
+    from std_msgs.msg import Float64MultiArray
     HAS_ROS = True
 except ImportError:
     HAS_ROS = False
+
 
 
 # ── keyboard physical layout (mm) ──────────────────────────────────────────────
@@ -172,6 +174,7 @@ def compute_homography(corners, ids):
     inside_pts = [inside_corner(c, all_centers) for c in corners_v]
 
     order = sort_four_corners(inside_pts)
+    
     src = np.array([inside_pts[order[i]] for i in range(4)], dtype=np.float32)
 
     H, _ = cv2.findHomography(src, KB_CORNERS_MM)
@@ -270,6 +273,7 @@ class KeyboardNode(Node):
     def __init__(self):
         super().__init__('keyboard_aruco')
         self.movement_pub = self.create_publisher(String, 'keyboard_movement', 10)
+        self.keyboard_center_pub = self.create_publisher(Float64MultiArray, 'keyboard_center', 10)
         self._arm_sub = self.create_subscription(
             String, 'arm_response', self._on_arm_response, 10)
         self._keys = []
@@ -279,13 +283,16 @@ class KeyboardNode(Node):
         self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
         self.timer = self.create_timer(0.1, self._timer_callback)
         self.cap = cv2.VideoCapture("/dev/video4")
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 12800)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 7200)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.frame = None
         self.cached_H_inv = None
         self.last_good = 0.0
         self.cached_H_inv = None
-        
+        self.get_logger().info("Starting frame grabber thread...")  
+
+        self.key_center = Float64MultiArray()
+        self.key_center.data = [0.0, 0.0]
         threading.Thread(target=self._frame_grabber, daemon=True).start()
 
     def _frame_grabber(self):
@@ -333,6 +340,22 @@ class KeyboardNode(Node):
 
         # try to get a fresh homography
         H, self.src_pts = compute_homography(corners, ids)
+        # Example: src_points = np.array([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
+        
+
+        #Getting center of keyboard in pixel coordinates and publishing to ROS topic
+        if self.src_pts is not None and len(self.src_pts) > 0:
+            center = np.mean(self.src_pts, axis=0)  # shape (2,)
+            x_center, y_center = center
+            x_center = -640/2 + x_center
+            y_center = 480/2 - y_center
+            
+            
+            self.get_logger().info(f"Center: {x_center}, {y_center}")
+            self.key_center.data = [float(x_center), float(y_center)]
+            self.keyboard_center_pub.publish(self.key_center)
+
+        #self.get_logger().info(f"Center: {self.key_center}")
         self.H_inv = None
         if H is not None and self.src_pts is not None:
             try:
