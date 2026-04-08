@@ -8,6 +8,7 @@ import base64
 
 from ground_detect import backproject_depth_sub
 from ground_detect import ransac_plane
+from ground_detect import apply_plane_to_full_depth
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
@@ -69,13 +70,41 @@ class SectorDepthClassifier():
         self.candidate_theta = None
         self.persistence_counter = 0
 
+        # RANSAC cache
+        self.cached_n = None
+        self.cached_d = None
+        self.ransac_counter = 0
+        self.RANSAC_INTERVAL = 15 
+
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
     GAP_THRESHOLD = np.float32(1.5) # The minimum distance between two obstacles such that the rover can fit.
     DEPTH_THRESH = np.float32(2.85)
     SAFETY_BUFFER = 0.7   
-        
+    
+    def get_ground_mask(self, depth):
+        self.ransac_counter += 1
+
+        if self.cached_n is None or self.ransac_counter >= self.RANSAC_INTERVAL:
+            pts_sub, _, _ = backproject_depth_sub(depth)
+            if len(pts_sub) >= 100:
+                success, n, d, _ = ransac_plane(
+                    pts=pts_sub,
+                    iters=300,          # 150 is plenty with early exit
+                    dist_thresh=0.08,
+                    angle_thresh_deg=45,
+                    min_inliers=450,
+                )
+                if success:
+                    self.cached_n = n
+                    self.cached_d = d
+                    self.ransac_counter = 0
+
+        if self.cached_n is not None:
+            return apply_plane_to_full_depth(depth, self.cached_n, self.cached_d)
+        return None
+
     ## CHANGED: Added 'compass_angle' as an argument
     def cb(self, depth_full, compass_angle, rover_gps):
         start_time = time.time()
@@ -91,10 +120,16 @@ class SectorDepthClassifier():
         # depth_full = depth_full[:, start_col:end_col]
 
 
-        rows = (self.Y_PIXEL_OFFSET - np.arange(depth_full.shape[0], dtype=np.float32)) / self.FOCAL_LENGTH
-        # maybe constant optimize? ^^^
-        ground_mask = depth_full * rows[:, None] < -0.3
-        depth_full[ground_mask] = np.float32(10)
+        ground_mask = self.get_ground_mask(depth_full)
+        if ground_mask is not None:
+            # RANSAC found the plane
+            depth_full[ground_mask] = np.float32(10)
+        else:
+            # Fallback to old method
+            rows = (self.Y_PIXEL_OFFSET - np.arange(H, dtype=np.float32)) / self.FOCAL_LENGTH
+            fallback_mask = depth_full * rows[:, None] < -0.3
+            depth_full[fallback_mask] = np.float32(10)
+            ground_mask = fallback_mask
 
         # list of all min values of each vertical sector. values are in m
         min_list = np.percentile(depth_full, 8, axis=0)
