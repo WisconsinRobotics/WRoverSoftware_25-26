@@ -225,51 +225,12 @@ class SectorDepthClassifier():
                     if abs(target_angle_rad - clamped_theta) < abs(target_angle_rad - best_theta):
                         best_theta = clamped_theta
                         gap_to_move_to = (round(safe_px_start), round(safe_px_end))
-
-        # 6. Visualization Block
-        if self.debug:
-            depth_vis = cv2.normalize(depth_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-            depth_vis = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
-
-            # Paint Ground Blue
-            depth_vis[ground_mask] = (255, 0, 0)
-
-            # Paint Valid Gaps Green
-            for gap in valid_gaps:
-                cv2.rectangle(depth_vis, (int(gap[0]), 0), (int(gap[1]), H-1), (0, 255, 0), -1)
-
-            # Paint Chosen Gap Yellow (Drawn over green)
-            if best_theta != 999.0:
-                cv2.rectangle(depth_vis, (int(gap_to_move_to[0]), 0), (int(gap_to_move_to[1]), H-1), (0, 255, 255), -1)
-                
-                # Paint Chosen Pixel Column Red
-                chosen_pixel = int((math.tan(best_theta) * self.FOCAL_LENGTH) + self.X_PIXEL_OFFSET)
-                cv2.line(depth_vis, (chosen_pixel, 0), (chosen_pixel, H-1), (0, 0, 255), 3)
-            
-            # cv2.imshow("Aasd", depth_vis)
-            # cv2.waitKey(1)
-
-            try:
-                # Compress to jpg to save bandwidth
-                ret, buffer = cv2.imencode('.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
-                if ret:
-                    # 2. Convert to Base64 (This is what the receiver expects)
-                    jpg_as_text = base64.b64encode(buffer.tobytes())
-
-                    # 3. Send as a single message (Receiver uses recv(), not recv_multipart())
-                    self.socket.send(jpg_as_text)
-                    print("--------------------------sent frame -----------------------------")
-            except Exception as e:
-                print(f"")
-
-            # cv2.imshow("obstacle avoidance", depth_full)
-            # cv2.waitKey(1)
         
         if best_theta == 999.0:
             print("YOUR HAVE CRASHED NO VALID GAPSS S ---- :))))")
             # Return a "Stop" command [Speed, Angle, LeftMotor, RightMotor]
             print("error = not moving lol")
-            return [0.0, 0.0, -1.0, -1.0] 
+            #return [0.0, 0.0, -1.0, -1.0] 
 
         end_time = time.time() - start_time
         # print("time :",end_time)
@@ -337,8 +298,47 @@ class SectorDepthClassifier():
         if abs(speed) > max_speed:
             speed = math.copysign(max_speed, speed)
 
+        
+        # Visualization Block
+        if self.debug:
+            depth_vis = cv2.normalize(depth_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+            depth_vis = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
 
-        if abs(error) < 3.7: # range to move forward
+            # Paint Ground Blue
+            depth_vis[ground_mask] = (255, 0, 0)
+
+            # Paint Valid Gaps Green
+            for gap in valid_gaps:
+                cv2.rectangle(depth_vis, (int(gap[0]), 0), (int(gap[1]), H-1), (0, 255, 0), -1)
+
+            # Paint Chosen Gap Yellow (Drawn over green)
+            if best_theta != 999.0:
+                cv2.rectangle(depth_vis, (int(gap_to_move_to[0]), 0), (int(gap_to_move_to[1]), H-1), (0, 255, 255), -1)
+                
+                # Paint Chosen Pixel Column Red
+                chosen_pixel = int((math.tan(smoothed_theta) * self.FOCAL_LENGTH) + self.X_PIXEL_OFFSET)
+                cv2.line(depth_vis, (chosen_pixel, 0), (chosen_pixel, H-1), (0, 0, 255), 3)
+            
+            # cv2.imshow("Aasd", depth_vis)
+            # cv2.waitKey(1)
+
+            try:
+                # Compress to jpg to save bandwidth
+                ret, buffer = cv2.imencode('.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
+                if ret:
+                    # 2. Convert to Base64 (This is what the receiver expects)
+                    jpg_as_text = base64.b64encode(buffer.tobytes())
+
+                    # 3. Send as a single message (Receiver uses recv(), not recv_multipart())
+                    self.socket.send(jpg_as_text)
+                    print("--------------------------sent frame -----------------------------")
+            except Exception as e:
+                print(f"")
+
+            # cv2.imshow("obstacle avoidance", depth_full)
+            # cv2.waitKey(1)
+
+        if abs(error) < 6.0: # range to move forward
             return [0.8, 0.0, -1.0, -1.0] # Drive forward
         else:
             if speed < 0:
