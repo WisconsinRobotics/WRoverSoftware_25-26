@@ -59,6 +59,7 @@ class IMUNode(Node):
 class SectorDepthClassifier():
     def __init__(self):
         self.debug = True
+        self.onRover = True
         # This sets up the code to broadcast video to the network
         #if self.debug:
         # self.context = zmq.Context()
@@ -226,7 +227,7 @@ class SectorDepthClassifier():
                         best_theta = clamped_theta
                         gap_to_move_to = (round(safe_px_start), round(safe_px_end))
         
-end_time = time.time() - start_time
+        end_time = time.time() - start_time
 
         ALPHA = 0.30 # weight attributed to value of new frame
         HYSTERESIS_THRESHOLD = math.radians(20) # When to trigger checks
@@ -341,21 +342,22 @@ end_time = time.time() - start_time
             if is_recovery:
                 cv2.putText(depth_vis, "RECOVERY TURN", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
             
-            cv2.imshow("Aasd", depth_vis)
-            cv2.waitKey(1)
-            
-            # try:
-            #     # Compress to jpg to save bandwidth
-            #     ret, buffer = cv2.imencode('.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
-            #     if ret:
-            #         # 2. Convert to Base64 (This is what the receiver expects)
-            #         jpg_as_text = base64.b64encode(buffer.tobytes())
+            if self.onRover:
+                cv2.imshow("Aasd", depth_vis)
+                cv2.waitKey(1)
+            else:    
+                try:
+                    # Compress to jpg to save bandwidth
+                    ret, buffer = cv2.imencode('.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
+                    if ret:
+                        # 2. Convert to Base64 (This is what the receiver expects)
+                        jpg_as_text = base64.b64encode(buffer.tobytes())
 
-            #         # 3. Send as a single message (Receiver uses recv(), not recv_multipart())
-            #         self.socket.send(jpg_as_text)
-            #         print("--------------------------sent frame -----------------------------")
-            # except Exception as e:
-            #     print("failed idk")
+                        # 3. Send as a single message (Receiver uses recv(), not recv_multipart())
+                        self.socket.send(jpg_as_text)
+                        print("--------------------------sent frame -----------------------------")
+                except Exception as e:
+                    print("failed idk")
 
         if abs(error) < 6.0 and not is_recovery:
             return[0.8, 0.0, -1.0, -1.0] # Drive forward
