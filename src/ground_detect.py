@@ -67,7 +67,7 @@ def apply_plane_to_full_depth(depth, n, d, dist_thresh=0.06):
 
     return (
         (dist < dist_thresh)           &
-        (depth > 0.1) & (depth < 3.5) &
+        (depth > 0.01) & (depth < 5.5) &
         _row_mask_full
     )  # boolean mask (720, 1280), ready for cv2 directly
 
@@ -78,7 +78,7 @@ def ransac_plane(pts,
                  angle_thresh_deg=30,
                  target=None, tol=1.0,
                  min_inliers=400,
-                 early_exit_ratio=0.65):
+                 early_exit_ratio=0.5):
     """
     RANSAC with two speed improvements:
       1. Transpose trick  — pts.T computed once, avoids per-iteration reshaping
@@ -212,55 +212,55 @@ def main(depth_full):
     cv2.imshow("obstacle avoidance", depth_vis)
     cv2.waitKey(1)
 
+if __name__ == "__main__":
+    with dai.Pipeline() as pipeline:
+        monoLeft = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
+        monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
+        stereo = pipeline.create(dai.node.StereoDepth)
 
-with dai.Pipeline() as pipeline:
-    monoLeft = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
-    monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
-    stereo = pipeline.create(dai.node.StereoDepth)
+        stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.ROBOTICS)
+        stereo.setDepthAlign(dai.CameraBoardSocket.CAM_A)
+        stereo.setOutputSize(1280, 720)
 
-    stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.ROBOTICS)
-    stereo.setDepthAlign(dai.CameraBoardSocket.CAM_A)
-    stereo.setOutputSize(1280, 720)
+        config = stereo.initialConfig
 
-    config = stereo.initialConfig
+        # Median filter to remove the salt n pepper type pixels
+        config.postProcessing.median = dai.MedianFilter.KERNEL_7x7
+        config.postProcessing.thresholdFilter.maxRange = 8000  # 8.0m
 
-    # Median filter to remove the salt n pepper type pixels
-    config.postProcessing.median = dai.MedianFilter.KERNEL_7x7
-    config.postProcessing.thresholdFilter.maxRange = 8000  # 8.0m
+        config.setConfidenceThreshold(40)
+        config.setSubpixel(True)
+        config.setExtendedDisparity(True)
 
-    config.setConfidenceThreshold(40)
-    config.setSubpixel(True)
-    config.setExtendedDisparity(True)
+        monoLeftOut = monoLeft.requestOutput((1280, 720))
+        monoRightOut = monoRight.requestOutput((1280, 720))
 
-    monoLeftOut = monoLeft.requestOutput((1280, 720))
-    monoRightOut = monoRight.requestOutput((1280, 720))
+        monoLeftOut.link(stereo.left)
+        monoRightOut.link(stereo.right)
 
-    monoLeftOut.link(stereo.left)
-    monoRightOut.link(stereo.right)
+        rightOut = monoRightOut.createOutputQueue()
+        stereoOut = stereo.depth.createOutputQueue()
 
-    rightOut = monoRightOut.createOutputQueue()
-    stereoOut = stereo.depth.createOutputQueue()
+        pipeline.start()
+        while pipeline.isRunning():
+            start_time = time.perf_counter()
+            ## --- Depth Data Processing ---
+            stereoFrame = stereoOut.get()
 
-    pipeline.start()
-    while pipeline.isRunning():
-        start_time = time.perf_counter()
-        ## --- Depth Data Processing ---
-        stereoFrame = stereoOut.get()
+            assert stereoFrame.validateTransformations()
 
-        assert stereoFrame.validateTransformations()
+            # Get frame and convert to meters
+            depth = stereoFrame.getCvFrame().astype(np.float32) / 1000.0
 
-        # Get frame and convert to meters
-        depth = stereoFrame.getCvFrame().astype(np.float32) / 1000.0
+            # Call the processing function, now passing the heading
+            main(depth_full=depth)
 
-        # Call the processing function, now passing the heading
-        main(depth_full=depth)
+            # if cv2.waitKey(1) == ord('q'):
+            #     break
+            end_time = time.perf_counter()
+            elapsed_time = end_time - start_time
+            print(f"Elapsed time: {elapsed_time:.4f} seconds")
+        pipeline.stop()
 
-        # if cv2.waitKey(1) == ord('q'):
-        #     break
-        end_time = time.perf_counter()
-        elapsed_time = end_time - start_time
-        print(f"Elapsed time: {elapsed_time:.4f} seconds")
-    pipeline.stop()
-
-cv2.destroyAllWindows()
-## --- END: Pipeline and Device Loop ---
+    cv2.destroyAllWindows()
+    ## --- END: Pipeline and Device Loop ---

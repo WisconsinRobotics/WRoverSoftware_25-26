@@ -61,10 +61,10 @@ class SectorDepthClassifier():
         self.debug = True
         # This sets up the code to broadcast video to the network
         #if self.debug:
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.PUB)
-        self.socket.setsockopt(zmq.CONFLATE, 1)
-        self.socket.bind("tcp://*:9876")  # Binds to port 5555
+        # self.context = zmq.Context()
+        # self.socket = self.context.socket(zmq.PUB)
+        # self.socket.setsockopt(zmq.CONFLATE, 1)
+        # self.socket.bind("tcp://*:9876")  # Binds to port 5555
         print("Video Streamer initialized on port 6000")
         self.previous_best_theta = None
         self.candidate_theta = None
@@ -74,13 +74,13 @@ class SectorDepthClassifier():
         self.cached_n = None
         self.cached_d = None
         self.ransac_counter = 0
-        self.RANSAC_INTERVAL = 15 
+        self.RANSAC_INTERVAL = 10 
 
     X_PIXEL_OFFSET = np.float32(640)  #(648.040894)
     Y_PIXEL_OFFSET = np.float32(360)
     FOCAL_LENGTH = np.float32(563.33333)
     GAP_THRESHOLD = np.float32(1.5) # The minimum distance between two obstacles such that the rover can fit.
-    DEPTH_THRESH = np.float32(2.85)
+    DEPTH_THRESH = np.float32(3.3)
     SAFETY_BUFFER = 0.7   
     
     def get_ground_mask(self, depth):
@@ -120,16 +120,16 @@ class SectorDepthClassifier():
         # depth_full = depth_full[:, start_col:end_col]
 
 
-        ground_mask = self.get_ground_mask(depth_full)
-        if ground_mask is not None:
-            # RANSAC found the plane
-            depth_full[ground_mask] = np.float32(10)
-        else:
-            # Fallback to old method
-            rows = (self.Y_PIXEL_OFFSET - np.arange(H, dtype=np.float32)) / self.FOCAL_LENGTH
-            fallback_mask = depth_full * rows[:, None] < -0.3
-            depth_full[fallback_mask] = np.float32(10)
-            ground_mask = fallback_mask
+        # ground_mask = self.get_ground_mask(depth_full)
+        # if ground_mask is not None:
+        #     # RANSAC found the plane
+        #     depth_full[ground_mask] = np.float32(10)
+        # else:
+        #     # Fallback to old method
+        rows = (self.Y_PIXEL_OFFSET - np.arange(H, dtype=np.float32)) / self.FOCAL_LENGTH
+        fallback_mask = depth_full * rows[:, None] < -0.3
+        depth_full[fallback_mask] = np.float32(10)
+        ground_mask = fallback_mask
 
         # list of all min values of each vertical sector. values are in m
         min_list = np.percentile(depth_full, 8, axis=0)
@@ -173,7 +173,7 @@ class SectorDepthClassifier():
 
         # compute_bearing: angle from North to target in the clockwise direction
         bearing_to_target = self.compute_bearing(rover_gps , target_gps)
-        bearing_to_target = 90 # always moves
+        bearing_to_target = 90 # always moves 
         # Calculate the relative angle the rover needs to turn to
         # diff: how many degrees we need to turn from current heading to hit bearing
         target_angle_deg = (360 - (compass_angle - bearing_to_target)) % 360
@@ -234,10 +234,10 @@ class SectorDepthClassifier():
 
         end_time = time.time() - start_time
         # print("time :",end_time)
-        ALPHA = 0.35 
-        HYSTERESIS_THRESHOLD = math.radians(20) # ~0.35 rad (When to trigger checks)
+        ALPHA = 0.23 # weight attributed to value of new frame
+        HYSTERESIS_THRESHOLD = math.radians(20) # When to trigger checks
         IMPROVEMENT_THRESHOLD = 0.20 # rad (Massive shortcut threshold)
-        REQUIRED_FRAMES = 3 # How long a minor shift must persist
+        REQUIRED_FRAMES = 4 # How long a minor shift must persist
 
         if self.previous_best_theta is not None:
             angle_diff = abs(best_theta - self.previous_best_theta)
@@ -248,13 +248,13 @@ class SectorDepthClassifier():
                 old_error = abs(target_angle_rad - self.previous_best_theta)
                 new_error = abs(target_angle_rad - best_theta)
 
-                # RULE 1: The "Massive Shortcut" (Accept Immediately)
+                # # RULE 1: The "Massive Shortcut" (Accept Immediately)
                 if new_error < (old_error - IMPROVEMENT_THRESHOLD):
-                    self.persistence_counter = 0  # Reset counter
-                    self.candidate_theta = None
-                    # best_theta is accepted as-is
+                     self.persistence_counter = 0  # Reset counter
+                     self.candidate_theta = None
+                     # best_theta is accepted as-is
                 
-                # RULE 2: Wait for Persistence
+                # # RULE 2: Wait for Persistence
                 else:
                     # Check if this new angle is stable (within a 5-degree noise margin of the candidate)
                     if self.candidate_theta is not None and abs(best_theta - self.candidate_theta) < math.radians(5):
@@ -273,7 +273,7 @@ class SectorDepthClassifier():
                     else:
                         # It hasn't proven itself yet. Reject it and stick to the old path.
                         best_theta = self.previous_best_theta
-            
+        
             else:
                 # We are tracking the same general gap. Reset persistence tracking.
                 self.persistence_counter = 0
@@ -319,21 +319,21 @@ class SectorDepthClassifier():
                 chosen_pixel = int((math.tan(smoothed_theta) * self.FOCAL_LENGTH) + self.X_PIXEL_OFFSET)
                 cv2.line(depth_vis, (chosen_pixel, 0), (chosen_pixel, H-1), (0, 0, 255), 3)
             
-            # cv2.imshow("Aasd", depth_vis)
-            # cv2.waitKey(1)
+            cv2.imshow("Aasd", depth_vis)
+            cv2.waitKey(1)
 
-            try:
-                # Compress to jpg to save bandwidth
-                ret, buffer = cv2.imencode('.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
-                if ret:
-                    # 2. Convert to Base64 (This is what the receiver expects)
-                    jpg_as_text = base64.b64encode(buffer.tobytes())
+            # try:
+            #     # Compress to jpg to save bandwidth
+            #     ret, buffer = cv2.imencode('.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
+            #     if ret:
+            #         # 2. Convert to Base64 (This is what the receiver expects)
+            #         jpg_as_text = base64.b64encode(buffer.tobytes())
 
-                    # 3. Send as a single message (Receiver uses recv(), not recv_multipart())
-                    self.socket.send(jpg_as_text)
-                    print("--------------------------sent frame -----------------------------")
-            except Exception as e:
-                print(f"")
+            #         # 3. Send as a single message (Receiver uses recv(), not recv_multipart())
+            #         self.socket.send(jpg_as_text)
+            #         print("--------------------------sent frame -----------------------------")
+            # except Exception as e:
+            #     print(f"")
 
             # cv2.imshow("obstacle avoidance", depth_full)
             # cv2.waitKey(1)
@@ -428,7 +428,7 @@ with dai.Pipeline() as pipeline:
     config.postProcessing.median = dai.MedianFilter.KERNEL_7x7
     config.postProcessing.thresholdFilter.maxRange = 8000 # 8.0m
 
-    config.setConfidenceThreshold(30)
+    config.setConfidenceThreshold(50)
     config.setSubpixel(True)
     config.setExtendedDisparity(True)
 
