@@ -83,7 +83,7 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_differential_left(self, msg):
         can_msg_angle = String()
-        speed_amount = msg.data * 5000
+        speed_amount = msg.data * self.max_rpm 
         if(speed_amount == 0.0):
             can_msg_angle.data = self.vesc_ids["differential_left"][0] + " CAN_PACKET_SET_CURRENT_HANDBRAKE_REL " + str(BREAK_REL) +" float"
         else:

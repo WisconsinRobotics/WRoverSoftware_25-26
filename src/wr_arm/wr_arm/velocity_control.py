@@ -109,7 +109,7 @@ class ArmLogic(Node):
 
     def set_wrist_speeds(self, up, down, left, right, x, y) -> Float32MultiArray:
         if(x==1):
-            self.modifier = .5
+            self.modifier = 3
         elif(y==1):
             self.modifier = .3
         else:
@@ -124,22 +124,22 @@ class ArmLogic(Node):
             self.msg_wrist_left.data = -WRIST_SPEED_VALUE*self.modifier
             self.going_down = 10
         elif right == 1:
-            self.msg_wrist_right.data = -(WRIST_SPEED_VALUE*0.8)*self.modifier
-            self.msg_wrist_left.data = (WRIST_SPEED_VALUE*1.2)*self.modifier
+            self.msg_wrist_right.data = (WRIST_SPEED_VALUE)*self.modifier
+            self.msg_wrist_left.data = -(WRIST_SPEED_VALUE)*self.modifier
             self.going_down = 0
         elif left == 1:
-            self.msg_wrist_right.data = (WRIST_SPEED_VALUE*1.2)*self.modifier
-            self.msg_wrist_left.data = -(WRIST_SPEED_VALUE*0.8)*self.modifier
+            self.msg_wrist_right.data = -(WRIST_SPEED_VALUE)*self.modifier
+            self.msg_wrist_left.data = (WRIST_SPEED_VALUE)*self.modifier
             self.going_down = 0
         else:
-            if(self.going_down>0):
-                self.msg_wrist_right.data = WRIST_SPEED_VALUE*self.modifier
-                self.msg_wrist_left.data = WRIST_SPEED_VALUE*self.modifier
-                self.going_down -= 1
-            else:
+            # if(self.going_down>0):
+            #     self.msg_wrist_right.data = WRIST_SPEED_VALUE*self.modifier
+            #     self.msg_wrist_left.data = WRIST_SPEED_VALUE*self.modifier
+            #     self.going_down -= 1
+            # else:
                 self.msg_wrist_right.data = 0.0
                 self.msg_wrist_left.data = 0.0 
- 
+    
 
     
     def get_gripper_speed(self, a, b) -> float:

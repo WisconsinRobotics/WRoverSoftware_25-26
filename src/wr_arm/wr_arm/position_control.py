@@ -97,7 +97,8 @@ class ArmLogic(Node):
 
     def get_wrist_position(self, up, down, left, right,x,y) -> Float32MultiArray:
         if(x==1):
-            self.modifier = 0.2
+            self.get_logger().info("Activated X MODIFIER")
+            self.modifier = 0.05
         elif(y==1):
             self.modifier = 1
         else:
