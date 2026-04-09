@@ -9,8 +9,8 @@ class SwerveControlSubsrciber(Node):
     def __init__(self):
         super().__init__('swerve_control')
         #TODO:CHANGE IDS
-        self.vesc_ids = {"CAROUSEL":["83"],
-                         "AUGER":["84"],
+        self.vesc_ids = {"CAROUSEL":["84"],
+                         "AUGER":["83"],
                          "INSERT":["85"]
                         }
         self.max_rpm = 6000
@@ -41,8 +41,8 @@ class SwerveControlSubsrciber(Node):
     def listener_carousel(self, msg):
         can_msg_rpm = String()
 
-        rpm = msg.data * 0.05
-        can_msg_rpm.data = self.vesc_ids["CAROUSEL"][0] + " CAN_PACKET_SET_DUTY " + str(rpm) + " float"
+        rpm = msg.data * self.max_rpm / 6
+        can_msg_rpm.data = self.vesc_ids["CAROUSEL"][0] + " CAN_PACKET_SET_RPM " + str(rpm) + " float"
         self.publisher_.publish(can_msg_rpm)
         self.get_logger().info('Publishing DUTY CAUROSEL: "%s"' % rpm)
 
@@ -50,10 +50,10 @@ class SwerveControlSubsrciber(Node):
     def listener_auger(self, msg):
         can_msg_duty = String()
 
-        duty = msg.data
-        can_msg_duty.data = self.vesc_ids["AUGER"][0] + " CAN_PACKET_SET_DUTY " + str(duty) + " float"
+        duty = msg.data*10000*2
+        can_msg_duty.data = self.vesc_ids["AUGER"][0] + " CAN_PACKET_SET_RPM " + str(duty) + " float"
         self.publisher_.publish(can_msg_duty)
-        #self.get_logger().info('Publishing RPM AUGER: "%s"' % can_msg_duty)
+        self.get_logger().info('Publishing RPM AUGER: "%s"' % can_msg_duty)
 
 
     def listener_insert(self, msg):
@@ -62,7 +62,7 @@ class SwerveControlSubsrciber(Node):
         duty = msg.data
         can_msg_duty.data = self.vesc_ids["INSERT"][0] + " CAN_PACKET_SET_DUTY " + str(duty) + " float"
         self.publisher_.publish(can_msg_duty)
-        #self.get_logger().info('Publishing RPM INSERT: "%s"' % can_msg_duty)
+        self.get_logger().info('Publishing RPM INSERT: "%s"' % can_msg_duty)
 
     def listener_chute(self, msg):
         can_msg_servo = String()
