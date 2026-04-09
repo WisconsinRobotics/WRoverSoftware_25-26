@@ -62,10 +62,10 @@ class SectorDepthClassifier():
         self.onRover = True
         # This sets up the code to broadcast video to the network
         #if self.debug:
-        # self.context = zmq.Context()
-        # self.socket = self.context.socket(zmq.PUB)
-        # self.socket.setsockopt(zmq.CONFLATE, 1)
-        # self.socket.bind("tcp://*:9876")  # Binds to port 5555
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.PUB)
+        self.socket.setsockopt(zmq.CONFLATE, 1)
+        self.socket.bind("tcp://*:9876")  # Binds to port 5555
         print("Video Streamer initialized on port 6000")
         self.previous_best_theta = None
         self.candidate_theta = None
@@ -92,7 +92,7 @@ class SectorDepthClassifier():
             if len(pts_sub) >= 100:
                 success, n, d, _ = ransac_plane(
                     pts=pts_sub,
-                    iters=300,          # 150 is plenty with early exit
+                    iters=300,         
                     dist_thresh=0.08,
                     angle_thresh_deg=45,
                     min_inliers=450,
@@ -124,11 +124,11 @@ class SectorDepthClassifier():
         # ground_mask = self.get_ground_mask(depth_full)
         # if ground_mask is not None:
         #     # RANSAC found the plane
-        #     depth_full[ground_mask] = np.float32(10)
+        #      depth_full[ground_mask] = np.float32(10)
         # else:
-        #     # Fallback to old method
+        # #     # Fallback to old method
         rows = (self.Y_PIXEL_OFFSET - np.arange(H, dtype=np.float32)) / self.FOCAL_LENGTH
-        fallback_mask = depth_full * rows[:, None] < -0.3
+        fallback_mask = depth_full * rows[:, None] < -0.18
         depth_full[fallback_mask] = np.float32(10)
         ground_mask = fallback_mask
 
@@ -174,7 +174,7 @@ class SectorDepthClassifier():
 
         # compute_bearing: angle from North to target in the clockwise direction
         bearing_to_target = self.compute_bearing(rover_gps , target_gps)
-        bearing_to_target = 90 # always moves 
+        bearing_to_target = 30 # always moves 
         # Calculate the relative angle the rover needs to turn to
         # diff: how many degrees we need to turn from current heading to hit bearing
         target_angle_deg = (360 - (compass_angle - bearing_to_target)) % 360
@@ -229,7 +229,7 @@ class SectorDepthClassifier():
         
         end_time = time.time() - start_time
 
-        ALPHA = 0.30 # weight attributed to value of new frame
+        ALPHA = 0.27 # weight attributed to value of new frame
         HYSTERESIS_THRESHOLD = math.radians(20) # When to trigger checks
         IMPROVEMENT_THRESHOLD = 0.20 # rad (Massive shortcut threshold)
         REQUIRED_FRAMES = 3 # How long a minor shift must persist
@@ -243,8 +243,10 @@ class SectorDepthClassifier():
             # 1. SMART DECISION: Which side of the camera has more open space?
             # We compare the average distance of the left half vs the right half
             midpoint = len(min_list) // 2
-            left_space = np.mean(min_list[:midpoint])
-            right_space = np.mean(min_list[midpoint:])
+            left_half = min_list[:midpoint]
+            right_half = min_list[midpoint:]
+            left_space = np.mean(left_half[left_half < 10.0])
+            right_space = np.mean(right_half[right_half < 10.0])
             
             if left_space > right_space + 0.2:
                 # Left side is on average 20cm deeper/more open
@@ -342,7 +344,7 @@ class SectorDepthClassifier():
             if is_recovery:
                 cv2.putText(depth_vis, "RECOVERY TURN", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
             
-            if self.onRover:
+            if not self.onRover:
                 cv2.imshow("Aasd", depth_vis)
                 cv2.waitKey(1)
             else:    
