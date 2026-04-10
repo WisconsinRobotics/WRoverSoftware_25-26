@@ -1,3 +1,82 @@
-build/*
-install/*
-log/*
+# =========================
+# ROS 2 / Colcon
+# =========================
+build/
+install/
+log/
+
+# Colcon metadata
+.colcon/
+.colcon_install_layout
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc.*
+*.py,cover
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# =========================
+# C/C++ (ament / cmake)
+# =========================
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# =========================
+# ROS 2 specific
+# =========================
+*.log
+*.bag
+*.db3
+*.sqlite3
+
+# Ignore generated message/service files
+rosidl_generator_*/
+rosidl_typesupport_*/
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Testing / Coverage
+# =========================
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# =========================
+# Misc
+# =========================
+*.bak
+*.tmp
+*.temp
