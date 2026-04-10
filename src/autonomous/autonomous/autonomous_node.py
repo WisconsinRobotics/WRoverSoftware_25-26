@@ -92,7 +92,7 @@ class AutonomousLogic(Node):
             return
  
         current_time = self.get_clock().now()
- 
+        self.get_logger().info("Running arucoLogic")
         self.aruco_swerve = self.aruco_specialist.drive_logic(self.frame, self.localization_msg, self.imu_msg, current_time, self.zeroing_out_indicator)
  
         if self.zeroing_out_indicator < 1:
@@ -130,7 +130,7 @@ class AutonomousLogic(Node):
         if obsAvoidanceSwerve[2] == False:
             aruco_linear = arucoSwerve[0] + arucoSwerve[1]      # lin_y + lin_x
             aruco_angular = arucoSwerve[2] - arucoSwerve[3]     # ang_pos - ang_neg
-            sw_msg.data = [float(aruco_linear), float(aruco_angular)]
+            sw_msg.data = [float(arucoSwerve[0]), float(arucoSwerve[1]), float(arucoSwerve[2]), float(arucoSwerve[3])]
         else:
             sw_msg.data = [float(obsAvoidanceSwerve[0]), float(obsAvoidanceSwerve[1])]
  

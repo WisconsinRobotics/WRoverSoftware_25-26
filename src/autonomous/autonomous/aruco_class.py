@@ -617,12 +617,12 @@ class ArucoClass:
         rv_w = imu.orientation.w
         rv_x = imu.orientation.x
         rv_y = imu.orientation.y
-        rv_z = imu.orientaiton.z
+        rv_z = imu.orientation.z
         # Calculate the yaw (orientation)
         siny_cosp = 2 * (rv_w * rv_z + rv_x * rv_y)
         cosy_cosp = 1 - 2 * (rv_y * rv_y + rv_z * rv_z)
         current_orientation = (math.degrees(math.atan2(siny_cosp, cosy_cosp)) + 360) % 360
-        
+        print(f"Orientation: {current_orientation}")
         # TODO: Change this to GNSS coordinates with the center of the circle as the reference point
         latitude = localization.latitude
         longitude = localization.longitude
@@ -779,7 +779,7 @@ class ArucoClass:
                 if not self.full_search_done:
                     lin_y = 0.0
                     lin_x = 3.0
-                    ang_pos = imu.angular_velocity
+                    ang_pos = imu.angular_velocity.z
                     ang_neg = 0.0
                 else:
                     lin_y = 0.0

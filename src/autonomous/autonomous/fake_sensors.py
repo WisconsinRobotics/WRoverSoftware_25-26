@@ -19,7 +19,7 @@ class SimRover(Node):
         super().__init__('sim_rover')
 
         # Publishers: "fake" localization & IMU
-        self.loc_pub = self.create_publisher(Float32MultiArray, 'fix', 10)
+        self.loc_pub = self.create_publisher(NavSatFix, 'fix', 10)
         self.imu_pub = self.create_publisher(Float32MultiArray, 'imu_fake', 10)
 
         # Subscriber: your drive commands
