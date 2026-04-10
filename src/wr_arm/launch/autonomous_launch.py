@@ -17,12 +17,10 @@ def generate_launch_description():
         )#,
         
 
-        
-        #Control with xbox
-#        Node(
-#           package='wr_controller',
-#           executable='xbox_controller',
-#           name='xbox_controller'
-#        )
-
     ])
+        #Control with xbox
+        # Node(
+        #    package='wr_controller',
+        #    executable='xbox_controller',
+        #    name='xbox_controller'
+        # )
