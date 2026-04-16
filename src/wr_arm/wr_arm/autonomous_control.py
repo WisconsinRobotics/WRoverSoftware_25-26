@@ -74,11 +74,14 @@ class ArmLogic(Node):
         
         self.going_down = 0
         self.modifier = 1
+        self.counter = 0
 
 
     
     #Put publishers in timer to limit rate of publishing
     def timer_callback(self):
+        self.counter += 1
+        self.get_logger().info(str(self.counter))
         self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
         self.arm_publisher_up_and_down.publish(self.msg_up_and_down)
         self.arm_publisher_forwards_and_bacwards.publish(self.msg_forwards_and_backwards)
@@ -180,7 +183,7 @@ class ArmLogic(Node):
         self.autonomous = True
         if(self.autonomous == True):
             if(abs(x) < close_enough and abs(y) < close_enough):
-                self.msg_forwards_and_backwards.data = 1.0
+                self.msg_forwards_and_backwards.data = 0.0
                 self.msg_side_to_side.data = 0.0
                 self.msg_up_and_down.data = 0.0
             else:
@@ -195,6 +198,8 @@ class ArmLogic(Node):
                     self.msg_up_and_down.data = 1.0
                 else:
                     self.msg_up_and_down.data = -1.0
+
+    
 
 
 def main(args=None):
