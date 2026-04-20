@@ -4,15 +4,15 @@ import numpy as np
 
 # Add the parent folder of project_root to Python's path
 # so that imports like "from src.utils..." resolve correctly
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-from src.pointcloud.load_clean import load_and_clean_lidar
-from src.pointcloud.knn_builder import build_knn
-from src.pathplanning.graph_builder import build_graph_vectorized
-from src.utils.nearest_point import find_nearest_node
-from src.utils.point_conversion import get_epsg, gps_to_xy
-from src.pathplanning.multi_target import compute_cost_matrix, find_best_order, build_full_path
-from src.utils.visualization import visualize_path
+sys.path.append(os.path.dirname(__file__))
+                                                                                                                                                                                                                
+from pointcloud.load_clean import load_and_clean_lidar                                                                                                                                                            
+from pointcloud.knn_builder import build_knn          
+from pathplanning.graph_builder import build_graph_vectorized                                                                                                                                                     
+from utils.nearest_point import find_nearest_node            
+from utils.point_conversion import get_epsg, gps_to_xy
+from pathplanning.multi_target import compute_cost_matrix, find_best_order, build_full_path                                                                                                                       
+from utils.visualization import visualize_path
 
 def main():
     # Get the LiDAR file path from the user and load it
