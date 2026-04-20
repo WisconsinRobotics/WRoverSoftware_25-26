@@ -1,4 +1,4 @@
-from src.utils.geo_helpers import *
+from utils.geo_helpers import *
 import numpy as np
 
 '''
