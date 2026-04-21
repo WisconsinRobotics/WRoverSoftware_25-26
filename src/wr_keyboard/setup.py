@@ -24,7 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'keyboard_test = wr_keyboard.keyboard_test:main'
+            'keyboard_test = wr_keyboard.keyboard_test:main',
+            'camera_receiver = wr_keyboard.camera_receiver:main',
         ],
     },
 )
