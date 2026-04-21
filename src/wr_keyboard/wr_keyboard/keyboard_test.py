@@ -124,6 +124,13 @@ KB_CORNERS_MM = np.array([
     [0.0, KEYBOARD_D],      # BL
 ], dtype=np.float32)
 
+MARKER_ID_TO_CORNER = {
+    0: 0,     #TL
+    1: 1,     #TR
+    2: 2,     #BR
+    3: 3,     #BL
+}
+
 # CLAHE helps even out glare/reflections before marker detection
 CLAHE = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
@@ -161,24 +168,77 @@ def sort_four_corners(points):
     br = bot[np.argmax(pts[bot, 0])]
     return [tl, tr, br, bl]
 
-
 def compute_homography(corners, ids):
-    """from detected markers, get the pixel->mm homography matrix.
-    uses inside corners (not centers) so the mapping lines up with
-    the actual keyboard edges, not the middle of each marker."""
-    if ids is None or len(corners) < 4:
+    
+    if ids is None or len(corners) < 2:
         return None, None
 
-    corners_v = list(corners[:4])
-    all_centers = [marker_center(c) for c in corners_v]
-    inside_pts = [inside_corner(c, all_centers) for c in corners_v]
+    flat_ids = ids.flatten()
+    all_centers = [marker_center(c) for c in corners]
 
-    order = sort_four_corners(inside_pts)
-    
-    src = np.array([inside_pts[order[i]] for i in range(4)], dtype=np.float32)
+    # Build matched pairs w id to corner
+    src_pts, dst_pts = [], []
+    for i, mid in enumerate(flat_ids):
+        corner_idx = MARKER_ID_TO_CORNER.get(int(mid))
+        if corner_idx is None:
+            continue   # unknown marker ID, skip
+        src_pts.append(inside_corner(corners[i], all_centers))
+        dst_pts.append(KB_CORNERS_MM[corner_idx])
 
-    H, _ = cv2.findHomography(src, KB_CORNERS_MM)
+    n = len(src_pts)
+    if n < 2:
+        return None, None
+
+    src = np.array(src_pts, dtype=np.float32)
+    dst = np.array(dst_pts, dtype=np.float32)
+    # Full homography — handles perspective distortion
+    if n >= 4:
+        H, _ = cv2.findHomography(src, dst)
+        if H is None:
+            return None, None
+        return H, src
+    #affine transform
+    if n == 3:
+        M = cv2.getAffineTransform(src[:3], dst[:3])
+        H = np.vstack([M, [0.0, 0.0, 1.0]])
+        return H, src
+
+    # n == 2
+    # Similarity (4 DOF): rotation + uniform scale + translation
+    # estimateAffinePartial2D is RANSAC-based so handles one bad point too
+    M, inliers = cv2.estimateAffinePartial2D(src, dst)
+    if M is None:
+        return None, None
+    H = np.vstack([M, [0.0, 0.0, 1.0]])
     return H, src
+
+
+def compute_homography(corners, ids):
+    #TODO implement len<4 center checking 
+    #TODO 
+    
+    
+    #
+    
+    #affine transform with three
+    
+    #similarity transform with two
+    
+    
+    
+    
+    
+    #get homography w 4
+    if len(corners) >= 4:
+        corners_v = list(corners[:4])
+        all_centers = [marker_center(c) for c in corners_v]
+        inside_pts = [inside_corner(c, all_centers) for c in corners_v]
+        order = sort_four_corners(inside_pts)
+        
+        src = np.array([inside_pts[order[i]] for i in range(4)], dtype=np.float32)
+
+        H, _ = cv2.findHomography(src, KB_CORNERS_MM)
+        return H, src
 
 
 def mm_to_px(H_inv, x_mm, y_mm):
@@ -290,7 +350,6 @@ class KeyboardNode(Node):
         self.last_good = 0.0
         self.cached_H_inv = None
         self.get_logger().info("Starting frame grabber thread...")  
-
         self.key_center = Float64MultiArray()
         self.key_center.data = [0.0, 0.0]
         threading.Thread(target=self._frame_grabber, daemon=True).start()
@@ -362,7 +421,13 @@ class KeyboardNode(Node):
                 self.H_inv = np.linalg.inv(H)
             except np.linalg.LinAlgError:
                 pass
-
+        
+        
+        
+        
+        
+        
+        
         # use fresh if we got one, otherwise fall back to cache
         if self.H_inv is not None:
             self.cached_H_inv = self.H_inv
