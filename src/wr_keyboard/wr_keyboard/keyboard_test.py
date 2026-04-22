@@ -2,14 +2,6 @@
 # 4 ArUco markers on K552 corners -> homography -> publish movement vectors to arm
 # arm_response topic triggers next key in sequence
 # L for launch word Q to quit P to print
-#TODO add in path correction, eyeball global offset first and try to use that, otherwise tuning and transforming
-
-#Path idea 1: add a global offset if the arm misses in one direction consistently.
-#Path idea 2: Use a per region correction tuning step if the accuracy changes at the edges for example.
-#Press 4-5 keys across board, measure error, and then add affine transformation?
-#Path idea 3: Pynput but I would only measure error on a diff key but would close state machine loop but dont think
-# will be usable in comp so prolly not
-
 
 import cv2
 import numpy as np
@@ -131,6 +123,15 @@ MARKER_ID_TO_CORNER = {
     3: 3,     #BL
 }
 
+_PAIR_QUALITY = {
+    frozenset({0, 2}): 'diagonal',   
+    frozenset({1, 3}): 'diagonal',   
+    frozenset({0, 1}): 'same_edge',  
+    frozenset({2, 3}): 'same_edge',  
+    frozenset({0, 3}): 'same_edge',
+    frozenset({1, 2}): 'same_edge',  
+}
+
 # CLAHE helps even out glare/reflections before marker detection
 CLAHE = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
@@ -148,14 +149,20 @@ def marker_center(one_corner):
     return one_corner.reshape(4, 2).mean(axis=0).astype(np.float32)
 
 
-def inside_corner(one_corner, all_centers):
-    """the vertex closest to the centroid of all markers is the inside corner,
-    i.e. the one pointing toward the middle of the keyboard"""
-    pts = one_corner.reshape(4, 2)
-    centroid = np.mean(all_centers, axis=0)
-    dists = np.linalg.norm(pts - centroid, axis=1)
-    return pts[np.argmin(dists)].astype(np.float32)
 
+#Check if the two detected are diagonal for similarity transform 
+def check_two_marker_quality(corners, ids):
+    if len(corners) != 2 or ids is None or len(ids) != 2:
+        return False
+    #get id 
+    ca = MARKER_ID_TO_CORNER.get(int(ids[0][0]))
+    cb = MARKER_ID_TO_CORNER.get(int(ids[1][0]))
+    
+    if ca is None or cb is None:
+        return False
+    pair = frozenset({ca, cb})
+    quality = _PAIR_QUALITY.get(pair)
+    return quality
 
 def sort_four_corners(points):
     """sort 4 points into TL, TR, BR, BL order by position"""
@@ -169,14 +176,12 @@ def sort_four_corners(points):
     return [tl, tr, br, bl]
 
 def compute_homography(corners, ids):
-    
     if ids is None or len(corners) < 2:
         return None, None
-
+    
+    # Build matched pairs w id to corner
     flat_ids = ids.flatten()
     all_centers = [marker_center(c) for c in corners]
-
-    # Build matched pairs w id to corner
     src_pts, dst_pts = [], []
     for i, mid in enumerate(flat_ids):
         corner_idx = MARKER_ID_TO_CORNER.get(int(mid))
@@ -184,14 +189,15 @@ def compute_homography(corners, ids):
             continue   # unknown marker ID, skip
         src_pts.append(inside_corner(corners[i], all_centers))
         dst_pts.append(KB_CORNERS_MM[corner_idx])
-
+        
     n = len(src_pts)
     if n < 2:
         return None, None
 
-    src = np.array(src_pts, dtype=np.float32)
+    src = np.array(src_pts, dtype=np.float32) #for transforms we need float32
     dst = np.array(dst_pts, dtype=np.float32)
-    # Full homography — handles perspective distortion
+    
+    # Homography possible 
     if n >= 4:
         H, _ = cv2.findHomography(src, dst)
         if H is None:
@@ -203,42 +209,16 @@ def compute_homography(corners, ids):
         H = np.vstack([M, [0.0, 0.0, 1.0]])
         return H, src
 
-    # n == 2
     # Similarity (4 DOF): rotation + uniform scale + translation
-    # estimateAffinePartial2D is RANSAC-based so handles one bad point too
-    M, inliers = cv2.estimateAffinePartial2D(src, dst)
-    if M is None:
-        return None, None
-    H = np.vstack([M, [0.0, 0.0, 1.0]])
-    return H, src
-
-
-def compute_homography(corners, ids):
-    #TODO implement len<4 center checking 
-    #TODO 
-    
-    
-    #
-    
-    #affine transform with three
-    
-    #similarity transform with two
-    
-    
-    
-    
-    
-    #get homography w 4
-    if len(corners) >= 4:
-        corners_v = list(corners[:4])
-        all_centers = [marker_center(c) for c in corners_v]
-        inside_pts = [inside_corner(c, all_centers) for c in corners_v]
-        order = sort_four_corners(inside_pts)
-        
-        src = np.array([inside_pts[order[i]] for i in range(4)], dtype=np.float32)
-
-        H, _ = cv2.findHomography(src, KB_CORNERS_MM)
+    if check_two_marker_quality(corners, ids) == 'diagonal':
+        M, inliers = cv2.estimateAffinePartial2D(src, dst)
+        if M is None:
+            return None, None
+        H = np.vstack([M, [0.0, 0.0, 1.0]])
         return H, src
+    else:
+        return None, None
+
 
 
 def mm_to_px(H_inv, x_mm, y_mm):
@@ -332,7 +312,7 @@ class KeyboardNode(Node):
 
     def __init__(self):
         super().__init__('keyboard_aruco')
-        self.movement_pub = self.create_publisher(String, 'keyboard_movement', 10)
+        self.movement_pub = self.create_publisher(String,  'keyboard_key_positions', 10)
         self.keyboard_center_pub = self.create_publisher(Float64MultiArray, 'keyboard_center', 10)
         self._arm_sub = self.create_subscription(
             String, 'arm_response', self._on_arm_response, 10)
@@ -372,7 +352,7 @@ class KeyboardNode(Node):
 
         img = frame.copy()
 
-        # detect markers (CLAHE helps with glare on markers)
+        #TODO take preprocess out and hardcode in the four IDS as they wont change
         enhanced = preprocess_for_aruco(frame)
         corners, ids, _ = cv2.aruco.detectMarkers(enhanced, ARUCO_DICT, parameters=ARUCO_PARAMS)
 
@@ -404,11 +384,11 @@ class KeyboardNode(Node):
 
         #Getting center of keyboard in pixel coordinates and publishing to ROS topic
         if self.src_pts is not None and len(self.src_pts) > 0:
+            #TODO change this piece to using homo instead of averaging 
             center = np.mean(self.src_pts, axis=0)  # shape (2,)
             x_center, y_center = center
             x_center = -640/2 + x_center
             y_center = 480/2 - y_center
-            
             
             self.get_logger().info(f"Center: {x_center}, {y_center}")
             self.key_center.data = [float(x_center), float(y_center)]
