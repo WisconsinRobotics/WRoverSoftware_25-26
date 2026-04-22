@@ -31,6 +31,12 @@ class ArmLogic(Node):
             'keyboard_key_positions',
             self.listener_callback_key_positions,
             10)
+        self.subscription_buttons = self.create_subscription(
+            Float64MultiArray,
+            'keyboard_center',
+            self.listener_callback_keyboard_center,
+            10)
+
 
         self.arm_publisher_side_to_side = self.create_publisher(Float64, 'side_to_side', 10)
         self.arm_publisher_up_and_down = self.create_publisher(Float64, 'up_and_down', 10)
@@ -76,6 +82,7 @@ class ArmLogic(Node):
         self.modifier = 1
         self.counter = 0
 
+        self.centered = False
 
     
     #Put publishers in timer to limit rate of publishing
@@ -171,8 +178,10 @@ class ArmLogic(Node):
         
 
         self.msg_gripper.data = float(gripper_speed)
-    def listener_callback_key_positions(self, msg):
-        #msg should be [x away,  y away] from target
+
+
+    def listener_callback_keyboard_center(self, msg):
+        #msg should be [x center,  y center] of target
         # left of screen is negative x
         # top of screen positive y
         x = msg.data[0]
@@ -183,13 +192,8 @@ class ArmLogic(Node):
         self.autonomous = True
         if(self.autonomous == True):
             if(abs(x) < close_enough and abs(y) < close_enough):
-                self.msg_forwards_and_backwards.data = 0.0
-                self.msg_side_to_side.data = 0.0
-                self.msg_up_and_down.data = 0.0
+                self.centered = True
             else:
-                self.msg_forwards_and_backwardsdata = -1.0
-
-                #Publishing
                 if(x < 0):
                     self.msg_side_to_side.data = 1.0
                 else:
@@ -198,6 +202,38 @@ class ArmLogic(Node):
                     self.msg_up_and_down.data = 1.0
                 else:
                     self.msg_up_and_down.data = -1.0
+
+    def listener_callback_key_positions(self, msg):
+        #msg should be [x away,  y away] from target
+        # left of screen is negative x
+        # top of screen positive y
+
+        if(self.centered == True):
+            x = msg.data[0]
+            y = msg.data[1]
+
+        else:
+            close_enough = 10
+            
+            #Set to true if autonomous runs
+            self.autonomous = True
+            if(self.autonomous == True):
+                if(abs(x) < close_enough and abs(y) < close_enough):
+                    self.msg_forwards_and_backwards.data = 0.0
+                    self.msg_side_to_side.data = 0.0
+                    self.msg_up_and_down.data = 0.0
+                else:
+                    self.msg_forwards_and_backwardsdata = -1.0
+
+                    #Publishing
+                    if(x < 0):
+                        self.msg_side_to_side.data = 1.0
+                    else:
+                        self.msg_side_to_side.data = -1.0
+                    if(y < 0):
+                        self.msg_up_and_down.data = 1.0
+                    else:
+                        self.msg_up_and_down.data = -1.0
 
     
 
