@@ -2,6 +2,11 @@
 # 4 ArUco markers on K552 corners -> homography -> publish movement vectors to arm
 # arm_response topic triggers next key in sequence
 # L for launch word Q to quit P to print
+#wreciever imports 
+from typing import List
+import zmq
+import base64
+
 
 import cv2
 import numpy as np
@@ -9,7 +14,6 @@ import json
 import time
 import threading
 import argparse
-
 try:
     import rclpy
     from rclpy.node import Node
@@ -18,25 +22,19 @@ try:
     HAS_ROS = True
 except ImportError:
     HAS_ROS = False
-
-
-
 # ── keyboard physical layout (mm) ──────────────────────────────────────────────
 
 KEYBOARD_W = 354.0
 KEYBOARD_D = 123.0
 PITCH = 19.05  # 1u key spacing, standard across most mechs
-
 # where the arm rests in keyboard mm space (0,0 = top-left of board)
 KB_CX = 174.8
 KB_CY = 56.5
 Z_MM = 10.0  # press depth, needs tuning on real board
-
 # nudge every arm command if it consistently misses one direction
 # only affects what gets sent to the arm, overlay stays unchanged
 OFFSET_X = 0.0  # + = right
 OFFSET_Y = 0.0  # + = up (same convention as MOVES dy)
-
 # vectors from arm home to each key (dx+ right, dy+ up in arm frame)
 MOVES = {
     'A': (-127.14, -10.18),
@@ -78,7 +76,6 @@ MOVES = {
     'Space': (-39.03, -48.28),
     'Enter': (94.32, -10.18),
 }
-
 # wider-than-1u keys for the overlay
 WIDTHS = {
     'Space': PITCH * 6.25,
@@ -116,13 +113,14 @@ KB_CORNERS_MM = np.array([
     [0.0, KEYBOARD_D],      # BL
 ], dtype=np.float32)
 
-MARKER_ID_TO_CORNER = {
-    0: 0,     #TL
-    1: 1,     #TR
-    2: 2,     #BR
-    3: 3,     #BL
-}
 
+
+MARKER_ID_TO_CORNER = {
+    1: 0,   # marker ID 1 at TL corner
+    4: 1,   #4 at TR
+    3: 2,   #3 at BR
+    2: 3,   #2 at BL
+}
 _PAIR_QUALITY = {
     frozenset({0, 2}): 'diagonal',   
     frozenset({1, 3}): 'diagonal',   
@@ -143,12 +141,10 @@ def preprocess_for_aruco(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return CLAHE.apply(gray)
 
-sd
+
 def marker_center(one_corner):
     """average of a marker's 4 vertices = its center"""
     return one_corner.reshape(4, 2).mean(axis=0).astype(np.float32)
-
-
 
 #Check if the two detected are diagonal for similarity transform 
 def check_two_marker_quality(corners, ids):
@@ -235,6 +231,14 @@ def char_to_label(ch):
         return up
     return {' ': 'Space', '\n': 'Enter', '\t': 'Tab'}.get(ch)
 
+def inside_corner(corners, center):
+    """given a marker's 4 corners and center, return the corner closest to the center"""
+    c = np.array(center)
+    pts = corners.reshape(4, 2)
+    dists = np.linalg.norm(pts - c, axis=1)
+    idx = np.argmin(dists)
+    return pts[idx]
+
 
 # ── debug overlay drawing ─────────────────────────────────────────────────────
 
@@ -302,8 +306,120 @@ def draw_markers(frame, corners, ids, sorted_src):
             cv2.circle(frame, (int(pt[0]), int(pt[1])), 6, (0, 0, 255), -1)
             cv2.putText(frame, name, (int(pt[0]) + 8, int(pt[1]) + 8),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
+            
+#wreciever helpers =======================================================   
+def start_multiple_receivers(ip: str, ports: List[int], timeout: float, window_prefix: str = "Stream"):
+    stop_event = threading.Event()
+    threads: List[threading.Thread] = []
+    frames: dict = {}
+    lock = threading.Lock()
+    stats = {}
 
+    for port in ports:
+        t = threading.Thread(
+            target=receive_camera_data, 
+            args=(ip, port, timeout, stop_event, frames, lock, stats, window_prefix), 
+            daemon=True
+        )
+        t.start()
+        threads.append(t)
 
+    return stop_event, threads, frames, lock, stats   
+
+def _rate_limited_warn(counter: int, message: str, every: int = 50):
+    if counter == 1 or counter % every == 0:
+        print(f"\033[91m{message} (count={counter})\033[0m")
+
+def receive_camera_data(ip: str, port: int, timeout: float, stop_event: threading.Event, frames: dict, lock: threading.Lock, stats: dict, window_prefix: str = "Stream"):
+    """Subscribe to a single publisher at ip:port and display frames until stop_event is set."""
+    context = zmq.Context()
+    footage_socket = context.socket(zmq.SUB)
+    footage_socket.setsockopt(zmq.CONFLATE, 1)
+    footage_socket.setsockopt(zmq.LINGER, 0)
+    footage_socket.connect(f'tcp://{ip}:{port}')
+    footage_socket.setsockopt_string(zmq.SUBSCRIBE, '')
+    # set a receive timeout so we can check stop_event periodically
+    footage_socket.setsockopt(zmq.RCVTIMEO, 500)
+
+    window_name = f"{window_prefix}-{port}"
+    print(f"\033[93mAttempting to connect to {ip}:{port}...\033[0m")
+    
+    # Verify connection by waiting for first frame (10 second timeout)
+    connection_timeout = timeout
+    start_time = time.time()
+    first_frame_received = False
+    stat_update_failures = 0
+    decode_failures = 0
+    frame_store_failures = 0
+    
+    while not stop_event.is_set() and not first_frame_received:
+        try:
+            footage_socket.recv(zmq.NOBLOCK)
+            first_frame_received = True
+            print(f"\033[92mConnected to {ip}:{port} -> window '{window_name}'\033[0m")
+            print("\033[92mPress 'q' in any window to quit\033[0m")
+        except zmq.Again:
+            if time.time() - start_time > connection_timeout:
+                print(f"\033[91mFailed to connect to {ip}:{port} (timeout after {connection_timeout}s)\033[0m")
+                return
+            time.sleep(0.1)
+            continue
+    
+    if not first_frame_received:
+        return
+
+    try:
+        while not stop_event.is_set():
+            try:
+                frame_bytes = footage_socket.recv()
+            except zmq.Again:
+                continue
+
+            try:
+                with lock:
+                    stats[window_name] = stats.get(window_name, 0) + len(frame_bytes)
+            except (TypeError, RuntimeError) as exc:
+                stat_update_failures += 1
+                _rate_limited_warn(stat_update_failures, f"[{window_name}] stats update failed: {exc}")
+
+            try:
+                img = base64.b64decode(frame_bytes)
+                npimg = np.frombuffer(img, dtype=np.uint8)
+                source = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+                if source is None:
+                    decode_failures += 1
+                    _rate_limited_warn(decode_failures, f"[{window_name}] frame decode returned None")
+                    continue
+                # store the latest frame for the main thread to display
+                try:
+                    with lock:
+                        frames[window_name] = source.copy()
+                except (TypeError, RuntimeError) as exc:
+                    frame_store_failures += 1
+                    _rate_limited_warn(frame_store_failures, f"[{window_name}] frame store failed: {exc}")
+                    # if storing fails, skip this frame
+                    continue
+            except (base64.binascii.Error, ValueError) as exc:
+                decode_failures += 1
+                _rate_limited_warn(decode_failures, f"[{window_name}] malformed frame payload: {exc}")
+                # skip malformed frames
+                continue
+    finally:
+        # remove any stored frame for this window
+        try:
+            with lock:
+                if window_name in frames:
+                    del frames[window_name]
+                if window_name in stats:
+                    del stats[window_name]
+        except Exception:
+            pass
+        footage_socket.close()
+        try:
+            context.term()
+        except Exception:
+            pass
+        
 # ── ROS2 node ──────────────────────────────────────────────────────────────────
 # publishes JSON to keyboard_movement: {key, dx_mm, dy_mm, z_mm}
 # waits for any message on arm_response before sending the next key
@@ -312,6 +428,7 @@ class KeyboardNode(Node):
 
     def __init__(self):
         super().__init__('keyboard_aruco')
+        #keyboard args
         self.movement_pub = self.create_publisher(String,  'keyboard_key_positions', 10)
         self.keyboard_center_pub = self.create_publisher(Float64MultiArray, 'keyboard_center', 10)
         self._arm_sub = self.create_subscription(
@@ -323,8 +440,6 @@ class KeyboardNode(Node):
         self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
         self.timer = self.create_timer(0.1, self._timer_callback)
         self.cap = cv2.VideoCapture("/dev/video4")
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.frame = None
         self.cached_H_inv = None
         self.last_good = 0.0
@@ -332,31 +447,35 @@ class KeyboardNode(Node):
         self.get_logger().info("Starting frame grabber thread...")  
         self.key_center = Float64MultiArray()
         self.key_center.data = [0.0, 0.0]
-        threading.Thread(target=self._frame_grabber, daemon=True).start()
-
-    def _frame_grabber(self):
-        """Continuously grab frames from the camera."""
-        while True:
-            ret, frame = self.cap.read()
-            if ret:
-                self.frame = frame
-            time.sleep(0.001)  # small sleep to yield
-
+        self.H_inv = None
+        
+        #wreciever args
+        broadcast_ip = "0.0.0.0"
+        base_port = 5555
+        stream_count = 1
+        connection_timeout = 10.0
+        window_prefix = "Stream"
+        ports = [base_port + i for i in range(stream_count)]
+        self.stop_event, self.threads, self.frames, self.lock, self.stats = start_multiple_receivers(broadcast_ip, ports, connection_timeout, window_prefix)
+        
     def _timer_callback(self):
         """periodic timer to resend current key if we're waiting for arm response"""
-       
-        if self.frame is None:
-            return
-        frame = self.frame.copy()
-    
-
+        frame = None
+        #wreciever main loop
+        with self.lock:
+            keys = list(self.frames.keys())
+        for k in keys:
+            with self.lock:
+                frame = self.frames.get(k)
+            if frame is None:
+                self.get_logger().warning(f"Frame for {k} disappeared")
+                return
+            cv2.imshow(k, frame)
+                
         img = frame.copy()
-
-        #TODO take preprocess out and hardcode in the four IDS as they wont change
         enhanced = preprocess_for_aruco(frame)
         corners, ids, _ = cv2.aruco.detectMarkers(enhanced, ARUCO_DICT, parameters=ARUCO_PARAMS)
-
-        # throw out false positives from keycap icons / LED labels
+        # throw out false positives from keycap icons / LED labels while constricting by known
         if ids is not None:
             MIN_AREA = 500
             MIN_ASPECT = 0.6
@@ -381,18 +500,17 @@ class KeyboardNode(Node):
         H, self.src_pts = compute_homography(corners, ids)
         # Example: src_points = np.array([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
         
-
-        #Getting center of keyboard in pixel coordinates and publishing to ROS topic
-        if self.src_pts is not None and len(self.src_pts) > 0:
-            #TODO change this piece to using homo instead of averaging 
-            center = np.mean(self.src_pts, axis=0)  # shape (2,)
-            x_center, y_center = center
-            x_center = -640/2 + x_center
-            y_center = 480/2 - y_center
-            
-            self.get_logger().info(f"Center: {x_center}, {y_center}")
-            self.key_center.data = [float(x_center), float(y_center)]
-            self.keyboard_center_pub.publish(self.key_center)
+        #This implementation gets center using the src points and averaging them 
+        #if self.src_pts is not None and len(self.src_pts) > 0:
+        #   
+        #   center = np.mean(self.src_pts, axis=0)  # shape (2,)
+        #    x_center, y_center = center
+        #    x_center = -640/2 + x_center
+        #    y_center = 480/2 - y_center
+        #    
+        #    self.get_logger().info(f"Center: {x_center}, {y_center}")
+        #    self.key_center.data = [float(x_center), float(y_center)]
+        #    self.keyboard_center_pub.publish(self.key_center)
 
         #self.get_logger().info(f"Center: {self.key_center}")
         self.H_inv = None
@@ -401,13 +519,7 @@ class KeyboardNode(Node):
                 self.H_inv = np.linalg.inv(H)
             except np.linalg.LinAlgError:
                 pass
-        
-        
-        
-        
-        
-        
-        
+            
         # use fresh if we got one, otherwise fall back to cache
         if self.H_inv is not None:
             self.cached_H_inv = self.H_inv
@@ -418,6 +530,17 @@ class KeyboardNode(Node):
             self.src_pts = self.cached_src
         else:
             self.cached_H_inv = None
+            
+        #This implementation gets center using the homography and the known keyboard center,
+        #should be more redundant to missing markers 
+        if self.H_inv is not None:
+            # H_inv maps mm -> pixels (correct direction)
+            cx_px, cy_px = mm_to_px(self.H_inv, KEYBOARD_W / 2.0, KEYBOARD_D / 2.0)
+            x_center = cx_px - 640.0
+            y_center = 480.0 / 2.0 - cy_px
+            self.get_logger().info(f"Center: {x_center:.1f}, {y_center:.1f}")
+            self.key_center.data = [float(x_center), float(y_center)]
+            self.keyboard_center_pub.publish(self.key_center)    
 
         # status bar
         if self.H_inv is not None:
@@ -490,6 +613,8 @@ class KeyboardNode(Node):
         })
         self.movement_pub.publish(msg)
         self.get_logger().info(f"Sent: {label}  dx={dx + OFFSET_X:.1f}  dy={dy + OFFSET_Y:.1f}")
+        
+    #TODO make function to send center in callback 
 
     def _on_arm_response(self, msg):
         """arm says it finished a press, advance to next key"""
