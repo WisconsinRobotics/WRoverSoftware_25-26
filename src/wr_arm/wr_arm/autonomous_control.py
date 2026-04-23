@@ -11,6 +11,7 @@ import math
 
 WRIST_SPEED_VALUE = .5
 GRIPPER_SPEED_VALUE = .5
+IN_OUT_MOVE = 100 #TODO check this value
 class ArmLogic(Node):
 
     def __init__(self):
@@ -80,15 +81,15 @@ class ArmLogic(Node):
         
         self.going_down = 0
         self.modifier = 1
-        self.counter = 0
+        self.counter_x = 0
+        self.counter_y = 0
+        self.counter_in_out = 0
 
         self.centered = False
 
     
     #Put publishers in timer to limit rate of publishing
     def timer_callback(self):
-        self.counter += 1
-        self.get_logger().info(str(self.counter))
         self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
         self.arm_publisher_up_and_down.publish(self.msg_up_and_down)
         self.arm_publisher_forwards_and_bacwards.publish(self.msg_forwards_and_backwards)
@@ -211,29 +212,37 @@ class ArmLogic(Node):
         if(self.centered == True):
             x = msg.data[0]
             y = msg.data[1]
-
-        else:
-            close_enough = 10
+            #move x:
             
-            #Set to true if autonomous runs
-            self.autonomous = True
-            if(self.autonomous == True):
-                if(abs(x) < close_enough and abs(y) < close_enough):
-                    self.msg_forwards_and_backwards.data = 0.0
-                    self.msg_side_to_side.data = 0.0
-                    self.msg_up_and_down.data = 0.0
+            if(self.counter < abs(x)):
+                self.counter_x +=1
+                if(x < 0):
+                    self.msg_side_to_side.data = 1.0
                 else:
-                    self.msg_forwards_and_backwardsdata = -1.0
+                    self.msg_side_to_side.data = -1.0
+            else:
+                self.x_done = True
+            #move y:
+            if(self.counter < abs(y)):
+                self.counter_y +=1
+                if(y < 0):
+                    self.msg_up_and_down.data = 1.0
+                else:
+                    self.msg_up_and_down.data = -1.0
+            else:
+                self.y_done = True
+        
+        if(self.y_done and self.x_done):
+            self.counter_in_out += 1
+            if(self.counter_in_out < IN_OUT_MOVE): #TUNE THIS TODO
+                self.msg_forwards_and_backwards.data = 1
+            elif(self.counter_in_out > IN_OUT_MOVE and self.counter_in_out < IN_OUT_MOVE + 100):
+                self.msg_forwards_and_backwards.data = -1
+        
 
-                    #Publishing
-                    if(x < 0):
-                        self.msg_side_to_side.data = 1.0
-                    else:
-                        self.msg_side_to_side.data = -1.0
-                    if(y < 0):
-                        self.msg_up_and_down.data = 1.0
-                    else:
-                        self.msg_up_and_down.data = -1.0
+
+                   
+                    
 
     
 
