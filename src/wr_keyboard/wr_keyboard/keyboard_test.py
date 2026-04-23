@@ -143,7 +143,7 @@ def preprocess_for_aruco(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return CLAHE.apply(gray)
 
-
+sd
 def marker_center(one_corner):
     """average of a marker's 4 vertices = its center"""
     return one_corner.reshape(4, 2).mean(axis=0).astype(np.float32)
