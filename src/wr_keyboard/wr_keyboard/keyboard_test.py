@@ -6,6 +6,7 @@
 from typing import List
 import zmq
 import base64
+import socket
 
 
 import cv2
@@ -420,6 +421,68 @@ def receive_camera_data(ip: str, port: int, timeout: float, stop_event: threadin
         except Exception:
             pass
         
+def discover_stream_config(discovery_port: int, timeout: float, streamer_name_filter: str = None):
+    """Listen for UDP discovery heartbeats and return the first matching stream config."""
+    receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    receiver_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    receiver_socket.bind(("", discovery_port))
+    receiver_socket.settimeout(0.25)
+
+    print(
+        f"\033[93mListening for discovery on UDP {discovery_port} for up to {timeout:.1f}s"
+        f"{f' (filter={streamer_name_filter})' if streamer_name_filter else ''}...\033[0m"
+    )
+
+    deadline = time.time() + max(0.1, timeout)
+    try:
+        while time.time() < deadline:
+            try:
+                data, _addr = receiver_socket.recvfrom(4096)
+            except socket.timeout:
+                continue
+
+            try:
+                payload = json.loads(data.decode("utf8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                continue
+
+            if payload.get("type") != DISCOVERY_MESSAGE_TYPE:
+                continue
+            if payload.get("version") != DISCOVERY_VERSION:
+                continue
+
+            streamer_name = str(payload.get("streamer_name", "")).strip()
+            streamer_ip = str(payload.get("streamer_ip", "")).strip()
+            base_port = payload.get("base_port")
+            stream_count = payload.get("stream_count")
+
+            if streamer_name_filter and streamer_name != streamer_name_filter:
+                continue
+
+            if not streamer_ip or not streamer_name:
+                continue
+
+            if not isinstance(base_port, int) or not (1 <= base_port <= 65535):
+                continue
+
+            if not isinstance(stream_count, int) or stream_count < 1:
+                continue
+
+            print(
+                f"\033[92mDiscovered '{streamer_name}' at {streamer_ip} "
+                f"(base_port={base_port}, streams={stream_count})\033[0m"
+            )
+            return {
+                "streamer_name": streamer_name,
+                "streamer_ip": streamer_ip,
+                "base_port": base_port,
+                "stream_count": stream_count,
+            }
+    finally:
+        receiver_socket.close()
+
+    return None     
+        
 # ── ROS2 node ──────────────────────────────────────────────────────────────────
 # publishes JSON to keyboard_movement: {key, dx_mm, dy_mm, z_mm}
 # waits for any message on arm_response before sending the next key
@@ -439,7 +502,6 @@ class KeyboardNode(Node):
         self._lock = threading.Lock()
         self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
         self.timer = self.create_timer(0.1, self._timer_callback)
-        self.cap = cv2.VideoCapture("/dev/video4")
         self.frame = None
         self.cached_H_inv = None
         self.last_good = 0.0
@@ -450,13 +512,13 @@ class KeyboardNode(Node):
         self.H_inv = None
         
         #wreciever args
-        broadcast_ip = "0.0.0.0"
-        base_port = 5555
-        stream_count = 1
-        connection_timeout = 10.0
-        window_prefix = "Stream"
-        ports = [base_port + i for i in range(stream_count)]
-        self.stop_event, self.threads, self.frames, self.lock, self.stats = start_multiple_receivers(broadcast_ip, ports, connection_timeout, window_prefix)
+        self.connection_timeout = 10.0
+        self.window_prefix = "Stream"
+        self.discovery_port = 5550
+        self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
+        self.ports = [self.base_port + i for i in range(self.stream_count)]
+        
+        self.stop_event, self.threads, self.frames, self.lock, self.stats = start_multiple_receivers(self.broadcast_ip, self.ports, self.connection_timeout, self.window_prefix)
         
     def _timer_callback(self):
         """periodic timer to resend current key if we're waiting for arm response"""
@@ -614,7 +676,7 @@ class KeyboardNode(Node):
         self.movement_pub.publish(msg)
         self.get_logger().info(f"Sent: {label}  dx={dx + OFFSET_X:.1f}  dy={dy + OFFSET_Y:.1f}")
         
-    #TODO make function to send center in callback 
+ 
 
     def _on_arm_response(self, msg):
         """arm says it finished a press, advance to next key"""
