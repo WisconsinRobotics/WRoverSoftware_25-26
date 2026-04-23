@@ -1,126 +1,138 @@
 import depthai as dai
+import cv2
+import numpy as np
+import time
+import math
+import zmq
+import base64
+
+from ground_detect import backproject_depth_sub
+from ground_detect import ransac_plane
+from ground_detect import apply_plane_to_full_depth
 import rclpy
 from rclpy.node import Node
+from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Imu
+from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float64
+from gps_heading import HeadingVerifier
 
-class SwervePublisher(Node):
+class SectorDepthClassifier():
     def __init__(self):
-        super().__init__("swerve_publisher")
-        self.pub = self.create_publisher(Imu, "imu/data", 10)
+        self.W = 1280
+        self.H = 720
+        self.FOCAL_LENGTH = 563.33333
+        self.X_PIXEL_OFFSET = 640
+        self.ALPHA_DEG = 3.0   # degrees per sector
+        self.FOV_DEG = 2 * np.degrees(np.arctan(self.W / (2 * self.FOCAL_LENGTH)))
+        self.NUM_SECTORS = int(self.FOV_DEG / self.ALPHA_DEG)
+        print("NUM SECTORS = ", self.NUM_SECTORS)
 
-        # --- Sensor Syncing Cache ---
-        # DepthAI sends packets asynchronously. We cache the raw sensors (Accel/Gyro)
-        # and publish the full ROS message only when the Orientation (Rotation Vector) arrives.
-        self.cached_accel = None
-        self.cached_gyro = None
-
-    def process_packet(self, packet):
-        """
-        Ingests a single DepthAI IMU packet.
-        1. Updates cache if raw data is present.
-        2. Publishes ROS message if Rotation Vector is present.
-        """
-        # 1. Cache Raw Data
-        if packet.acceleroMeter:
-            self.cached_accel = packet.acceleroMeter
+        cols = np.arange(self.W)
+        angle_deg = np.degrees(np.arctan((cols - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH))
+        self.col_to_sector = np.clip(
+            ((angle_deg + self.FOV_DEG / 2) / self.ALPHA_DEG).astype(int),
+            0, self.NUM_SECTORS - 1
+        )
+        self.pixel_to_sector = np.tile(self.col_to_sector, (self.H, 1))
+        self.pixels_per_sector = np.bincount(
+            self.pixel_to_sector.ravel(),
+            minlength=self.NUM_SECTORS
+        ).astype(float)
+        self.pixels_per_sector[self.pixels_per_sector == 0] = 1
         
-        if packet.gyroscope:
-            self.cached_gyro = packet.gyroscope
-
-        # 2. Trigger Publish on Orientation Update
-        if packet.rotationVector:
-            self.publish_msg(packet.rotationVector)
-
-    def publish_msg(self, rv):
-        msg = Imu()
         
-        # --- Header ---
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = "imu_link"
+    def cb(self, depth):
+        depth_vis = cv2.normalize(depth, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        depth_vis = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
 
-        # --- Orientation (DepthAI i,j,k,real -> ROS x,y,z,w) ---
-        msg.orientation.x = rv.i
-        msg.orientation.y = rv.j
-        msg.orientation.z = rv.k
-        msg.orientation.w = rv.real
-        
-        # Covariance: Low variance (High confidence in Sensor Fusion)
-        msg.orientation_covariance = [
-            0.001, 0.0, 0.0, 
-            0.0, 0.001, 0.0, 
-            0.0, 0.0, 0.001
-        ]
+        # alternate colors per sector
+        colors = [[0, 0, 255], [0, 255, 0]]  # cyan, green
+        for i in range(self.W):
+            sector = self.col_to_sector[i]
+            depth_vis[:, i] = colors[sector % 2]
 
-        # --- Angular Velocity (Gyro) ---
-        if self.cached_gyro:
-            msg.angular_velocity.x = self.cached_gyro.x
-            msg.angular_velocity.y = self.cached_gyro.y
-            msg.angular_velocity.z = self.cached_gyro.z
-            msg.angular_velocity_covariance = [
-                0.02, 0.0, 0.0, 
-                0.0, 0.02, 0.0, 
-                0.0, 0.0, 0.02
-            ]
-        else:
-            msg.angular_velocity_covariance[0] = -1.0 # Data invalid
+        cv2.imshow("sector viz", depth_vis)  # was showing raw depth, not depth_vis
+        cv2.waitKey(0)
 
-        # --- Linear Acceleration (Accel) ---
-        if self.cached_accel:
-            msg.linear_acceleration.x = self.cached_accel.x
-            msg.linear_acceleration.y = self.cached_accel.y
-            msg.linear_acceleration.z = self.cached_accel.z
-            msg.linear_acceleration_covariance = [
-                0.04, 0.0, 0.0, 
-                0.0, 0.04, 0.0, 
-                0.0, 0.0, 0.04
-            ]
-        else:
-            msg.linear_acceleration_covariance[0] = -1.0 # Data invalid
 
-        self.pub.publish(msg)
+with dai.Pipeline() as pipeline:
+    monoLeft = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
+    monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
+    stereo = pipeline.create(dai.node.StereoDepth)
 
-# --- DEPTHAI V3 PIPELINE SETUP ---
+    stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.ROBOTICS)
+    stereo.setDepthAlign(dai.CameraBoardSocket.CAM_B)
+    stereo.setOutputSize(1280, 720)
 
-def main():
-    pipeline = dai.Pipeline()
+    config = stereo.initialConfig
 
-    # 1. Create IMU Node
+    # Median filter to remove the salt n pepper type pixels
+    config.postProcessing.median = dai.MedianFilter.KERNEL_7x7
+    config.postProcessing.thresholdFilter.maxRange = 8000 # 8.0m
+
+    config.setConfidenceThreshold(50)
+    config.setSubpixel(True)
+    config.setExtendedDisparity(True)
+
+    monoLeftOut = monoLeft.requestOutput((1280, 720))
+    monoRightOut = monoRight.requestOutput((1280, 720))
+
+    monoLeftOut.link(stereo.left)
+    monoRightOut.link(stereo.right)
+
+    rightOut = monoRightOut.createOutputQueue()
+    stereoOut = stereo.depth.createOutputQueue()
+    
     imu = pipeline.create(dai.node.IMU)
-
-    # 2. Enable Sensors
-    # We enable all three. The device will send them in batches.
-    # ARVR_STABILIZED_ROTATION_VECTOR: 9-axis fusion (internal mag/gyro/accel)
-    imu.enableIMUSensor([
-        dai.IMUSensor.ARVR_STABILIZED_ROTATION_VECTOR,
-        dai.IMUSensor.ACCELEROMETER_RAW,
-        dai.IMUSensor.GYROSCOPE_CALIBRATED
-    ], 100) # 100Hz
-
+    imu.enableIMUSensor(dai.IMUSensor.ARVR_STABILIZED_ROTATION_VECTOR, 100) # 100 Hz
     imu.setBatchReportThreshold(1)
     imu.setMaxBatchReports(10)
-
-    # 3. V3 Change: Create Output Queue DIRECTLY from the node
-    # No "XLinkOut" node is required in v3.
     imuQueue = imu.out.createOutputQueue(maxSize=10, blocking=False)
 
-    # 4. Initialize ROS
+    obj = SectorDepthClassifier()
+
     rclpy.init()
-    swerve_node = SwervePublisher()
+    # imu_node = IMUNode()
+    #swerve_queue = np.array() # TODO FINSIH THIS TODODODODODO
+    verifier = HeadingVerifier(min_move_dist=1.0, alpha=0.2)
     pipeline.start()
-    while rclpy.ok() and pipeline.isRunning():
-        # Spin ROS (non-blocking)
-        rclpy.spin_once(swerve_node, timeout_sec=0.001)
+    current_heading = 0.0
+    while pipeline.isRunning():
+        # rclpy.spin_once(imu_node, timeout_sec=0.0)
+        # msg = imu_node.latest_imu
 
-        # Fetch data from v3 queue
-        imuData = imuQueue.tryGet()
+        # q_x = msg.x
+        # q_y = msg.y
+        # q_z = msg.z
+        # q_w = msg.w
+
+        # current_heading = quaternion_to_yaw(q_x, q_y, q_z, q_w)
+        # print("uncorrected heeading relative to north = ", current_heading)
+
+        # final_heading = verifier.get_corrected_heading(
+        #      current_imu=imu_node.latest_imu, 
+        #      current_gps=gps_node.latest_gps
+        # )
+
+        # current_heading = final_heading
+
+        stereoFrame = stereoOut.get()
+        # print("corrected heeading relative to north = ", current_heading)
+        assert stereoFrame.validateTransformations()
         
-        if imuData:
-            # Iterate through the batch of packets
-            for packet in imuData.packets:
-                swerve_node.process_packet(packet)
+        # Get frame and convert to meters
+        depth = stereoFrame.getCvFrame().astype(np.float32) / 1000.0
+        
+        
+        # Call the processing function, now passing the heading
+        obj.cb(depth)
+        # if cv2.waitKey(1) == ord('q'):
+        #     break
+        
 
-    swerve_node.destroy_node()
-    rclpy.shutdown()
+    pipeline.stop()
 
-if __name__ == '__main__':
-    main()
+
+cv2.destroyAllWindows()
+## --- END: Pipeline and Device Loop ---
