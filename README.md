@@ -3,7 +3,9 @@ Official Wisconsin Robotics software repository for the 2026 University Rover Ch
 
 
 # How To Set Up Simulation
-starting from the rot of the WiscRobo directory (where this readme is)
+starting from the rot of the WiscRobo directory (where this readme is).
+NOTE: for development purposes, it is recommended to use VScode seeing as there are custom
+build commands and compile tasks in VSCode
 
 ### Raw Commands
 ```
@@ -31,5 +33,5 @@ make build
 
 # Run Projects
 source install/setup.sh
-ros2 launch simulation simulation.launch.py
+make run
 ```

@@ -25,12 +25,14 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
         *get_data_files("models"),
+        *get_data_files("config"),
+        *get_data_files("worlds"),
         ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Christopher Teggatz Jr.',
     maintainer_email='categgatzjr@gmail.com',
-    description='A package for simulating the robot in Gazebo.',
+    description='A ROS2/Gazebo Robot simulation environment for Wisconsin Robotics',
     license='Apache-2.0',
     extras_require={
         'test': [

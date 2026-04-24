@@ -5,18 +5,28 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 pkg = get_package_share_directory("simulation")
+models = os.path.join(pkg, "models")
 
 def generate_launch_description():
     return LaunchDescription([
         # add environment path for resourcs
         SetEnvironmentVariable(
             name = "GZ_SIM_RESOURCE_PATH",
-            value = os.path.join(pkg, "models")
+            value = models + ":" + os.environ.get('GZ_SIM_RESOURCE_PATH', '')
         ),
 
+        SetEnvironmentVariable(
+            name = "IGN_GAZEBO_RESOURCE_PATH",
+            value = models + ":" + os.environ.get('IGN_GAZEBO_RESOURCE_PATH', '')
+        ),
+    
         # Start Gazebo with the world
         ExecuteProcess(
-            cmd=['ros2', 'launch', "ros_gz_sim", "gz_sim.launch.py", f'gz_args:=-r {os.path.join(pkg, "models", "world.sdf")}'],
+            cmd=['ros2', 'launch', "ros_gz_sim", "gz_sim.launch.py", f'gz_args:=-r {os.path.join(pkg, "worlds", "test.world")}'],
+            additional_env={
+                'GZ_SIM_RESOURCE_PATH': models,
+                'IGN_GAZEBO_RESOURCE_PATH': models,
+            },
             output='screen'
         ),
         # Start ROS Bridge to transfer ros messages to gazebo messages after a delay
@@ -26,11 +36,9 @@ def generate_launch_description():
                 Node(
                     package='ros_gz_bridge',
                     executable='parameter_bridge',
-                    arguments=[
-                        # ROS TOPIC | ROS MSG TYPE | IGN MSG TYPE
-                        # These need to match in order for things to start correctly
-                        '/cmd_wheel_velocity@std_msgs/msg/Float64@ignition.msgs.Double'
-                    ],
+                    parameters = [{
+                        "config_file" : os.path.join(pkg, "config", "ROS_gazebo_bridge_config.yaml")
+                    }],
                     output='screen'
                 )
             ]

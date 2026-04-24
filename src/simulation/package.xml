@@ -3,7 +3,7 @@
 <package format="3">
   <name>simulation</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>A ROS2/Gazebo Robot simulation environment for Wisconsin Robotics</description>
   <maintainer email="categgatzjr@gmail.com">teggatz</maintainer>
   <license>Apache-2.0</license>
 

@@ -36,7 +36,24 @@
 		{
             "label": "Run_Simulation",
             "type": "shell",
-            "command": "echo '----- running simulation -----'source ~/.bashrc && source /opt/ros/humble/setup.sh && source install/setup.sh && ros2 launch simulation simulation.launch.py",
+            "command": "echo '----- running simulation -----' source ~/.bashrc && source /opt/ros/humble/setup.sh && source install/setup.sh && ros2 launch simulation simulation.launch.py",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": ["Build"],
+			"options": {
+                "shell": {
+                    "executable": "/bin/bash",
+                    "args": ["--login", "-i", "-c"]  // --login loads your ~/.bashrc
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run_Raw_Gazebo",
+            "type": "shell",
+            "command": "echo '----- running simulation -----' source ~/.bashrc && source /opt/ros/humble/setup.sh && source install/setup.sh && ign gazebo worlds/test.world",
             "group": {
                 "kind": "build",
                 "isDefault": true
