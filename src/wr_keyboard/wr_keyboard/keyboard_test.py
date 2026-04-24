@@ -309,179 +309,113 @@ def draw_markers(frame, corners, ids, sorted_src):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
             
 #wreciever helpers =======================================================   
-def start_multiple_receivers(ip: str, ports: List[int], timeout: float, window_prefix: str = "Stream"):
-    stop_event = threading.Event()
-    threads: List[threading.Thread] = []
-    frames: dict = {}
-    lock = threading.Lock()
-    stats = {}
+def receive_camera_data(
+	ip: str,
+	port: int,
+	timeout: float,
+):
+	"""Subscribe to a single publisher at ip:port and display frames until stop_event is set."""
+	context = zmq.Context()
+	footage_socket = context.socket(zmq.SUB)
+	footage_socket.setsockopt(zmq.CONFLATE, 1)
+	footage_socket.setsockopt(zmq.LINGER, 0)
+	footage_socket.connect(f"tcp://{ip}:{port}")
+	footage_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+	# set a receive timeout so we can check stop_event periodically
+	footage_socket.setsockopt(zmq.RCVTIMEO, 500)
+ 
+	window_name = f"Stream-{port}"
+ 
+	# Verify connection by waiting for first frame (10 second timeout)
+	connection_timeout = timeout
+	start_time = time.time()
+	first_frame_received = False
+ 
+	while not first_frame_received:
+		try:
+			footage_socket.recv(zmq.NOBLOCK)
+			first_frame_received = True
+		except zmq.Again:
+			if time.time() - start_time > connection_timeout:
+				return
+			time.sleep(0.1)  # ZMQ_CONNECTION_POLL_INTERVAL_SECONDS
+			continue
+ 
+	if not first_frame_received:
+		return
+ 
+	try:
+		while True:
+			try:
+				frame_bytes = footage_socket.recv()
+			except zmq.Again:
+				continue
+ 
+			try:
+				npimg = np.frombuffer(frame_bytes, dtype=np.uint8)
+				source = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+				if source is None:
+					continue
+				cv2.imshow(window_name, source)
+				if cv2.waitKey(1) & 0xFF == ord("q"):
+					print("Quit signal received, exiting...")
+					break
+			except ValueError:
+				# skip malformed frames
+				continue
+	finally:
+		# remove any stored frame for this window
+		footage_socket.close()
+		try:
+			context.term()
+		except Exception:
+			pass
 
-    for port in ports:
-        t = threading.Thread(
-            target=receive_camera_data, 
-            args=(ip, port, timeout, stop_event, frames, lock, stats, window_prefix), 
-            daemon=True
-        )
-        t.start()
-        threads.append(t)
+def discover_stream_config(
+	discovery_port: int, timeout: float, streamer_name_filter: str = None
+):
+	"""Listen for UDP discovery heartbeats and return the first matching stream config."""
+	receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	receiver_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	receiver_socket.bind(("", discovery_port))
+	receiver_socket.settimeout(DISCOVERY_SOCKET_TIMEOUT_SECONDS)
 
-    return stop_event, threads, frames, lock, stats   
+	print(
+		color_text(
+			f"Listening for discovery on UDP {discovery_port} for up to {timeout:.1f}s"
+			f"{f' (filter={streamer_name_filter})' if streamer_name_filter else ''}...",
+			ANSI_YELLOW,
+		)
+	)
 
-def _rate_limited_warn(counter: int, message: str, every: int = 50):
-    if counter == 1 or counter % every == 0:
-        print(f"\033[91m{message} (count={counter})\033[0m")
+	deadline = time.time() + max(MIN_TIMEOUT_SECONDS, timeout)
+	try:
+		while time.time() < deadline:
+			try:
+				data, _addr = receiver_socket.recvfrom(DISCOVERY_BUFFER_SIZE_BYTES)
+			except socket.timeout:
+				continue
 
-def receive_camera_data(ip: str, port: int, timeout: float, stop_event: threading.Event, frames: dict, lock: threading.Lock, stats: dict, window_prefix: str = "Stream"):
-    """Subscribe to a single publisher at ip:port and display frames until stop_event is set."""
-    context = zmq.Context()
-    footage_socket = context.socket(zmq.SUB)
-    footage_socket.setsockopt(zmq.CONFLATE, 1)
-    footage_socket.setsockopt(zmq.LINGER, 0)
-    footage_socket.connect(f'tcp://{ip}:{port}')
-    footage_socket.setsockopt_string(zmq.SUBSCRIBE, '')
-    # set a receive timeout so we can check stop_event periodically
-    footage_socket.setsockopt(zmq.RCVTIMEO, 500)
+			discovered = parse_discovery_payload(data, streamer_name_filter)
+			if discovered is None:
+				continue
 
-    window_name = f"{window_prefix}-{port}"
-    print(f"\033[93mAttempting to connect to {ip}:{port}...\033[0m")
+			print(
+				color_text(
+					f"Discovered '{discovered['streamer_name']}' at {discovered['streamer_ip']} "
+					f"(base_port={discovered['base_port']}, streams={discovered['stream_count']})",
+					ANSI_GREEN,
+				)
+			)
+			return discovered
+	finally:
+		receiver_socket.close()
+
+	return None
+
     
-    # Verify connection by waiting for first frame (10 second timeout)
-    connection_timeout = timeout
-    start_time = time.time()
-    first_frame_received = False
-    stat_update_failures = 0
-    decode_failures = 0
-    frame_store_failures = 0
-    
-    while not stop_event.is_set() and not first_frame_received:
-        try:
-            footage_socket.recv(zmq.NOBLOCK)
-            first_frame_received = True
-            print(f"\033[92mConnected to {ip}:{port} -> window '{window_name}'\033[0m")
-            print("\033[92mPress 'q' in any window to quit\033[0m")
-        except zmq.Again:
-            if time.time() - start_time > connection_timeout:
-                print(f"\033[91mFailed to connect to {ip}:{port} (timeout after {connection_timeout}s)\033[0m")
-                return
-            time.sleep(0.1)
-            continue
-    
-    if not first_frame_received:
-        return
 
-    try:
-        while not stop_event.is_set():
-            try:
-                frame_bytes = footage_socket.recv()
-            except zmq.Again:
-                continue
 
-            try:
-                with lock:
-                    stats[window_name] = stats.get(window_name, 0) + len(frame_bytes)
-            except (TypeError, RuntimeError) as exc:
-                stat_update_failures += 1
-                _rate_limited_warn(stat_update_failures, f"[{window_name}] stats update failed: {exc}")
-
-            try:
-                img = base64.b64decode(frame_bytes)
-                npimg = np.frombuffer(img, dtype=np.uint8)
-                source = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-                if source is None:
-                    decode_failures += 1
-                    _rate_limited_warn(decode_failures, f"[{window_name}] frame decode returned None")
-                    continue
-                # store the latest frame for the main thread to display
-                try:
-                    with lock:
-                        frames[window_name] = source.copy()
-                except (TypeError, RuntimeError) as exc:
-                    frame_store_failures += 1
-                    _rate_limited_warn(frame_store_failures, f"[{window_name}] frame store failed: {exc}")
-                    # if storing fails, skip this frame
-                    continue
-            except (base64.binascii.Error, ValueError) as exc:
-                decode_failures += 1
-                _rate_limited_warn(decode_failures, f"[{window_name}] malformed frame payload: {exc}")
-                # skip malformed frames
-                continue
-    finally:
-        # remove any stored frame for this window
-        try:
-            with lock:
-                if window_name in frames:
-                    del frames[window_name]
-                if window_name in stats:
-                    del stats[window_name]
-        except Exception:
-            pass
-        footage_socket.close()
-        try:
-            context.term()
-        except Exception:
-            pass
-        
-def discover_stream_config(discovery_port: int, timeout: float, streamer_name_filter: str = None):
-    """Listen for UDP discovery heartbeats and return the first matching stream config."""
-    receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    receiver_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    receiver_socket.bind(("", discovery_port))
-    receiver_socket.settimeout(0.25)
-
-    print(
-        f"\033[93mListening for discovery on UDP {discovery_port} for up to {timeout:.1f}s"
-        f"{f' (filter={streamer_name_filter})' if streamer_name_filter else ''}...\033[0m"
-    )
-
-    deadline = time.time() + max(0.1, timeout)
-    try:
-        while time.time() < deadline:
-            try:
-                data, _addr = receiver_socket.recvfrom(4096)
-            except socket.timeout:
-                continue
-
-            try:
-                payload = json.loads(data.decode("utf8"))
-            except (UnicodeDecodeError, json.JSONDecodeError):
-                continue
-
-            if payload.get("type") != DISCOVERY_MESSAGE_TYPE:
-                continue
-            if payload.get("version") != DISCOVERY_VERSION:
-                continue
-
-            streamer_name = str(payload.get("streamer_name", "")).strip()
-            streamer_ip = str(payload.get("streamer_ip", "")).strip()
-            base_port = payload.get("base_port")
-            stream_count = payload.get("stream_count")
-
-            if streamer_name_filter and streamer_name != streamer_name_filter:
-                continue
-
-            if not streamer_ip or not streamer_name:
-                continue
-
-            if not isinstance(base_port, int) or not (1 <= base_port <= 65535):
-                continue
-
-            if not isinstance(stream_count, int) or stream_count < 1:
-                continue
-
-            print(
-                f"\033[92mDiscovered '{streamer_name}' at {streamer_ip} "
-                f"(base_port={base_port}, streams={stream_count})\033[0m"
-            )
-            return {
-                "streamer_name": streamer_name,
-                "streamer_ip": streamer_ip,
-                "base_port": base_port,
-                "stream_count": stream_count,
-            }
-    finally:
-        receiver_socket.close()
-
-    return None     
         
 # ── ROS2 node ──────────────────────────────────────────────────────────────────
 # publishes JSON to keyboard_movement: {key, dx_mm, dy_mm, z_mm}
@@ -512,14 +446,16 @@ class KeyboardNode(Node):
         self.H_inv = None
         
         #wreciever args
+    
         self.connection_timeout = 10.0
         self.window_prefix = "Stream"
         self.discovery_port = 5550
         self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
         self.ports = [self.base_port + i for i in range(self.stream_count)]
+        threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout))
         
-        self.stop_event, self.threads, self.frames, self.lock, self.stats = start_multiple_receivers(self.broadcast_ip, self.ports, self.connection_timeout, self.window_prefix)
         
+
     def _timer_callback(self):
         """periodic timer to resend current key if we're waiting for arm response"""
         frame = None
