@@ -308,11 +308,43 @@ def draw_markers(frame, corners, ids, sorted_src):
             cv2.putText(frame, name, (int(pt[0]) + 8, int(pt[1]) + 8),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
             
+            
+            
+class FrameStore:
+	def __init__(self):
+		self._frames: dict = {}
+		self._lock = threading.Lock()
+
+	def set_latest(self, stream_name: str, frame: np.ndarray):
+		try:
+			with self._lock:
+				self._frames[stream_name] = frame.copy()
+			return None
+		except (TypeError, RuntimeError) as exc:
+			return exc
+
+	def remove_stream(self, stream_name: str):
+		try:
+			with self._lock:
+				self._frames.pop(stream_name, None)
+		except Exception:
+			pass
+
+	def snapshot_keys(self) -> List[str]:
+		with self._lock:
+			return list(self._frames.keys())
+
+	def get_frame(self, stream_name: str):
+		with self._lock:
+			return self._frames.get(stream_name)
+            
 #wreciever helpers =======================================================   
 def receive_camera_data(
 	ip: str,
 	port: int,
 	timeout: float,
+    frame_store: FrameStore,
+    stop_event: threading.Event,
 ):
 	"""Subscribe to a single publisher at ip:port and display frames until stop_event is set."""
 	context = zmq.Context()
@@ -331,7 +363,7 @@ def receive_camera_data(
 	start_time = time.time()
 	first_frame_received = False
  
-	while not first_frame_received:
+	while not stop_event.is_set() and not first_frame_received:
 		try:
 			footage_socket.recv(zmq.NOBLOCK)
 			first_frame_received = True
@@ -345,7 +377,7 @@ def receive_camera_data(
 		return
  
 	try:
-		while True:
+		while not stop_event.is_set():
 			try:
 				frame_bytes = footage_socket.recv()
 			except zmq.Again:
@@ -378,21 +410,19 @@ def discover_stream_config(
 	receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	receiver_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	receiver_socket.bind(("", discovery_port))
-	receiver_socket.settimeout(DISCOVERY_SOCKET_TIMEOUT_SECONDS)
+	receiver_socket.settimeout(0.25)
 
 	print(
-		color_text(
+		
 			f"Listening for discovery on UDP {discovery_port} for up to {timeout:.1f}s"
-			f"{f' (filter={streamer_name_filter})' if streamer_name_filter else ''}...",
-			ANSI_YELLOW,
-		)
+			f"{f' (filter={streamer_name_filter})' if streamer_name_filter else ''}..."
 	)
 
-	deadline = time.time() + max(MIN_TIMEOUT_SECONDS, timeout)
+	deadline = time.time() + max(0.1, timeout)
 	try:
 		while time.time() < deadline:
 			try:
-				data, _addr = receiver_socket.recvfrom(DISCOVERY_BUFFER_SIZE_BYTES)
+				data, _addr = receiver_socket.recvfrom(4096)
 			except socket.timeout:
 				continue
 
@@ -401,11 +431,9 @@ def discover_stream_config(
 				continue
 
 			print(
-				color_text(
+				
 					f"Discovered '{discovered['streamer_name']}' at {discovered['streamer_ip']} "
-					f"(base_port={discovered['base_port']}, streams={discovered['stream_count']})",
-					ANSI_GREEN,
-				)
+					f"(base_port={discovered['base_port']}, streams={discovered['stream_count']})"
 			)
 			return discovered
 	finally:
@@ -413,7 +441,47 @@ def discover_stream_config(
 
 	return None
 
-    
+def parse_discovery_payload(
+	packet: bytes,
+	streamer_name_filter = None,
+):
+	"""Parse and validate a discovery packet.
+
+	Returns a normalized dict for valid packets, otherwise None.
+	"""
+	try:
+		payload = json.loads(packet.decode("utf8"))
+	except (UnicodeDecodeError, json.JSONDecodeError):
+		return None
+
+	if payload.get("type") != "WRECORDER_DISCOVERY":
+		return None
+	if payload.get("version") != 1:
+		return None
+
+	streamer_name = str(payload.get("streamer_name", "")).strip()
+	streamer_ip = str(payload.get("streamer_ip", "")).strip()
+	base_port = payload.get("base_port")
+	stream_count = payload.get("stream_count")
+
+	if streamer_name_filter and streamer_name != streamer_name_filter:
+		return None
+
+	if not streamer_ip or not streamer_name:
+		return None
+
+	if not (0 <= base_port <= 65535):
+		return None
+
+	if not isinstance(stream_count, int) or stream_count < 1:
+		return None
+
+	return {
+		"streamer_name": streamer_name,
+		"streamer_ip": streamer_ip,
+		"base_port": base_port,
+		"stream_count": stream_count,
+	}
 
 
         
@@ -446,29 +514,30 @@ class KeyboardNode(Node):
         self.H_inv = None
         
         #wreciever args
-    
+        self.frame_store = FrameStore()
+        self.stop_event = threading.Event()
         self.connection_timeout = 10.0
         self.window_prefix = "Stream"
         self.discovery_port = 5550
-        self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter="cam-pi-2")
+        self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
         self.ports = [self.base_port + i for i in range(self.stream_count)]
-        threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout))
+        threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout, self.frame_store, self.stop_event), daemon=True).start()
+        
         
         
 
     def _timer_callback(self):
         """periodic timer to resend current key if we're waiting for arm response"""
-        frame = None
-        #wreciever main loop
-        with self.lock:
-            keys = list(self.frames.keys())
-        for k in keys:
-            with self.lock:
-                frame = self.frames.get(k)
-            if frame is None:
-                self.get_logger().warning(f"Frame for {k} disappeared")
-                return
-            cv2.imshow(k, frame)
+       
+        frame = self.frame_store.get_frame(self.window_prefix + f"-{self.ports[0]}")
+        if frame is not None:
+            cv2.imshow("Keyboard ArUco", frame)
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            print("Quit signal received, exiting...")
+            self.stop_event.set()    
+        
+        
+       
                 
         img = frame.copy()
         enhanced = preprocess_for_aruco(frame)
