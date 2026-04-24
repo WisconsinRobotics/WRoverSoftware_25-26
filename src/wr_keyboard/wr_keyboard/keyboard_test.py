@@ -515,7 +515,7 @@ class KeyboardNode(Node):
         self.connection_timeout = 10.0
         self.window_prefix = "Stream"
         self.discovery_port = 5550
-        self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
+        self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter="cam-pi-2")
         self.ports = [self.base_port + i for i in range(self.stream_count)]
         
         self.stop_event, self.threads, self.frames, self.lock, self.stats = start_multiple_receivers(self.broadcast_ip, self.ports, self.connection_timeout, self.window_prefix)
