@@ -519,7 +519,10 @@ class KeyboardNode(Node):
         self.connection_timeout = 10.0
         self.window_prefix = "Stream"
         self.discovery_port = 5550
-        self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
+        discovery_result = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
+        self.broadcast_ip = discovery_result["streamer_ip"]
+        self.stream_count = discovery_result["stream_count"]
+        self.base_port = discovery_result["base_port"]
         self.ports = [self.base_port + i for i in range(self.stream_count)]
         threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout, self.frame_store, self.stop_event), daemon=True).start()
         
@@ -530,11 +533,8 @@ class KeyboardNode(Node):
         """periodic timer to resend current key if we're waiting for arm response"""
        
         frame = self.frame_store.get_frame(self.window_prefix + f"-{self.ports[0]}")
-        if frame is not None:
-            cv2.imshow("Keyboard ArUco", frame)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            print("Quit signal received, exiting...")
-            self.stop_event.set()    
+        if frame is None:
+            return 
         
         
        
