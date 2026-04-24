@@ -450,7 +450,7 @@ class KeyboardNode(Node):
         self.connection_timeout = 10.0
         self.window_prefix = "Stream"
         self.discovery_port = 5550
-        self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
+        self.broadcast_ip, self.base_port, self.stream_count = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter="cam-pi-2")
         self.ports = [self.base_port + i for i in range(self.stream_count)]
         threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout))
         
