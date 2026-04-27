@@ -311,177 +311,173 @@ def draw_markers(frame, corners, ids, sorted_src):
             
             
 class FrameStore:
-	def __init__(self):
-		self._frames: dict = {}
-		self._lock = threading.Lock()
+    def __init__(self):
+        self._frames: dict = {}
+        self._lock = threading.Lock()
 
-	def set_latest(self, stream_name: str, frame: np.ndarray):
-		try:
-			with self._lock:
-				self._frames[stream_name] = frame.copy()
-			return None
-		except (TypeError, RuntimeError) as exc:
-			return exc
+    def set_latest(self, stream_name: str, frame: np.ndarray):
+        try:
+            with self._lock:
+                self._frames[stream_name] = frame.copy()
+            return None
+        except (TypeError, RuntimeError) as exc:
+            return exc
 
-	def remove_stream(self, stream_name: str):
-		try:
-			with self._lock:
-				self._frames.pop(stream_name, None)
-		except Exception:
-			pass
+    def remove_stream(self, stream_name: str):
+        try:
+            with self._lock:
+                self._frames.pop(stream_name, None)
+        except Exception:
+            pass
 
-	def snapshot_keys(self) -> List[str]:
-		with self._lock:
-			return list(self._frames.keys())
+    def snapshot_keys(self) -> List[str]:
+        with self._lock:
+            return list(self._frames.keys())
 
-	def get_frame(self, stream_name: str):
-		with self._lock:
-			return self._frames.get(stream_name)
+    def get_frame(self, stream_name: str):
+        with self._lock:
+            return self._frames.get(stream_name)
             
 #wreciever helpers =======================================================   
 def receive_camera_data(
-	ip: str,
-	port: int,
-	timeout: float,
+    ip: str,
+    port: int,
+    timeout: float,
     frame_store: FrameStore,
     stop_event: threading.Event,
 ):
-	"""Subscribe to a single publisher at ip:port and display frames until stop_event is set."""
-	context = zmq.Context()
-	footage_socket = context.socket(zmq.SUB)
-	footage_socket.setsockopt(zmq.CONFLATE, 1)
-	footage_socket.setsockopt(zmq.LINGER, 0)
-	footage_socket.connect(f"tcp://{ip}:{port}")
-	footage_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-	# set a receive timeout so we can check stop_event periodically
-	footage_socket.setsockopt(zmq.RCVTIMEO, 500)
+    """Subscribe to a single publisher at ip:port and display frames until stop_event is set."""
+    context = zmq.Context()
+    footage_socket = context.socket(zmq.SUB)
+    footage_socket.setsockopt(zmq.CONFLATE, 1)
+    footage_socket.setsockopt(zmq.LINGER, 0)
+    footage_socket.connect(f"tcp://{ip}:{port}")
+    footage_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+    # set a receive timeout so we can check stop_event periodically
+    footage_socket.setsockopt(zmq.RCVTIMEO, 500)
  
-	window_name = f"Stream-{port}"
+    window_name = f"Stream-{port}"
  
-	# Verify connection by waiting for first frame (10 second timeout)
-	connection_timeout = timeout
-	start_time = time.time()
-	first_frame_received = False
+    # Verify connection by waiting for first frame (10 second timeout)
+    connection_timeout = timeout
+    start_time = time.time()
+    first_frame_received = False
  
-	while not stop_event.is_set() and not first_frame_received:
-		try:
-			footage_socket.recv(zmq.NOBLOCK)
-			first_frame_received = True
-		except zmq.Again:
-			if time.time() - start_time > connection_timeout:
-				return
-			time.sleep(0.1)  # ZMQ_CONNECTION_POLL_INTERVAL_SECONDS
-			continue
+    while not stop_event.is_set() and not first_frame_received:
+        try:
+            footage_socket.recv(zmq.NOBLOCK)
+            first_frame_received = True
+        except zmq.Again:
+            if time.time() - start_time > connection_timeout:
+                return
+            time.sleep(0.1)  # ZMQ_CONNECTION_POLL_INTERVAL_SECONDS
+            continue
  
-	if not first_frame_received:
-		return
+    if not first_frame_received:
+        return
  
-	try:
-		while not stop_event.is_set():
-			try:
-				frame_bytes = footage_socket.recv()
-			except zmq.Again:
-				continue
+    try:
+        while not stop_event.is_set():
+            try:
+                frame_bytes = footage_socket.recv()
+            except zmq.Again:
+                continue
  
-			try:
-				npimg = np.frombuffer(frame_bytes, dtype=np.uint8)
-				source = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-				if source is None:
-					continue
-				cv2.imshow(window_name, source)
-				if cv2.waitKey(1) & 0xFF == ord("q"):
-					print("Quit signal received, exiting...")
-					break
-			except ValueError:
-				# skip malformed frames
-				continue
-	finally:
-		# remove any stored frame for this window
-		footage_socket.close()
-		try:
-			context.term()
-		except Exception:
-			pass
+            try:
+                npimg = np.frombuffer(frame_bytes, dtype=np.uint8)
+                source = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+                if source is None:
+                    continue
+                frame_store.set_latest(window_name, source)
+            except ValueError:
+                # skip malformed frames
+                continue
+    finally:
+        # remove any stored frame for this window
+        footage_socket.close()
+        try:
+            context.term()
+        except Exception:
+            pass
 
 def discover_stream_config(
-	discovery_port: int, timeout: float, streamer_name_filter: str = None
+    discovery_port: int, timeout: float, streamer_name_filter: str = None
 ):
-	"""Listen for UDP discovery heartbeats and return the first matching stream config."""
-	receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	receiver_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	receiver_socket.bind(("", discovery_port))
-	receiver_socket.settimeout(0.25)
+    """Listen for UDP discovery heartbeats and return the first matching stream config."""
+    receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    receiver_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    receiver_socket.bind(("", discovery_port))
+    receiver_socket.settimeout(0.25)
 
-	print(
-		
-			f"Listening for discovery on UDP {discovery_port} for up to {timeout:.1f}s"
-			f"{f' (filter={streamer_name_filter})' if streamer_name_filter else ''}..."
-	)
+    print(
+        
+            f"Listening for discovery on UDP {discovery_port} for up to {timeout:.1f}s"
+            f"{f' (filter={streamer_name_filter})' if streamer_name_filter else ''}..."
+    )
 
-	deadline = time.time() + max(0.1, timeout)
-	try:
-		while time.time() < deadline:
-			try:
-				data, _addr = receiver_socket.recvfrom(4096)
-			except socket.timeout:
-				continue
+    deadline = time.time() + max(0.1, timeout)
+    try:
+        while time.time() < deadline:
+            try:
+                data, _addr = receiver_socket.recvfrom(4096)
+            except socket.timeout:
+                continue
+            self.get_logger().info(f"Received discovery packet: {data[:100]} from {_addr}")
+            discovered = parse_discovery_payload(data, streamer_name_filter)
+            if discovered is None:
+                continue
 
-			discovered = parse_discovery_payload(data, streamer_name_filter)
-			if discovered is None:
-				continue
+            self.get_logger().info(
+                f"Discovered '{discovered['streamer_name']}' at {discovered['streamer_ip']} "
+                f"(base_port={discovered['base_port']}, streams={discovered['stream_count']})"
+            )
+            return discovered
+    finally:
+        receiver_socket.close()
 
-			print(
-				
-					f"Discovered '{discovered['streamer_name']}' at {discovered['streamer_ip']} "
-					f"(base_port={discovered['base_port']}, streams={discovered['stream_count']})"
-			)
-			return discovered
-	finally:
-		receiver_socket.close()
-
-	return None
+    return None
 
 def parse_discovery_payload(
-	packet: bytes,
-	streamer_name_filter = None,
+    packet: bytes,
+    streamer_name_filter = None,
 ):
-	"""Parse and validate a discovery packet.
+    """Parse and validate a discovery packet.
 
-	Returns a normalized dict for valid packets, otherwise None.
-	"""
-	try:
-		payload = json.loads(packet.decode("utf8"))
-	except (UnicodeDecodeError, json.JSONDecodeError):
-		return None
+    Returns a normalized dict for valid packets, otherwise None.
+    """
+    try:
+        payload = json.loads(packet.decode("utf8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return None
 
-	if payload.get("type") != "WRECORDER_DISCOVERY":
-		return None
-	if payload.get("version") != 1:
-		return None
+    if payload.get("type") != "WRECORDER_DISCOVERY":
+        return None
+    if payload.get("version") != 1:
+        return None
 
-	streamer_name = str(payload.get("streamer_name", "")).strip()
-	streamer_ip = str(payload.get("streamer_ip", "")).strip()
-	base_port = payload.get("base_port")
-	stream_count = payload.get("stream_count")
+    streamer_name = str(payload.get("streamer_name", "")).strip()
+    streamer_ip = str(payload.get("streamer_ip", "")).strip()
+    base_port = payload.get("base_port")
+    stream_count = payload.get("stream_count")
 
-	if streamer_name_filter and streamer_name != streamer_name_filter:
-		return None
+    if streamer_name_filter and streamer_name != streamer_name_filter:
+        return None
 
-	if not streamer_ip or not streamer_name:
-		return None
+    if not streamer_ip or not streamer_name:
+        return None
 
-	if not (0 <= base_port <= 65535):
-		return None
+    if not (0 <= base_port <= 65535):
+        return None
 
-	if not isinstance(stream_count, int) or stream_count < 1:
-		return None
+    if not isinstance(stream_count, int) or stream_count < 1:
+        return None
 
-	return {
-		"streamer_name": streamer_name,
-		"streamer_ip": streamer_ip,
-		"base_port": base_port,
-		"stream_count": stream_count,
-	}
+    return {
+        "streamer_name": streamer_name,
+        "streamer_ip": streamer_ip,
+        "base_port": base_port,
+        "stream_count": stream_count,
+    }
 
 
         
@@ -533,7 +529,7 @@ class KeyboardNode(Node):
         if frame is not None:
             cv2.imshow("Keyboard ArUco", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
-            print("Quit signal received, exiting...")
+            self.get_logger().info("Quit signal received, exiting...")
             self.stop_event.set()    
         
         
