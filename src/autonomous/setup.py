@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'autonomous_node = autonomous.autonomous_node:main',
+            'fake_sensors = autonomous.fake_sensors:main',
         ],
     },
 )

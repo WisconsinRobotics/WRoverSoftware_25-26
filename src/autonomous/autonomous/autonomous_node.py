@@ -13,8 +13,8 @@ import rclpy
 from rclpy.node import Node
 import cv_bridge
 from std_msgs.msg import Float32MultiArray
- 
-from aruco_class import ArucoClass
+
+from autonomous.aruco_class import ArucoClass
 # from obstacle_avoidance_class import ObsAvoidaceClass
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
