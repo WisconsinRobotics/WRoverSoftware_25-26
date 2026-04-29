@@ -6,12 +6,15 @@ from std_msgs.msg import Float64
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Int16MultiArray
 from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Bool
 import math
 
 
 WRIST_SPEED_VALUE = .5
 GRIPPER_SPEED_VALUE = .5
 IN_OUT_MOVE = 100 #TODO check this value
+CLOSE_ENOUGH = 10
+
 class ArmLogic(Node):
 
     def __init__(self):
@@ -37,7 +40,25 @@ class ArmLogic(Node):
             'keyboard_center',
             self.listener_callback_keyboard_center,
             10)
-
+        
+        #Current limiting the linear rail control
+        self.current_side_to_side = self.create_subscription(
+            Bool,
+            'current_side_to_side',
+            self.arm_listener_side_to_side_current,
+            10)
+        self.side_to_side_can_go = True
+        self.msg_side_to_side_zero = Float64()
+        self.msg_side_to_side_zero.data = 0.0
+        
+        self.current_up_and_down = self.create_subscription(
+            Bool,
+            'current_side_to_side',
+            self.arm_listener_up_and_down_current,
+            10)
+        self.up_and_down_can_go = True
+        self.msg_up_and_down_zero = Float64()
+        self.msg_up_and_down_zero.data = 0.0
 
         self.arm_publisher_side_to_side = self.create_publisher(Float64, 'side_to_side', 10)
         self.arm_publisher_up_and_down = self.create_publisher(Float64, 'up_and_down', 10)
@@ -90,8 +111,16 @@ class ArmLogic(Node):
     
     #Put publishers in timer to limit rate of publishing
     def timer_callback(self):
-        self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
-        self.arm_publisher_up_and_down.publish(self.msg_up_and_down)
+        if(self.side_to_side_can_go):
+            self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
+        else:
+            self.arm_publisher_side_to_side.publish(self.msg_side_to_side_zero)
+
+        if(self.up_and_down_can_go):
+            self.arm_publisher_up_and_down.publish(self.msg_up_and_down)
+        else:
+            self.arm_publisher_up_and_down.publish(self.msg_up_and_down_zero)
+
         self.arm_publisher_forwards_and_bacwards.publish(self.msg_forwards_and_backwards)
         self.arm_publisher_wrist_left.publish(self.msg_wrist_left)
         self.arm_publisher_wrist_right.publish(self.msg_wrist_right)
@@ -101,44 +130,55 @@ class ArmLogic(Node):
     def get_linear_rail_speed(self, left, right) -> Float64:
         #Reverse if right is positive
         #Converting -1 -> 1 range of triggers to 0->1
-        return ((left+1)/2 - (right+1)/2)
+        return (-(left+1)/2 + (right+1)/2)
 
     
     def timer_update_wrist(self):
         #Publishing
-        
-        if self.absolute_wrist >= 0 + self.kohler_shift and self.absolute_wrist <= 100 + self.kohler_shift and 1 in self.D_PAD:
-            #self.get_logger().info(str(self.absolute_wrist))
-            self.get_wrist_position(self.D_PAD[0],self.D_PAD[1],self.D_PAD[2],self.D_PAD[3], self.D_PAD[4], self.D_PAD[5])
-            self.msg_wrist_right.data = float(self.wrist_positions[0])
-            self.msg_wrist_left.data = float(self.wrist_positions[1])
+        self.set_wrist_speeds(self.D_PAD[0],self.D_PAD[1],self.D_PAD[2],self.D_PAD[3], self.D_PAD[4],self.D_PAD[5])
 
 
-    def get_wrist_position(self, up, down, left, right,x,y) -> Float32MultiArray:
+    def set_wrist_speeds(self, up, down, left, right, x, y) -> Float32MultiArray:
         if(x==1):
-            self.modifier = 1
+            self.modifier = 3
         elif(y==1):
-            self.modifier = 1
+            self.modifier = .3
         else:
             self.modifier = 1
+        #self.get_logger().info('I heard: "%s"' % self.modifier)
         if up == 1:
-            self.wrist_positions[0] += WRIST_SPEED_VALUE*self.modifier
-            self.wrist_positions[1] += WRIST_SPEED_VALUE*self.modifier
-            #if self.absolute_wrist >= 0 + self.kohler_shift + 1:
-            #    self.absolute_wrist += -WRIST_SPEED_VALUE #COMMENTED OUT LIMITS, can zero from bottom
+            self.msg_wrist_right.data = WRIST_SPEED_VALUE*self.modifier
+            self.msg_wrist_left.data = WRIST_SPEED_VALUE*self.modifier
+            self.going_down = 0
         elif down == 1:
-            self.wrist_positions[0] += -WRIST_SPEED_VALUE*self.modifier
-            self.wrist_positions[1] += -WRIST_SPEED_VALUE*self.modifier
-            #if self.absolute_wrist <= 100 + self.kohler_shift - 1:
-            #    self.absolute_wrist += WRIST_SPEED_VALUE
-        elif left == 1:
-            self.wrist_positions[0] += WRIST_SPEED_VALUE*self.modifier
-            self.wrist_positions[1] += -WRIST_SPEED_VALUE*self.modifier
+            self.msg_wrist_right.data = -WRIST_SPEED_VALUE*self.modifier
+            self.msg_wrist_left.data = -WRIST_SPEED_VALUE*self.modifier
+            self.going_down = 10
         elif right == 1:
-            self.wrist_positions[0] += -WRIST_SPEED_VALUE*self.modifier
-            self.wrist_positions[1] += WRIST_SPEED_VALUE*self.modifier
+            self.msg_wrist_right.data = (WRIST_SPEED_VALUE)*self.modifier
+            self.msg_wrist_left.data = -(WRIST_SPEED_VALUE)*self.modifier
+            self.going_down = 0
+        elif left == 1:
+            self.msg_wrist_right.data = -(WRIST_SPEED_VALUE)*self.modifier
+            self.msg_wrist_left.data = (WRIST_SPEED_VALUE)*self.modifier
+            self.going_down = 0
+        else:
+            # if(self.going_down>0):
+            #     self.msg_wrist_right.data = WRIST_SPEED_VALUE*self.modifier
+            #     self.msg_wrist_left.data = WRIST_SPEED_VALUE*self.modifier
+            #     self.going_down -= 1
+            # else:
+                self.msg_wrist_right.data = 0.0
+                self.msg_wrist_left.data = 0.0 
     
-     
+
+    #Read check current to see if we have limit
+    def arm_listener_side_to_side_current(self, msg):
+        self.side_to_side_can_go = msg.data
+
+    #Read check current to see if we have limit
+    def arm_listener_up_and_down_current(self, msg):
+        self.up_and_down_can_go = msg.data
     
     def get_gripper_speed(self, a, b) -> float:
         if a == 1:
@@ -163,7 +203,7 @@ class ArmLogic(Node):
             self.msg_up_and_down.data = motion[0]
 
             #Expecting (right y joystick)
-            self.msg_forwards_and_backwards.data = -motion[1]  
+            self.msg_forwards_and_backwards.data = motion[1]  
 
             #Publishing
             self.msg_side_to_side.data = linear_rail_speed
@@ -187,12 +227,12 @@ class ArmLogic(Node):
         # top of screen positive y
         x = msg.data[0]
         y = msg.data[1]
-        close_enough = 10
+        
         
         #Set to true if autonomous runs
         self.autonomous = True
         if(self.autonomous == True and self.centered == False):
-            if(abs(x) < close_enough and abs(y) < close_enough):
+            if(abs(x) < CLOSE_ENOUGH and abs(y) < CLOSE_ENOUGH):
                 self.centered = True
             else:
                 if(x < 0):
@@ -208,6 +248,7 @@ class ArmLogic(Node):
         #msg should be [x away,  y away] from target
         # left of screen is negative x
         # top of screen positive y
+        # center is 0,0
 
         if(self.centered == True and self.autonomous == True):
             x = msg.data[1]
