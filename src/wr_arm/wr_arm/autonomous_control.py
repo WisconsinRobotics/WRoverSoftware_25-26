@@ -191,7 +191,7 @@ class ArmLogic(Node):
         
         #Set to true if autonomous runs
         self.autonomous = True
-        if(self.autonomous == True):
+        if(self.autonomous == True and self.centered == False):
             if(abs(x) < close_enough and abs(y) < close_enough):
                 self.centered = True
             else:
@@ -209,12 +209,12 @@ class ArmLogic(Node):
         # left of screen is negative x
         # top of screen positive y
 
-        if(self.centered == True):
-            x = msg.data[0]
-            y = msg.data[1]
+        if(self.centered == True and self.autonomous == True):
+            x = msg.data[1]
+            y = msg.data[2]
             #move x:
             
-            if(self.counter < abs(x)):
+            if(self.counter_x < abs(x)): #TODO, scale this properly
                 self.counter_x +=1
                 if(x < 0):
                     self.msg_side_to_side.data = 1.0
@@ -223,7 +223,7 @@ class ArmLogic(Node):
             else:
                 self.x_done = True
             #move y:
-            if(self.counter < abs(y)):
+            if(self.counter_y < abs(y)): #TODO, scale this properly
                 self.counter_y +=1
                 if(y < 0):
                     self.msg_up_and_down.data = 1.0
@@ -236,13 +236,17 @@ class ArmLogic(Node):
             self.counter_in_out += 1
             if(self.counter_in_out < IN_OUT_MOVE): #TUNE THIS TODO
                 self.msg_forwards_and_backwards.data = 1
-            elif(self.counter_in_out > IN_OUT_MOVE and self.counter_in_out < IN_OUT_MOVE + 100):
+            elif(self.counter_in_out > IN_OUT_MOVE and self.counter_in_out < IN_OUT_MOVE + IN_OUT_MOVE):
                 self.msg_forwards_and_backwards.data = -1
-        
-
-
-                   
-                    
+            elif(self.counter_in_out > IN_OUT_MOVE + IN_OUT_MOVE):
+                self.counter_in_out = 0
+                self.counter_x = 0
+                self.counter_y = 0
+                self.y_done = 0
+                self.x_done = 0 
+                #TODO: go to next keyboard
+                x = msg.data[0]
+                y = msg.data[1]
 
     
 
