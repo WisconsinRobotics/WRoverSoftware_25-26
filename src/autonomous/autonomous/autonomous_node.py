@@ -1,10 +1,11 @@
-#!/usr/bin/env python3
+#/usr/bin/env python3
  
 import depthai as dai
-from sensor_msgs.msg import Image
 import cv2
 from numpy.matlib import empty
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import Imu
+from sensor_msgs.msg import NavSatFix
 import math
 import numpy as np
 import time
@@ -26,13 +27,14 @@ class AutonomousLogic(Node):
  
         self.publisher_ = self.create_publisher(Float32MultiArray, '/swerve', 10)
  
-        self.localization_subscription = self.create_subscription(Float32MultiArray, 'localization_info',
-                                                                  self.localization_callback, 10)
-        self.imu_subscription = self.create_subscription(Float32MultiArray, "imu_info", self.imu_callback, 10)
- 
+        # TODO: Currently subscribing to GPS, change to RTK GNSS later
+        self.localization_subscription = self.create_subscription(NavSatFix, 'fix', self.localization_callback, 10)
+        
+        self.imu_subscription = self.create_subscription(Imu, "imu/data", self.imu_callback, 10)
+        
         self.CAMERA_WIDTH = 1280
         self.CAMERA_HEIGHT = 720
- 
+        
         self.pipeline = dai.Pipeline()
         cam = self.pipeline.create(dai.node.Camera).build()
         self.videoQueue = cam.requestOutput(

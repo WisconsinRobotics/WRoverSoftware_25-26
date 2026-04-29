@@ -612,11 +612,36 @@ class ArucoClass:
  
         # BEFORE THIS CODE, TURN THE LOCALIZATION INFO (AND ORIENTATION FROM IMU) TO OUR LOCAL
         # COORDINATES (CENTER OF THE CIRCLE AS THE ORIGIN, AND INITIAL POSITION OF ROVER AS (radius, 0).
- 
- 
-        actual_x_linear_vel, actual_y_linear_vel, actual_angular_vel, current_orientation = imu.data
- 
-        current_x_position, current_y_position = localization.data
+        
+        # Get the quaternions from the IMU
+        rv_w = imu.orientation.w
+        rv_x = imu.orientation.x
+        rv_y = imu.orientation.y
+        rv_z = imu.orientaiton.z
+        # Calculate the yaw (orientation)
+        siny_cosp = 2 * (rv_w * rv_z + rv_x * rv_y)
+        cosy_cosp = 1 - 2 * (rv_y * rv_y + rv_z * rv_z)
+        current_orientation = (math.degrees(math.atan2(siny_cosp, cosy_cosp)) + 360) % 360
+        
+        # TODO: Change this to GNSS coordinates with the center of the circle as the reference point
+        latitude = localization.latitude
+        longitude = localization.longitude
+        
+        # Reference point: UW–Madison Mechanical Engineering Building
+        # Coordinates: 43.0716° N, 89.4077° W
+        HOME_LAT = 43.0716
+        HOME_LON = -89.4077
+        
+        # Conversion factors for Madison, WI (43.07° N)
+        # 1° Lat is roughly constant; 1° Lon depends on the cosine of the latitude
+        METERS_PER_DEGREE_LAT = 111095
+        METERS_PER_DEGREE_LON = 81424
+        
+        # Calculate displacement in meters
+        # Positive dy = North of ME Building
+        # Positive dx = East of ME Building
+        current_y_position = (latitude - HOME_LAT) * METERS_PER_DEGREE_LAT
+        current_x_position = (longitude - HOME_LON) * METERS_PER_DEGREE_LON
  
         if indicator == 0:
             self.x_offset = 10 - current_x_position
@@ -639,8 +664,7 @@ class ArucoClass:
             "y_position": current_y_position,
             "angle": current_angle,
             "orientation": current_orientation,
-            "radius": current_radius,
-            "linear_velocity": actual_x_linear_vel
+            "radius": current_radius
         }
  
  
@@ -755,8 +779,7 @@ class ArucoClass:
                 if not self.full_search_done:
                     lin_y = 0.0
                     lin_x = 3.0
-                    ang_pos = self.current_info["linear_velocity"] / self.semicircle[
-                        "radius"]  # publish the ang vel with actual lin vel
+                    ang_pos = imu.angular_velocity
                     ang_neg = 0.0
                 else:
                     lin_y = 0.0
