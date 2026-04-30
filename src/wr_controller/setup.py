@@ -29,6 +29,7 @@ setup(
         'console_scripts': [
             'keyboard_controller = wr_controller.keyboard_controller:main',
             'xbox_controller = wr_controller.xbox_controller:main',
+            'xbox_controller_bluetooth = wr_controller.xbox_controller_bluetooth:main',
         ],
     },
 )

@@ -14,13 +14,13 @@ def generate_launch_description():
             package='wr_arm',
             executable='autonomous_control',
             name='autonomous_control'
-        )#,
-        
+        ),
+            #Control with xbox
+        Node(
+           package='wr_controller',
+           executable='xbox_controller',
+           name='xbox_controller'
+        )
 
     ])
-        #Control with xbox
-        # Node(
-        #    package='wr_controller',
-        #    executable='xbox_controller',
-        #    name='xbox_controller'
-        # )
+    

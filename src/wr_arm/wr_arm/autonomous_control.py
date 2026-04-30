@@ -214,7 +214,8 @@ class ArmLogic(Node):
         #Expecting D-Pad
         self.D_PAD = [buttons[0], buttons[1], buttons[2], buttons[3], buttons[6],buttons[7]] # up, down, left, right, x, y
         
-        
+        #Expecting A and B buttons
+        gripper_speed = self.get_gripper_speed(buttons[4], buttons[5])
 
         self.msg_gripper.data = float(gripper_speed)
 

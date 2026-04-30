@@ -91,7 +91,7 @@ class ArmLogic(Node):
     #         wrist_speeds = [WRIST_SPEED_VALUE, -WRIST_SPEED_VALUE]
     #         return wrist_speeds
     #     elif down == 1:
-    #         wrist_speeds = [-WRIST_SPEED_VALUE, WRIST_SPEED_VALUE]
+    #         wrist_speeds = [-WRIST_SPEED_VALgripper_speedUE, WRIST_SPEED_VALUE]
     #         return wrist_speeds
     #     elif left == 1:
     #         wrist_speeds = [WRIST_SPEED_VALUE, WRIST_SPEED_VALUE]
