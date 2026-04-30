@@ -14,7 +14,6 @@ import numpy as np
 import json
 import time
 import threading
-import argparse
 try:
     import rclpy
     from rclpy.node import Node
@@ -184,7 +183,7 @@ def compute_homography(corners, ids):
         corner_idx = MARKER_ID_TO_CORNER.get(int(mid))
         if corner_idx is None:
             continue   # unknown marker ID, skip
-        src_pts.append(inside_corner(corners[i], all_centers))
+        src_pts.append(inside_corner(corners[i], all_centers[i]))
         dst_pts.append(KB_CORNERS_MM[corner_idx])
         
     n = len(src_pts)
@@ -422,16 +421,12 @@ def discover_stream_config(
                 data, _addr = receiver_socket.recvfrom(4096)
             except socket.timeout:
                 continue
-
+            #TODO might break cause no self make print if so
             discovered = parse_discovery_payload(data, streamer_name_filter)
             if discovered is None:
                 continue
 
-            print(
-                
-                    f"Discovered '{discovered['streamer_name']}' at {discovered['streamer_ip']} "
-                    f"(base_port={discovered['base_port']}, streams={discovered['stream_count']})"
-            )
+           
             return discovered
     finally:
         receiver_socket.close()
@@ -501,10 +496,8 @@ class KeyboardNode(Node):
         self._lock = threading.Lock()
         self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
         self.timer = self.create_timer(0.1, self._timer_callback)
-        self.frame = None
         self.cached_H_inv = None
         self.last_good = 0.0
-        self.cached_H_inv = None
         self.get_logger().info("Starting frame grabber thread...")  
         self.key_center = Float64MultiArray()
         self.key_center.data = [0.0, 0.0]
@@ -531,8 +524,8 @@ class KeyboardNode(Node):
        
         frame = self.frame_store.get_frame(self.window_prefix + f"-{self.ports[0]}")
         if frame is None:
-            self.get_logger().info("Frame is None, skipping processing")
-            return 
+            self.get_logger().debug("Did not get frame from store")
+            return
         
         
        
