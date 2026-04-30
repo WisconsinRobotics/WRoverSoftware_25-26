@@ -100,10 +100,14 @@ for label, (dx, dy) in MOVES.items():
 
 ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 ARUCO_PARAMS = cv2.aruco.DetectorParameters()
-ARUCO_PARAMS.adaptiveThreshWinSizeMin = 5
-ARUCO_PARAMS.adaptiveThreshWinSizeMax = 21
+ARUCO_PARAMS.adaptiveThreshWinSizeMin = 3
+ARUCO_PARAMS.adaptiveThreshWinSizeMax = 53
 ARUCO_PARAMS.adaptiveThreshWinSizeStep = 4
 ARUCO_PARAMS.adaptiveThreshConstant = 7
+ARUCO_PARAMS.polygonalApproxAccuracyRate = 0.05
+ARUCO_PARAMS.minMarkerPerimeterRate = 0.02
+ARUCO_PARAMS.errorCorrectionRate = 0.7
+ARUCO_PARAMS.perspectiveRemovePixelPerCell = 8
 
 # the 4 inside corners of our markers should map to these keyboard corners
 KB_CORNERS_MM = np.array([
@@ -121,6 +125,13 @@ MARKER_ID_TO_CORNER = {
     3: 2,   #3 at BR
     2: 3,   #2 at BL
 }
+INSIDE_CORNER_MAP = {
+    1: 2,  # bottom-right
+    2: 1,  # top-right
+    3: 0,  # top-left
+    4: 3   # bottom-left
+}
+
 _PAIR_QUALITY = {
     frozenset({0, 2}): 'diagonal',   
     frozenset({1, 3}): 'diagonal',   
@@ -132,6 +143,7 @@ _PAIR_QUALITY = {
 
 # CLAHE helps even out glare/reflections before marker detection
 CLAHE = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+
 
 
 # ── aruco helpers ──────────────────────────────────────────────────────────────
@@ -177,13 +189,14 @@ def compute_homography(corners, ids):
     
     # Build matched pairs w id to corner
     flat_ids = ids.flatten()
-    all_centers = [marker_center(c) for c in corners]
+    all_pts = np.vstack([c.reshape(4, 2) for c in corners])
+    global_center = np.mean(all_pts, axis=0)
     src_pts, dst_pts = [], []
     for i, mid in enumerate(flat_ids):
         corner_idx = MARKER_ID_TO_CORNER.get(int(mid))
         if corner_idx is None:
             continue   # unknown marker ID, skip
-        src_pts.append(inside_corner(corners[i], all_centers[i]))
+        src_pts.append(inside_corner(corners[i], global_center))
         dst_pts.append(KB_CORNERS_MM[corner_idx])
         
     n = len(src_pts)
@@ -231,13 +244,10 @@ def char_to_label(ch):
         return up
     return {' ': 'Space', '\n': 'Enter', '\t': 'Tab'}.get(ch)
 
-def inside_corner(corners, center):
-    """given a marker's 4 corners and center, return the corner closest to the center"""
-    c = np.array(center)
-    pts = corners.reshape(4, 2)
-    dists = np.linalg.norm(pts - c, axis=1)
-    idx = np.argmin(dists)
-    return pts[idx]
+def inside_corner(corner, global_center):
+    pts = corner.reshape(4, 2)
+    dists = np.linalg.norm(pts - global_center, axis=1)
+    return pts[np.argmin(dists)]
 
 
 # ── debug overlay drawing ─────────────────────────────────────────────────────
@@ -289,7 +299,7 @@ def draw_arrow(frame, H_inv, key_label):
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
 
-def draw_markers(frame, corners, ids, sorted_src):
+def draw_markers(frame, corners, ids, sorted_src, rejected_corners = None):
     """draw detected marker outlines, centers, and sorted corner labels"""
     if ids is None:
         return
@@ -301,6 +311,12 @@ def draw_markers(frame, corners, ids, sorted_src):
         cv2.circle(frame, (int(c[0]), int(c[1])), 5, (255, 0, 0), -1)
         cv2.putText(frame, f"ID {mid}", (pts[0][0], pts[0][1] - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        if rejected_corners is not None:
+            pts_rej = rejected_corners[i].reshape(4, 2).astype(np.int32)
+            cv2.polylines(frame, [pts_rej], True, (0, 0, 255), 2)
+            rc = marker_center(rejected_corners[i])
+            cv2.circle(frame, (int(rc[0]), int(rc[1])), 5, (255, 0, 0), -1)
+
     if sorted_src is not None:
         for pt, name in zip(sorted_src, ['TL', 'TR', 'BR', 'BL']):
             cv2.circle(frame, (int(pt[0]), int(pt[1])), 6, (0, 0, 255), -1)
@@ -519,6 +535,7 @@ class KeyboardNode(Node):
         
         
 
+
     def _timer_callback(self):
         """periodic timer to resend current key if we're waiting for arm response"""
        
@@ -531,31 +548,48 @@ class KeyboardNode(Node):
        
                 
         img = frame.copy()
+        img = cv2.rotate(img, cv2.ROTATE_180)
+        frame = cv2.rotate(frame, cv2.ROTATE_180)
         enhanced = preprocess_for_aruco(frame)
-        corners, ids, _ = cv2.aruco.detectMarkers(enhanced, ARUCO_DICT, parameters=ARUCO_PARAMS)
+        corners, ids, rejected_corners = cv2.aruco.detectMarkers(enhanced, ARUCO_DICT, parameters=ARUCO_PARAMS)
+        self.get_logger().info(f"Detected - {ids} markers")
+        self.get_logger().info(f"Coreners - {corners}")
+        rejected_corners = list(rejected_corners)
         # throw out false positives from keycap icons / LED labels while constricting by known
         if ids is not None:
-            MIN_AREA = 500
+            MIN_AREA = 100
             MIN_ASPECT = 0.6
             MAX_ASPECT = 1.4
             mask = []
             for i, c in enumerate(corners):
+                if ids[i][0] not in [1, 2, 3, 4]:
+                    self.get_logger().info(f"Ignored - {ids[i]} - INVALID OPTION")
+                    rejected_corners.append(c)
+                    continue
                 pts = c.reshape(4, 2)
                 area = cv2.contourArea(pts)
-                if area < MIN_AREA:
-                    continue
+                # if area < MIN_AREA:
+                #     self.get_logger().info(f"Ignored - {ids[i]} - TOO SMALL AREA")
+                #     rejected_corners.append(c)
+                #     continue
                 x, y, w, h = cv2.boundingRect(pts)
                 if h == 0:
+                    self.get_logger().info(f"Ignored - {ids[i]} - ZERO HEIGHT")
+                    rejected_corners.append(c)
                     continue
                 aspect = w / h
                 if aspect < MIN_ASPECT or aspect > MAX_ASPECT:
+                    self.get_logger().info(f"Ignored - {ids[i]} - aspect outside range - aspect - {aspect}")
+                    rejected_corners.append(c)
                     continue
                 mask.append(i)
             corners = [corners[i] for i in mask]
             ids = ids[mask] if len(mask) > 0 else None
+            
 
         # try to get a fresh homography
         H, self.src_pts = compute_homography(corners, ids)
+        self.get_logger().info(f"1 - SRC PTS - {self.src_pts}")
         # Example: src_points = np.array([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
         
         #This implementation gets center using the src points and averaging them 
@@ -600,7 +634,7 @@ class KeyboardNode(Node):
             self.get_logger().info(f"Center: {x_center:.1f}, {y_center:.1f}")
             self.key_center.data = [float(x_center), float(y_center)]
             self.keyboard_center_pub.publish(self.key_center)    
-        self.get_logger().info(f"Made it past center")
+        self.get_logger().info(f"Made it past center, H_inv val - {self.H_inv}")
         # status bar
         if self.H_inv is not None:
             draw_keys(img, self.H_inv)
@@ -617,8 +651,8 @@ class KeyboardNode(Node):
             else:
                 status = f"Need 4 markers (found {n})"
             color = (0, 0, 255)
-
-        draw_markers(img, corners, ids, self.src_pts)
+        self.get_logger().info(f"2 - SRC PTS - {self.src_pts}, ids - {ids}")
+        draw_markers(img, corners, ids, self.src_pts, rejected_corners = None)
         self.get_logger().info(f"drew markers ")
         # # show arrow to current target key if we're mid-sequence
         # if node and node.active and H_inv is not None:
