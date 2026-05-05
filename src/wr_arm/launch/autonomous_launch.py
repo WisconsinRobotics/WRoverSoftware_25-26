@@ -14,13 +14,25 @@ def generate_launch_description():
             package='wr_arm',
             executable='autonomous_control',
             name='autonomous_control'
-        )#,
-        
+        ),
+            #Control with xbox
+        Node(
+           package='wr_controller',
+           executable='xbox_controller_bluetooth',
+           name='xbox_controller_bluetooth'
+        ),
+        # Node(
+        #     package='wr_can_comms',
+        #     executable='can_comms',
+        #     name='can_comms'
+        # ),
+
+        # Node(
+        #     package='wr_can_comms',
+        #     executable='receive_can',
+        #     name='receive_can'
+        # ),
+
 
     ])
-        #Control with xbox
-        # Node(
-        #    package='wr_controller',
-        #    executable='xbox_controller',
-        #    name='xbox_controller'
-        # )
+    

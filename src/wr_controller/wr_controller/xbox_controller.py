@@ -35,7 +35,7 @@ class XboxPublisher(Node):
         if len(self.joysticks) > CONTROLLER:
             # Currently set up for bluetooth, might change later
             self.motion = [self.joysticks[CONTROLLER].get_axis(1), #Left stick up and down
-                        -self.joysticks[CONTROLLER].get_axis(4),  #Right stick up and down
+                        self.joysticks[CONTROLLER].get_axis(4),  #Right stick up and down
                         self.joysticks[CONTROLLER].get_axis(2), #Right Trigger
                         self.joysticks[CONTROLLER].get_axis(5) ]# Left Trigger 
             #self.get_logger().info("Motion: " + str(self.motion)) 
