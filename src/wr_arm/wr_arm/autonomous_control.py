@@ -70,16 +70,20 @@ class ArmLogic(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         timer_period = 0.01  # seconds
-        #self.timer_wrist = self.create_timer(timer_period, self.timer_update_wrist)
+        self.timer_wrist = self.create_timer(timer_period, self.timer_update_wrist)
 
         #Define Postion of left and right position of wrist
-        self.kohler_shift = 135.0
-        self.D_PAD = [0,0,0,0,0,0] #Array to keep track of which buttons are pressed
-        self.absolute_wrist = self.kohler_shift#Start at zero
-        self.wrist_positions = [0.0 + self.absolute_wrist ,0.0 + self.absolute_wrist] #[lef,right]
+        self.D_PAD = [0,0,0,0,0,0,0,0] #Array to keep track of which buttons are pressed
  
         #Set autonmous flag
         self.autonomous = False
+
+        #Set current limit flags
+        self.moving_right = False
+        self.moving_left = False
+        self.hit_left = False
+        self.hit_right = False
+
 
         #Define messages beforehand
         self.msg_side_to_side = Float64()
@@ -92,29 +96,36 @@ class ArmLogic(Node):
         self.msg_forwards_and_backwards.data = 0.0
 
         self.msg_wrist_left = Float64()
-        self.msg_wrist_left.data = self.absolute_wrist 
+        self.msg_wrist_left.data = 0.0
 
         self.msg_wrist_right = Float64()
-        self.msg_wrist_right.data = self.absolute_wrist 
+        self.msg_wrist_right.data = 0.0
 
         self.msg_gripper = Float64()
-        self.msg_gripper.data = 0.
+        self.msg_gripper.data = 0.0
         
+        #Autonomous messages
         self.going_down = 0
         self.modifier = 1
         self.counter_x = 0
         self.counter_y = 0
         self.counter_in_out = 0
-
+        self.key_counter = 0
+        self.x_done = False
+        self.y_done = False
         self.centered = False
+
+        #Autonomous timer
+        self.timer_autonomous = self.create_timer(0.1, self.autonomous_movement)
 
     
     #Put publishers in timer to limit rate of publishing
     def timer_callback(self):
-        if(self.side_to_side_can_go):
-            self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
-        else:
+        #self.get_logger().info("Hit left: " + str(self.hit_left) + " Hit right: " + str(self.hit_right))
+        if(self.hit_right or self.hit_left):
             self.arm_publisher_side_to_side.publish(self.msg_side_to_side_zero)
+        else:
+            self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
 
         if(self.up_and_down_can_go):
             self.arm_publisher_up_and_down.publish(self.msg_up_and_down)
@@ -122,9 +133,9 @@ class ArmLogic(Node):
             self.arm_publisher_up_and_down.publish(self.msg_up_and_down_zero)
 
         self.arm_publisher_forwards_and_bacwards.publish(self.msg_forwards_and_backwards)
-        # self.arm_publisher_wrist_left.publish(self.msg_wrist_left)
-        # self.arm_publisher_wrist_right.publish(self.msg_wrist_right)
-        # self.arm_publisher_gripper.publish(self.msg_gripper)
+        self.arm_publisher_wrist_left.publish(self.msg_wrist_left)
+        self.arm_publisher_wrist_right.publish(self.msg_wrist_right)
+        self.arm_publisher_gripper.publish(self.msg_gripper)
 
 
     def get_linear_rail_speed(self, left, right) -> Float64:
@@ -174,7 +185,15 @@ class ArmLogic(Node):
 
     #Read check current to see if we have limit
     def arm_listener_side_to_side_current(self, msg):
-        self.side_to_side_can_go = msg.data
+        
+        if(self.moving_right and not  msg.data):
+            self.hit_right = True
+        if(self.moving_left and not msg.data):
+            self.hit_left = True
+        if(self.hit_right and self.moving_left):
+            self.hit_right = False
+        if(self.hit_left and self.moving_right):
+            self.hit_left = False
 
     #Read check current to see if we have limit
     def arm_listener_up_and_down_current(self, msg):
@@ -198,12 +217,23 @@ class ArmLogic(Node):
         if(self.autonomous == False):
             #Expecting (left trigger, rigt trigger)
             linear_rail_speed = self.get_linear_rail_speed(motion[3], motion[2])
-
+            
+            if(linear_rail_speed > 0):
+                self.moving_left = True
+                self.moving_right = False
+            elif(linear_rail_speed < 0):
+                self.moving_left = False
+                self.moving_right = True
+            else:
+                self.moving_left = False
+                self.moving_right = False
+            
+            #self.get_logger().info("Moving left: " + str(self.moving_left) + " Moving right: " + str(self.moving_right))
             #Expecting (left y joystick)
             self.msg_up_and_down.data = motion[0]
 
             #Expecting (right y joystick)
-            self.msg_forwards_and_backwards.data = motion[1]  
+            self.msg_forwards_and_backwards.data = -motion[1]  
 
             #Publishing
             self.msg_side_to_side.data = linear_rail_speed
@@ -212,8 +242,10 @@ class ArmLogic(Node):
         buttons = msg.data
         
         #Expecting D-Pad
-        self.D_PAD = [buttons[0], buttons[1], buttons[2], buttons[3], buttons[6],buttons[7]] # up, down, left, right, x, y
+        self.D_PAD = [buttons[0], buttons[1], buttons[2], buttons[3], buttons[6],buttons[7], buttons[8],buttons[9]]
+         # up, down, left, right, x, y, Bumper Left, Bumper Right
         
+        #self.get_logger().info('I heard: "%s"' % self.D_PAD)
         #Expecting A and B buttons
         gripper_speed = self.get_gripper_speed(buttons[4], buttons[5])
 
@@ -232,7 +264,10 @@ class ArmLogic(Node):
         self.autonomous = True
         if(self.autonomous == True and self.centered == False):
             if(abs(x) < CLOSE_ENOUGH and abs(y) < CLOSE_ENOUGH):
-                self.centered = True
+
+                #Only actiavet if bumper left and right are held to prevent accidental activation
+                if(self.D_PAD[6] == 1 and self.D_PAD[7] == 1): #If Y button is held, stay centered
+                    self.centered = True
             else:
                 if(x < 0):
                     self.msg_side_to_side.data = 1.0
@@ -242,6 +277,7 @@ class ArmLogic(Node):
                     self.msg_up_and_down.data = 1.0
                 else:
                     self.msg_up_and_down.data = -1.0
+            self.get_logger().info("x: " + str(x) + " y: " + str(y) + " centered: " + str(self.centered))
 
     def listener_callback_key_positions(self, msg):
         #msg should be [x away,  y away] from target
@@ -249,44 +285,59 @@ class ArmLogic(Node):
         # top of screen positive y
         # center is 0,0
 
+        self.key_position = msg.data
+
+    def autonomous_movement(self):
+
+        if 2*self.key_counter + 1 >= len(self.key_position):
+            self.autonomous = False
+            self.get_logger().info("Completed all keys, stopping autonomous movement")
+            return
+        
         if(self.centered == True and self.autonomous == True):
-            x = msg.data[1]
-            y = msg.data[2]
+            x = self.key_position[0 + 2*self.key_counter]
+            y = self.key_position[1 + 2*self.key_counter]
             #move x:
             
-            if(self.counter_x < abs(x)): #TODO, scale this properly
+            if(self.counter_x < abs(x) and self.x_done == False): #TODO, scale this properly
                 self.counter_x +=1
                 if(x < 0):
                     self.msg_side_to_side.data = 1.0
                 else:
                     self.msg_side_to_side.data = -1.0
             else:
-                self.x_done = True
+                self.msg_side_to_side.data = 0.0
+                if(self.D_PAD[6] == 1 and self.D_PAD[7] == 1): #Prevent  saying x is done until we hold the bumper 
+                    self.x_done = True
             #move y:
-            if(self.counter_y < abs(y)): #TODO, scale this properly
+            if(self.counter_y < abs(y) and self.y_done == False): #TODO, scale this properly
                 self.counter_y +=1
                 if(y < 0):
                     self.msg_up_and_down.data = 1.0
                 else:
                     self.msg_up_and_down.data = -1.0
             else:
-                self.y_done = True
+                self.msg_up_and_down.data = 0.0
+                if(self.D_PAD[6] == 1 and self.D_PAD[7] == 1): #Prevent  saying x is done until we hold the bumper 
+                    self.y_done = True
         
         if(self.y_done and self.x_done):
             self.counter_in_out += 1
             if(self.counter_in_out < IN_OUT_MOVE): #TUNE THIS TODO
                 self.msg_forwards_and_backwards.data = 1
-            elif(self.counter_in_out > IN_OUT_MOVE and self.counter_in_out < IN_OUT_MOVE + IN_OUT_MOVE):
+            elif(self.counter_in_out >= IN_OUT_MOVE and self.counter_in_out < 2 * IN_OUT_MOVE):
                 self.msg_forwards_and_backwards.data = -1
-            elif(self.counter_in_out > IN_OUT_MOVE + IN_OUT_MOVE):
-                self.counter_in_out = 0
+            elif(self.counter_in_out > 2*IN_OUT_MOVE):
+                self.counter_in_out = 0.0
+                self.msg_forwards_and_backwards.data = 0.0
+                self.msg_up_and_down.data = 0.0
                 self.counter_x = 0
                 self.counter_y = 0
-                self.y_done = 0
-                self.x_done = 0 
+                self.y_done = False
+                self.x_done = False
                 #TODO: go to next keyboard
-                x = msg.data[0]
-                y = msg.data[1]
+                self.key_counter += 1
+                self.get_logger().info("Completed key " + str(self.key_counter))
 
     
 

@@ -20,7 +20,19 @@ def generate_launch_description():
            package='wr_controller',
            executable='xbox_controller',
            name='xbox_controller'
-        )
+        ),
+        # Node(
+        #     package='wr_can_comms',
+        #     executable='can_comms',
+        #     name='can_comms'
+        # ),
+
+        # Node(
+        #     package='wr_can_comms',
+        #     executable='receive_can',
+        #     name='receive_can'
+        # ),
+
 
     ])
     

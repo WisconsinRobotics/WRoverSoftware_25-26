@@ -35,9 +35,9 @@ class XboxPublisher(Node):
         if len(self.joysticks) > CONTROLLER:
             # Currently set up for bluetooth, might change later
             self.motion = [self.joysticks[CONTROLLER].get_axis(1), #Left stick up and down
-                        -self.joysticks[CONTROLLER].get_axis(4),  #Right stick up and down
-                        self.joysticks[CONTROLLER].get_axis(2), #Right Trigger
-                        self.joysticks[CONTROLLER].get_axis(5) ]# Left Trigger 
+                        self.joysticks[CONTROLLER].get_axis(3),  #Right stick up and down
+                        self.joysticks[CONTROLLER].get_axis(5), #Left Trigger
+                        self.joysticks[CONTROLLER].get_axis(4) ]# Right Trigger 
             #self.get_logger().info("Motion: " + str(self.motion)) 
             for i in range(4):
                 if abs(self.motion[i]) < self.AXIS_BOUNDARY:
@@ -57,10 +57,10 @@ class XboxPublisher(Node):
                     elif event.button == 1:  # B button
                         print("BUTTON B")
                         self.buttons[5] = 1
-                    elif event.button == 2: # X Button
+                    elif event.button == 3: # X Button
                         self.buttons[6] = 1
                         self.get_logger().info("Pressed ARM controller (ARM)")
-                    elif event.button == 3: # Y Button
+                    elif event.button == 4: # Y Button
                         self.buttons[7] = 1
                         self.get_logger().info("Pressed Y")
                 #print(self.buttons)
@@ -75,9 +75,9 @@ class XboxPublisher(Node):
                         self.buttons[4] = 0
                     elif event.button == 1:  # B button
                         self.buttons[5] = 0
-                    elif event.button == 2: # X Button
+                    elif event.button == 3: # X Button
                         self.buttons[6] = 0
-                    elif event.button == 3: # Y Button
+                    elif event.button == 4: # Y Button
                         self.buttons[7] = 0
                 #print(self.buttons)
                 buttons_command = Int16MultiArray()

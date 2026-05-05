@@ -25,7 +25,7 @@ class XboxPublisher(Node):
 
         self.buttons_publisher_ = self.create_publisher(Int16MultiArray, 'buttons_arm', 2)
 
-        self.buttons=[0,0,0,0,0,0,0,0] #Up, Down, Left, Right, A, B, X. Y
+        self.buttons=[0,0,0,0,0,0,0,0,0,0] #Up, Down, Left, Right, A, B, X, Y, Bumper Left, Bumper Right
 
 
     def timer_callback(self):
@@ -36,8 +36,8 @@ class XboxPublisher(Node):
             # Currently set up for bluetooth, might change later
             self.motion = [self.joysticks[CONTROLLER].get_axis(1), #Left stick up and down
                         self.joysticks[CONTROLLER].get_axis(4),  #Right stick up and down
-                        self.joysticks[CONTROLLER].get_axis(2), #Left Trigger
-                        self.joysticks[CONTROLLER].get_axis(5) ]# Right Trigger 
+                        self.joysticks[CONTROLLER].get_axis(2), #Right Trigger
+                        self.joysticks[CONTROLLER].get_axis(5) ]# Left Trigger 
             #self.get_logger().info("Motion: " + str(self.motion)) 
             for i in range(4):
                 if abs(self.motion[i]) < self.AXIS_BOUNDARY:
@@ -63,6 +63,13 @@ class XboxPublisher(Node):
                     elif event.button == 3: # Y Button
                         self.buttons[7] = 1
                         self.get_logger().info("Pressed Y")
+                    elif event.button == 4:  # Left Bumper (LB)
+                        print("LB")
+                        self.buttons[8] = 1
+                    elif event.button == 5:  # Right Bumper (RB)
+                        print("RB")
+                        self.buttons[9] = 1
+
                 #print(self.buttons)
                 buttons_command = Int16MultiArray()
                 buttons_command.data = self.buttons  
@@ -79,6 +86,10 @@ class XboxPublisher(Node):
                         self.buttons[6] = 0
                     elif event.button == 3: # Y Button
                         self.buttons[7] = 0
+                    elif event.button == 4:  # Left Bumper (LB)
+                        self.buttons[8] = 0
+                    elif event.button == 5:  # Right Bumper (RB)
+                        self.buttons[9] = 0
                 #print(self.buttons)
                 buttons_command = Int16MultiArray()
                 buttons_command.data = self.buttons  
