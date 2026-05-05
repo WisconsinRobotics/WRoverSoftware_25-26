@@ -512,7 +512,7 @@ class KeyboardNode(Node):
         self._waiting = False
         self._lock = threading.Lock()
         self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
-        #self.timer = self.create_timer(0.1, self._timer_callback)
+        self.timer = self.create_timer(0.1, self._timer_callback)
         self.cached_H_inv = None
         self.last_good = 0.0
         self.get_logger().info("Starting frame grabber thread...")  
@@ -522,18 +522,18 @@ class KeyboardNode(Node):
         
         self.publish_key_movements() #Call it in the init so it only happens once
 
-        # #wreciever args
-        # self.frame_store = FrameStore()
-        # self.stop_event = threading.Event()
-        # self.connection_timeout = 10.0
-        # self.window_prefix = "Stream"
-        # self.discovery_port = 5550
-        # discovery_result = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
-        # self.broadcast_ip = discovery_result["streamer_ip"]
-        # self.stream_count = discovery_result["stream_count"]
-        # self.base_port = discovery_result["base_port"]
-        # self.ports = [self.base_port + i for i in range(self.stream_count)]
-        # threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout, self.frame_store, self.stop_event), daemon=True).start()
+        #wreciever args
+        self.frame_store = FrameStore()
+        self.stop_event = threading.Event()
+        self.connection_timeout = 10.0
+        self.window_prefix = "Stream"
+        self.discovery_port = 5550
+        discovery_result = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
+        self.broadcast_ip = discovery_result["streamer_ip"]
+        self.stream_count = discovery_result["stream_count"]
+        self.base_port = discovery_result["base_port"]
+        self.ports = [self.base_port + i for i in range(self.stream_count)]
+        threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout, self.frame_store, self.stop_event), daemon=True).start()
         
         
         
