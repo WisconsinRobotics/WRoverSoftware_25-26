@@ -632,8 +632,8 @@ class KeyboardNode(Node):
         if self.H_inv is not None:
             # H_inv maps mm -> pixels (correct direction)
             cx_px, cy_px = mm_to_px(self.H_inv, KEYBOARD_W / 2.0, KEYBOARD_D / 2.0)
-            x_center = cx_px - 640.0
-            y_center = 480.0 / 2.0 - cy_px
+            x_center = cx_px - 640.0 + 280  #Manual correction
+            y_center = 480.0 / 2.0 - cy_px - 86
             self.get_logger().info(f"Center: {x_center:.1f}, {y_center:.1f}")
             self.key_center.data = [float(x_center), float(y_center)]
             self.keyboard_center_pub.publish(self.key_center)    
