@@ -7,6 +7,7 @@ from typing import List
 import zmq
 import base64
 import socket
+import sys
 
 
 import cv2
@@ -502,7 +503,7 @@ class KeyboardNode(Node):
     def __init__(self):
         super().__init__('keyboard_aruco')
         #keyboard args
-        self.movement_pub = self.create_publisher(String,  'keyboard_key_positions', 10)
+        self.movement_pub = self.create_publisher(Float64MultiArray,  'keyboard_key_positions', 10)
         self.keyboard_center_pub = self.create_publisher(Float64MultiArray, 'keyboard_center', 10)
         self._arm_sub = self.create_subscription(
             String, 'arm_response', self._on_arm_response, 10)
@@ -511,7 +512,7 @@ class KeyboardNode(Node):
         self._waiting = False
         self._lock = threading.Lock()
         self.get_logger().info(f"keyboard_aruco ready with {len(MOVES)} keys")
-        self.timer = self.create_timer(0.1, self._timer_callback)
+        #self.timer = self.create_timer(0.1, self._timer_callback)
         self.cached_H_inv = None
         self.last_good = 0.0
         self.get_logger().info("Starting frame grabber thread...")  
@@ -519,18 +520,20 @@ class KeyboardNode(Node):
         self.key_center.data = [0.0, 0.0]
         self.H_inv = None
         
-        #wreciever args
-        self.frame_store = FrameStore()
-        self.stop_event = threading.Event()
-        self.connection_timeout = 10.0
-        self.window_prefix = "Stream"
-        self.discovery_port = 5550
-        discovery_result = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
-        self.broadcast_ip = discovery_result["streamer_ip"]
-        self.stream_count = discovery_result["stream_count"]
-        self.base_port = discovery_result["base_port"]
-        self.ports = [self.base_port + i for i in range(self.stream_count)]
-        threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout, self.frame_store, self.stop_event), daemon=True).start()
+        self.publish_key_movements() #Call it in the init so it only happens once
+
+        # #wreciever args
+        # self.frame_store = FrameStore()
+        # self.stop_event = threading.Event()
+        # self.connection_timeout = 10.0
+        # self.window_prefix = "Stream"
+        # self.discovery_port = 5550
+        # discovery_result = discover_stream_config(self.discovery_port, self.connection_timeout, streamer_name_filter=None)
+        # self.broadcast_ip = discovery_result["streamer_ip"]
+        # self.stream_count = discovery_result["stream_count"]
+        # self.base_port = discovery_result["base_port"]
+        # self.ports = [self.base_port + i for i in range(self.stream_count)]
+        # threading.Thread(target = receive_camera_data, args=(self.broadcast_ip,self.ports[0], self.connection_timeout, self.frame_store, self.stop_event), daemon=True).start()
         
         
         
@@ -666,46 +669,33 @@ class KeyboardNode(Node):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
         cv2.imshow("Keyboard ArUco", img)
 
-        # keyboard controls
-        k = cv2.waitKey(1) & 0xFF
-     
-        if k == ord('l'):
-            if self.H_inv is None:
-                print("No tracking — need 4 markers visible")
-            else:
-                word, keys = prompt_word()
-                if word and keys:
-                    self.start_sequence(word, keys)
+        #Send key movements to arm 
+
+    def publish_key_movements(self):
+        '''periodic timer to resend current key if we're waiting for arm response'''
+        #Take first input and splits it into individual characters and stores them in a list called keys. If no input is provided, it initializes keys as an empty list.
+        keys = list(sys.argv[1].upper()) if len(sys.argv) > 1 else []
+        self.get_logger().info(f"Received keys: {keys}")
+
+        #Conver tkey to movements and store in list called positions. It iterates through each key in the keys list, checks if it exists in the MOVES dictionary, and if so, retrieves the corresponding movement vector (x, y) and extends the positions list with these values.
+        positions = []
+
+        for key in keys:
+            if key in MOVES:
+                x, y = MOVES[key]
+                positions.extend([x, y])
+
+        self.publish_keys(positions)
+
+
            
 
-    def start_sequence(self, word, keys):
-        """kick off a new typing sequence"""
-        with self._lock:
-            self._keys = keys
-            self._idx = 0
-            self._waiting = False
-        self.get_logger().info(f"Sequence: {word} -> {keys}")
-        self._publish_current()
-
-    def _publish_current(self):
-        """send the current key's move vector to the arm"""
-        with self._lock:
-            if self._idx >= len(self._keys):
-                self.get_logger().info("Sequence done.")
-                return
-            label = self._keys[self._idx]
-            self._waiting = True
-
-        dx, dy = MOVES[label]
-        msg = String()
-        msg.data = json.dumps({
-            'key': label,
-            'dx_mm': dx + OFFSET_X,
-            'dy_mm': dy + OFFSET_Y,
-            'z_mm': Z_MM,
-        })
+    def publish_keys(self, movements):
+        """publish dx, dy for all keys to the arm"""
+        msg = Float64MultiArray()
+        msg.data = movements
         self.movement_pub.publish(msg)
-        self.get_logger().info(f"Sent: {label}  dx={dx + OFFSET_X:.1f}  dy={dy + OFFSET_Y:.1f}")
+        self.get_logger().info(f"Published movements: {movements}")
         
  
 
