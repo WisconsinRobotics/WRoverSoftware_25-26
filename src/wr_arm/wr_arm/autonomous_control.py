@@ -32,7 +32,7 @@ class ArmLogic(Node):
             10)
         self.subscription_buttons = self.create_subscription(
             Float64MultiArray,
-            'keyboard_center',
+            'keyboard_key_positions',
             self.listener_callback_key_positions,
             10)
         self.subscription_buttons = self.create_subscription(
