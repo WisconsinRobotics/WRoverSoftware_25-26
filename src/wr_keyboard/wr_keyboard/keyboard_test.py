@@ -678,7 +678,7 @@ class KeyboardNode(Node):
         # keys = list(sys.argv[1].upper()) if len(sys.argv) > 1 else []
         # self.get_logger().info(f"Received keys: {keys}")
 
-        keys = ["W", "R"]
+        keys = ["q", "p", "m", "z", "q"]
         #Conver tkey to movements and store in list called positions. It iterates through each key in the keys list, checks if it exists in the MOVES dictionary, and if so, retrieves the corresponding movement vector (x, y) and extends the positions list with these values.
         positions = []
 
