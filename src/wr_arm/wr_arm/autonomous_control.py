@@ -114,6 +114,7 @@ class ArmLogic(Node):
         self.x_done = False
         self.y_done = False
         self.centered = False
+        self.key_position = []
 
         #Autonomous timer
         self.timer_autonomous = self.create_timer(0.1, self.autonomous_movement)
@@ -289,9 +290,12 @@ class ArmLogic(Node):
 
     def autonomous_movement(self):
 
+
+        self.get_logger().info("Key Positions: " + str(self.key_position))
         if 2*self.key_counter + 1 >= len(self.key_position):
             self.autonomous = False
-            self.get_logger().info("Completed all keys, stopping autonomous movement")
+            if(len(self.key_position)>0):
+                self.get_logger().info("Completed all keys, stopping autonomous movement")
             return
         
         if(self.centered == True and self.autonomous == True):

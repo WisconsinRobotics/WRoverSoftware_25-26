@@ -75,8 +75,8 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_forwards_and_backwards(self, msg):
         can_msg_rpm = String()
-        rpm = msg.data * self.max_rpm
-        can_msg_rpm.data = self.vesc_ids["forwards_and_backwards"][0] + " CAN_PACKET_SET_RPM " + str(rpm) + " float"
+        rpm = msg.data
+        can_msg_rpm.data = self.vesc_ids["forwards_and_backwards"][0] + " CAN_PACKET_SET_DUTY " + str(rpm) + " float"
         self.publisher_.publish(can_msg_rpm)
         #self.get_logger().info('Publishing RPM FL: "%s"' % can_msg_rpm)
 
