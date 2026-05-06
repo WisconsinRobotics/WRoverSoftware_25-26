@@ -669,14 +669,16 @@ class KeyboardNode(Node):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
         cv2.imshow("Keyboard ArUco", img)
 
+        k = cv2.waitKey(1) & 0xFF
         #Send key movements to arm 
 
     def publish_key_movements(self):
         '''periodic timer to resend current key if we're waiting for arm response'''
         #Take first input and splits it into individual characters and stores them in a list called keys. If no input is provided, it initializes keys as an empty list.
-        keys = list(sys.argv[1].upper()) if len(sys.argv) > 1 else []
-        self.get_logger().info(f"Received keys: {keys}")
+        # keys = list(sys.argv[1].upper()) if len(sys.argv) > 1 else []
+        # self.get_logger().info(f"Received keys: {keys}")
 
+        keys = ["W", "R"]
         #Conver tkey to movements and store in list called positions. It iterates through each key in the keys list, checks if it exists in the MOVES dictionary, and if so, retrieves the corresponding movement vector (x, y) and extends the positions list with these values.
         positions = []
 
