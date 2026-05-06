@@ -11,10 +11,12 @@ import math
 
 MODIFIER_X = (126.4/100) #Convert counts to mm [there are 126.4 mm in 100 counts of x_movement]
 MODIFIER_Y = (135.6/100) #Convert counts to mm [there are 135.6 mm in 100 counts of y_movement]
+OFFSET_Y = 200 #We start -200 mm offset from center
+OFFSET_X = 50
 WRIST_SPEED_VALUE = .5
 GRIPPER_SPEED_VALUE = .5
 IN_OUT_MOVE = 40 
-CLOSE_ENOUGH = 10
+CLOSE_ENOUGH = 2
 
 class ArmLogic(Node):
 
@@ -298,7 +300,7 @@ class ArmLogic(Node):
     def autonomous_movement(self):
 
 
-        #self.get_logger().info("Key Positions: " + str(self.key_position))
+        self.get_logger().info("Key Positions: " + str(self.key_position))
         if 2*self.key_counter + 1 >= len(self.key_position):
             self.autonomous = False
             if(len(self.key_position)>0):
@@ -306,13 +308,15 @@ class ArmLogic(Node):
             return
         
         if(self.centered == True and self.autonomous == True):
-            x = self.key_position[0 + 2*self.key_counter]
-            y = self.key_position[1 + 2*self.key_counter]
+            # x = self.key_position[0 + 2*self.key_counter]
+            # y = self.key_position[1 + 2*self.key_counter]
+            x = 0
+            y = 0
             #move x:
   
             if(self.counter_x*MODIFIER_X < abs(x) and self.x_done == False): #TODO, scale this properly
                 self.counter_x +=1
-                if(x < 0):
+                if(x+OFFSET_X < 0):
                     self.msg_side_to_side.data = 1.0
                 else:
                     self.msg_side_to_side.data = -1.0
@@ -323,7 +327,7 @@ class ArmLogic(Node):
             #move y:
             if(self.counter_y*MODIFIER_Y < abs(y) and self.y_done == False): #TODO, scale this properly
                 self.counter_y +=1
-                if(y < 0):
+                if(y+OFFSET_Y < 0):
                     self.msg_up_and_down.data = 1.0
                 else:
                     self.msg_up_and_down.data = -1.0
