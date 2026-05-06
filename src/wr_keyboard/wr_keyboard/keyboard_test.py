@@ -555,8 +555,8 @@ class KeyboardNode(Node):
         frame = cv2.rotate(frame, cv2.ROTATE_180)
         enhanced = preprocess_for_aruco(frame)
         corners, ids, rejected_corners = cv2.aruco.detectMarkers(enhanced, ARUCO_DICT, parameters=ARUCO_PARAMS)
-        self.get_logger().info(f"Detected - {ids} markers")
-        self.get_logger().info(f"Coreners - {corners}")
+        #self.get_logger().info(f"Detected - {ids} markers")
+        #self.get_logger().info(f"Coreners - {corners}")
         rejected_corners = list(rejected_corners)
         # throw out false positives from keycap icons / LED labels while constricting by known
         if ids is not None:
@@ -566,7 +566,7 @@ class KeyboardNode(Node):
             mask = []
             for i, c in enumerate(corners):
                 if ids[i][0] not in [1, 2, 3, 4]:
-                    self.get_logger().info(f"Ignored - {ids[i]} - INVALID OPTION")
+                    #self.get_logger().info(f"Ignored - {ids[i]} - INVALID OPTION")
                     rejected_corners.append(c)
                     continue
                 pts = c.reshape(4, 2)
@@ -577,12 +577,12 @@ class KeyboardNode(Node):
                 #     continue
                 x, y, w, h = cv2.boundingRect(pts)
                 if h == 0:
-                    self.get_logger().info(f"Ignored - {ids[i]} - ZERO HEIGHT")
+                    #self.get_logger().info(f"Ignored - {ids[i]} - ZERO HEIGHT")
                     rejected_corners.append(c)
                     continue
                 aspect = w / h
                 if aspect < MIN_ASPECT or aspect > MAX_ASPECT:
-                    self.get_logger().info(f"Ignored - {ids[i]} - aspect outside range - aspect - {aspect}")
+                    #self.get_logger().info(f"Ignored - {ids[i]} - aspect outside range - aspect - {aspect}")
                     rejected_corners.append(c)
                     continue
                 mask.append(i)
@@ -592,7 +592,7 @@ class KeyboardNode(Node):
 
         # try to get a fresh homography
         H, self.src_pts = compute_homography(corners, ids)
-        self.get_logger().info(f"1 - SRC PTS - {self.src_pts}")
+        #self.get_logger().info(f"1 - SRC PTS - {self.src_pts}")
         # Example: src_points = np.array([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
         
         #This implementation gets center using the src points and averaging them 
@@ -609,7 +609,7 @@ class KeyboardNode(Node):
 
         #self.get_logger().info(f"Center: {self.key_center}")
         self.H_inv = None
-        self.get_logger().info(f"Made it to getting reverse H")
+        #self.get_logger().info(f"Made it to getting reverse H")
         if H is not None and self.src_pts is not None:
             try:
                 self.H_inv = np.linalg.inv(H)
@@ -634,10 +634,10 @@ class KeyboardNode(Node):
             cx_px, cy_px = mm_to_px(self.H_inv, KEYBOARD_W / 2.0, KEYBOARD_D / 2.0)
             x_center = cx_px - 640.0 + 280  #Manual correction
             y_center = 480.0 / 2.0 - cy_px - 86
-            self.get_logger().info(f"Center: {x_center:.1f}, {y_center:.1f}")
+            #self.get_logger().info(f"Center: {x_center:.1f}, {y_center:.1f}")
             self.key_center.data = [float(x_center), float(y_center)]
             self.keyboard_center_pub.publish(self.key_center)    
-        self.get_logger().info(f"Made it past center, H_inv val - {self.H_inv}")
+        #self.get_logger().info(f"Made it past center, H_inv val - {self.H_inv}")
         # status bar
         if self.H_inv is not None:
             draw_keys(img, self.H_inv)
@@ -654,9 +654,9 @@ class KeyboardNode(Node):
             else:
                 status = f"Need 4 markers (found {n})"
             color = (0, 0, 255)
-        self.get_logger().info(f"2 - SRC PTS - {self.src_pts}, ids - {ids}")
+        #self.get_logger().info(f"2 - SRC PTS - {self.src_pts}, ids - {ids}")
         draw_markers(img, corners, ids, self.src_pts, rejected_corners = None)
-        self.get_logger().info(f"drew markers ")
+        #self.get_logger().info(f"drew markers ")
         # # show arrow to current target key if we're mid-sequence
         # if node and node.active and H_inv is not None:
         #     current = node.current_key
@@ -678,7 +678,7 @@ class KeyboardNode(Node):
         # keys = list(sys.argv[1].upper()) if len(sys.argv) > 1 else []
         # self.get_logger().info(f"Received keys: {keys}")
 
-        keys = ["q", "p", "m", "z", "q"]
+        keys = ["Q", "P", "M", "Z", "Q"]
         #Conver tkey to movements and store in list called positions. It iterates through each key in the keys list, checks if it exists in the MOVES dictionary, and if so, retrieves the corresponding movement vector (x, y) and extends the positions list with these values.
         positions = []
 
@@ -697,7 +697,7 @@ class KeyboardNode(Node):
         msg = Float64MultiArray()
         msg.data = movements
         self.movement_pub.publish(msg)
-        self.get_logger().info(f"Published movements: {movements}")
+        #self.get_logger().info(f"Published movements: {movements}")
         
  
 
