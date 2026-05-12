@@ -1,0 +1,19 @@
+---
+# Test
+- ros_topic_name: "cmd_wheel_velocity"
+  gazebo_topic_name: "cmd_wheel_velocity"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "ignition.msgs.Double"
+  direction: ROS_TO_GZ
+# Front Drive Train Wheel
+- ros_topic_name: "rover/drive/TR_wheel_swivel"
+  gazebo_topic_name: "rover/drive/TR_wheel_swivel"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "ignition.msgs.Double"
+  direction: ROS_TO_GZ
+# Front Swivel to Chasis
+- ros_topic_name: "rover/drive/TR_swivel_chasis"
+  gazebo_topic_name: "rover/drive/TR_swivel_chasis"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "ignition.msgs.Double"
+  direction: ROS_TO_GZ

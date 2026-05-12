@@ -257,12 +257,12 @@
         <plugin filename="gz-sim-joint-controller-system"
         name="gz::sim::systems::JointController">
             <joint_name>left_wheel_swivel_to_chasis</joint_name>
-            <initial_velocity>1.0</initial_velocity>
+            <initial_velocity>0.0</initial_velocity>
         </plugin>
         <plugin filename="gz-sim-joint-controller-system"
         name="gz::sim::systems::JointController">
             <joint_name>right_wheel_swivel_to_chasis</joint_name>
-            <initial_velocity>1.0</initial_velocity>
+            <initial_velocity>0.0</initial_velocity>
         </plugin>
     </model>
 </sdf>

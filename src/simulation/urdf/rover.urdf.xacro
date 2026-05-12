@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rover">
+    <!-- IMPORTS -->
+    <xacro:include filename="$(find simulation)/urdf/components/main_body.xacro"/>
+    <xacro:include filename="$(find simulation)/urdf/components/right_drive.xacro"/>
+
+    <!-- BODY -->
+    <link name = "base_link"/>
+    <xacro:main_body/>
+    <xacro:right_drive/>
+
+    <!-- ===================== -->
+    <!--         JOINTS        -->
+    <!-- ===================== -->
+    <joint name = "rd_chasis_to_main_body" type="fixed">
+        <parent link = "main_body"/>
+        <child link = "right_chasis"/>
+    </joint>
+</robot>

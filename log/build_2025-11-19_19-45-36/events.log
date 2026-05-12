@@ -1,5 +1,0 @@
-[0.000000] (-) TimerEvent: {}
-[0.000127] (telemetry) JobQueued: {'identifier': 'telemetry', 'dependencies': OrderedDict()}
-[0.000174] (telemetry) JobStarted: {'identifier': 'telemetry'}
-[0.013820] (telemetry) JobEnded: {'identifier': 'telemetry', 'rc': 0}
-[0.023844] (-) EventReactorShutdown: {}

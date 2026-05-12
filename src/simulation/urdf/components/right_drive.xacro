@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name = "right_drive">
+        <!-- Imports -->
+         <!-- I dont understand why but ROS1 imports only work for imports T_T -->
+        <xacro:include filename="$(find simulation)/urdf/util/materials.xacro"/>
+
+
+        <!-- =====================-->
+        <!--     RIGHT CHASIS     -->
+        <!-- =====================-->
+        <xacro:property name="rc_pos_x" value = "0.292"/>
+        <xacro:property name="rc_pos_y" value = "-0.115"/>
+        <xacro:property name="rc_pos_z" value = "-0.0125"/>
+
+        <xacro:property name="rc_col_x" value = "0.044"/>
+        <xacro:property name="rc_col_y" value = "1.1"/>
+        <xacro:property name="rc_col_z" value = "0.25"/>
+
+        <link name = "right_chasis">
+            <!-- Inertial Values-->
+            <inertial>
+                <mass value="6.019"/>
+                <origin xyz = "${rc_pos_x} ${rc_pos_y} ${rc_pos_z}"/>
+                <inertia
+                    ixx="0.919"
+                    ixy="-0.00008998"
+                    ixz="0.000008095"
+                    iyy="0.024"
+                    iyz="-0.00001027"
+                    izz="0.898"/>
+            </inertial>
+
+            <!-- Visuals -->
+            <visual name = "rd_chasis_visual">
+                <geometry>
+                    <!-- And ros2 imports only work for meshes T_T -->
+                    <mesh filename = "package://simulation/meshes/rd_chasis.stl"/>
+                </geometry>
+                <xacro:body_mat link_name = "rd_chasis"/>
+            </visual>
+
+            <!-- Collisions-->
+            <collision name = "rd_chasis_collision">
+                <geometry>
+                    <box size="${rc_col_x} ${rc_col_y} ${rc_col_z}"/>
+                </geometry>
+                <origin xyz="${rc_pos_x} ${rc_pos_y} ${rc_pos_z}" rpy="0 0 0"/>
+            </collision>
+        </link>
+
+        <!-- =====================-->
+        <!--     BACK SWIVEL      -->
+        <!-- =====================-->
+        <xacro:property name="bw_pos_x" value = "0.292"/>
+        <xacro:property name="bw_pos_y" value = "0.343"/>
+        <xacro:property name="bw_pos_z" value = "-0.211"/>
+
+        <link name = "back_swivel">
+            <inertial>
+                <mass value="0.227"/>
+                <!-- -->
+                <origin xyz = "0 0 0"/>
+                <inertia
+                    ixx="8.402e-5"
+                    ixy="4.130e-6"
+                    ixz="2.454e-10"
+                    iyy="7.958e-5"
+                    iyz="-1.171e-11"
+                    izz="1.523e-4"/>
+            </inertial>
+
+            <!-- Visuals -->
+            <visual name = "rd_back_swivel_visual">
+                <origin xyz="${-bw_pos_x} ${-bw_pos_y} ${-bw_pos_z}" rpy="0 0 0"/>
+                <geometry>
+                    <!-- And ros2 imports only work for meshes T_T -->
+                    <mesh filename = "package://simulation/meshes/rd_back_swivel.stl"/>
+                </geometry>
+                <xacro:body_mat link_name = "rd_back_swivel"/>
+            </visual>
+        </link>
+
+        <joint name="rd_to_bw" type="continuous">
+            <parent link="right_chasis"/>
+            <child link="back_swivel"/>
+            <origin xyz="${bw_pos_x} ${bw_pos_y} ${bw_pos_z}" rpy="0 0 0"/>
+            <axis xyz = "0 0 1"/>
+        </joint>  
+        
+
+
+
+        <!-- =====================-->
+        <!--     FRONT SWIVEL      -->
+        <!-- =====================-->
+        <xacro:property name="fs_pos_x" value = "0.292"/>
+        <xacro:property name="fs_pos_y" value = "-0.574"/>
+        <xacro:property name="fs_pos_z" value = "-0.211"/>
+
+        <link name = "front_swivel">
+            <inertial>
+                <mass value="0.227"/>
+                <!-- -->
+                <origin xyz = "0 0 0"/>
+                <inertia
+                    ixx="8.402e-5"
+                    ixy="3.706e-6"
+                    ixz="2.454e-10"
+                    iyy="7.958e-5"
+                    iyz="-3.206e-11"
+                    izz="1.523e-4"/>
+            </inertial>
+
+            <!-- Visuals -->
+            <visual name = "rd_back_swivel_visual">
+                <origin xyz="${-fs_pos_x} ${-fs_pos_y} ${-fs_pos_z}" rpy="0 0 0"/>
+                <geometry>
+                    <!-- And ros2 imports only work for meshes T_T -->
+                    <mesh filename = "package://simulation/meshes/rd_front_swivel.stl"/>
+                </geometry>
+                <xacro:body_mat link_name = "rd_back_swivel"/>
+            </visual>
+        </link>
+
+        <joint name="rd_to_fw" type="continuous">
+            <parent link="right_chasis"/>
+            <child link="front_swivel"/>
+            <origin xyz="${fs_pos_x} ${fs_pos_y} ${fs_pos_z}" rpy="0 0 0"/>
+            <axis xyz = "0 0 1"/>
+        </joint>  
+
+
+    </xacro:macro>
+</robot>
