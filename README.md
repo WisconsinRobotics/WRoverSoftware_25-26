@@ -13,10 +13,10 @@ sudo apt install ros-[distro]-ublox-gps
 
 After setting up RTK on the base with ublox, use the following command to make each base start receiving RTK and publishing the corrected topics:
 ```bash
-ros2 run ublox_dgnss_node ublox_dgnss_node --ros-args -r __ns:=/rover1 -p device_serial_string:=/dev/ttyACM1
+ros2 run ublox_dgnss_node ublox_dgnss_node --ros-args -r __ns:=/rover1 -p device_serial_string:="'1'"
 ```
 * Replace `/rover1` with your desired output topic namespace.
-* Replace `/dev/ttyACM1` with your device's specific USB input port.
+* Replace "'1'" with your device's specific id
 
 ### Output Topics
 
