@@ -27,6 +27,8 @@ setup(
         *get_data_files("models"),
         *get_data_files("config"),
         *get_data_files("worlds"),
+        *get_data_files("urdf"),
+        *get_data_files("meshes"),
         ],
     install_requires=['setuptools'],
     zip_safe=True,

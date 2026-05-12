@@ -65,11 +65,12 @@
                 </surface>
             </link>
         </model>
-
+        <!--
         <model name = "rover">
             <include>
                 <uri>model://rover</uri>
             </include>
         </model>
+        -->
     </world>
 </sdf>
