@@ -6,7 +6,7 @@
 Install the `ublox` package with:
 ```bash
 sudo apt update
-sudo apt install ros-[distro]-ublox-gps
+sudo apt install ros-[distro]-ublox-dgnss
 ```
 
 ### Running the Node
