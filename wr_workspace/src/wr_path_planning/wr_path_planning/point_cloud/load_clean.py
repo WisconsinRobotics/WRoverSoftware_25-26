@@ -1,16 +1,38 @@
 import laspy
 import numpy as np
 
+from typing import List, Tuple
 
-def load_and_clean_lidar(path, voxel_size=0.35, min_points_per_cell=2):
+
+def load_and_clean_lidar(path: str, voxel_size=0.35, min_points_per_cell=2, logger=None, skip=10) -> List[Tuple[float]]:
+    """Loands and cleans lidar data
+
+    Args:
+        path - path to the las file
+        voxel_size - resolution paramenter 
+        min_points_per_cell - minimum number of points per cell when generating points
+    Returns:
+        Filtered list of points (lat, lon, alt) i.e. list[(lat, lon, alt)]
+    """
+
     las_data = laspy.read(path)
+    points = las_data.xyz[::skip]
+    x = points[:, 0]
+    y = points[:, 1]
+    z = points[:, 2]
 
-    x = np.asarray(las_data.x)
-    y = np.asarray(las_data.y)
-    z = np.asarray(las_data.z)
+    """
+    x = np.asarray([x for i, x in enumerate(las_data.x) if i % skip == 0])
+    y = np.asarray([y for i, y in enumerate(las_data.y) if i % skip == 0])
+    z = np.asarray([z for i, z in enumerate(las_data.z) if i % skip == 0])
+
+    if logger:
+        logger.info(f"Number of points loaded {len(x)}")
+
 
     # Stack into (N, 3) array — each row is one LiDAR point
     points = np.vstack((x, y, z)).T
+    """
 
     # VOXEL HASH FILTER
     # Assign every point to a voxel cell using integer grid coordinates.

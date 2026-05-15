@@ -2,6 +2,9 @@ import laspy
 import numpy as np
 from pyproj import Transformer
 
+UTAH_EPSG = 32612
+WORLD_EPSG = 4326
+
 _transformer_cache = {}
 
 def get_epsg(laz_path):
@@ -31,13 +34,23 @@ def get_epsg(laz_path):
 
     # Convert the CRS object to a simple integer EPSG code
     # e.g. 32612 for UTM Zone 12N
-    epsg = crs.to_epsg()
+    if crs:
+        epsg = crs.to_epsg()
+    else:
+        epsg = UTAH_EPSG
 
     print(f"LAZ file EPSG: {epsg}")
     return epsg
 
+def xy_to_gps(x, y, epsg=UTAH_EPSG):
+    if WORLD_EPSG not in _transformer_cache:
+        _transformer_cache[WORLD_EPSG] = Transformer.from_crs(f"EPSG:{epsg}", f"EPSG:{WORLD_EPSG}", always_xy=True)
+    transformer = _transformer_cache[WORLD_EPSG]
 
-def gps_to_xy(lat, lon, epsg):
+    lon, lat = transformer.transform(x, y)
+    return lon, lat
+
+def gps_to_xy(lon, lat, epsg=UTAH_EPSG):
     """
     Converts a GPS coordinate (lat, lon) into the same horizontal coordinate
     system as the LiDAR points in the LAZ file.
@@ -62,7 +75,7 @@ def gps_to_xy(lat, lon, epsg):
     # always_xy=True ensures we always pass (longitude, latitude) in that order
     # regardless of what the projection expects — avoids a common axis-swap bug
     if epsg not in _transformer_cache:
-        _transformer_cache[epsg] = Transformer.from_crs("EPSG:4326", f"EPSG:{epsg}", always_xy=True)
+        _transformer_cache[epsg] = Transformer.from_crs(f"EPSG:{WORLD_EPSG}", f"EPSG:{epsg}", always_xy=True)
     transformer = _transformer_cache[epsg]
 
     # Transform longitude and latitude into projected x and y coordinates

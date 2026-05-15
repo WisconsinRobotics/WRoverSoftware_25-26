@@ -1,5 +1,5 @@
 import numpy as np
-from configs.settings import K_NEIGHBORS
+from wr_path_planning.configs.settings import K_NEIGHBORS
 from scipy.spatial import cKDTree
 
 

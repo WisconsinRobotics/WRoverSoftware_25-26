@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from glob import glob
 
 package_name = 'wr_path_planning'
 
@@ -10,16 +11,22 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        # If you have your own data files, you can add them here ('share/' + package_name + "/data", glob("data/*")),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='sungkarb',
+    maintainer='wizk',
     maintainer_email='sungkar.bolat@gmail.com',
     description='TODO: Package description',
-    license='Apache-2.0',
-    tests_require=['pytest'],
+    license='TODO: License declaration',
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
     entry_points={
         'console_scripts': [
+            'path_planner = wr_path_planning.path_planner_node:main',
         ],
     },
 )

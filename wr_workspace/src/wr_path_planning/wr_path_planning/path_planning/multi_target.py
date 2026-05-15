@@ -1,5 +1,5 @@
 import itertools
-from pathplanning.astar import astar
+from wr_path_planning.path_planning.astar import astar
 
 def compute_cost_matrix(graph, points, node_indices):
     

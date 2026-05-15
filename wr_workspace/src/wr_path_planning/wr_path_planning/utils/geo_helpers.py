@@ -1,5 +1,7 @@
 import numpy as np
-from configs.settings import MAX_SLOPE_DEG, SLOPE_MULTIPLIER
+from wr_path_planning.configs.settings import MAX_SLOPE_DEG, SLOPE_MULTIPLIER
+
+from typing import List, Tuple
 
 # Weight = distance * (1 + overall slope cost)
 '''
@@ -23,7 +25,20 @@ def compute_edge_weight(i, j, dist, points):
     return edge_weight
 '''
 
-def compute_edge_weight_vectorized(i_indices, j_indices, dists, points):
+def compute_edge_weight_vectorized(i_indices: List[int], j_indices: List[int], dists: List[float], points: List[Tuple[float]]) -> List[float]:
+    """
+    Compute edge weights for all edges in a vectorized manner.
+
+    Args:
+        i_indices: list of source node indices
+        j_indices: list of target node indices
+        dists: list of horizontal distances between nodes
+        points: Nx3 array of 3D coordinates for each node
+    Returns:
+        edge_weights: list of edge weights, where weight is distance * (1 + slope cost)
+                      If an edge is too steep, its weight is set to np.nan
+    """
+
     dx_array = points[j_indices, 0] - points[i_indices, 0]
     dy_array = points[j_indices, 1] - points[i_indices, 1]
     dz_array = points[j_indices, 2] - points[i_indices, 2]

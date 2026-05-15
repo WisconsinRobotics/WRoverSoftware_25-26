@@ -1,0 +1,5 @@
+wr_workspace/src/wr_path_planning/data
+wr_workspace/install/*
+wr_workspace/build/*
+wr_workspace/log/*
+__pycache__/

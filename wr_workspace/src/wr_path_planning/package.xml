@@ -4,8 +4,8 @@
   <name>wr_path_planning</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="sungkar.bolat@gmail.com">sungkarb</maintainer>
-  <license>Apache-2.0</license>
+  <maintainer email="sungkar.bolat@gmail.com">wizk</maintainer>
+  <license>TODO: License declaration</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

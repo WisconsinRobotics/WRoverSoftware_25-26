@@ -1,5 +1,7 @@
-from utils.geo_helpers import *
+from wr_path_planning.utils.geo_helpers import *
 import numpy as np
+
+from typing import List, Tuple
 
 '''
 def build_graph(points, neighbour_indices, neighbour_distances):
@@ -30,7 +32,19 @@ def build_graph(points, neighbour_indices, neighbour_distances):
     return graph
 '''
 
-def build_graph_vectorized(points, neighbour_indices, neighbour_distances):
+def build_graph_vectorized(points: List[Tuple[float]], neighbour_indices: List[List[int]], neighbour_distances: List[List[float]]) -> List[List[Tuple[int, float]]]:
+    """
+    Build the graph using adjacency list representation in a fully vectorized manner.
+
+    Args:
+        points - 3 dimensional vector points
+        neighbour_indices - neighbour_indices[i] indicates a set of indices j that are adjacent to node i
+        neighbour_distances - distance between node i and j
+    
+    Returns:
+        An adjacency list s.t. res[i] = {(neighbour, weight): neighbour } i.e. for every node i it will produce a set of neighbours with corresponding edge weights
+    """
+
     N = points.shape[0]
 
     # Step 1: flatten neighbors

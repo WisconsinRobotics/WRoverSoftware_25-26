@@ -1,7 +1,21 @@
 import heapq
 import numpy as np
 
-def astar(graph, points, start_idx, goal_idx):
+from typing import List, Tuple
+
+def astar(graph: List[List[Tuple[int, float]]], points: np.ndarray, start_idx: int, goal_idx: int) -> Tuple[List[int], float]:
+    """"
+    A* Pathfinding algorithm implementation
+
+    Args:
+        graph: adjacency list representation of the graph, where graph[i] is a list of (neighbor_index, weight) pairs
+        points: Nx3 array of 3D coordinates for each node
+        start_idx: index of the start node
+        goal_idx: index of the goal node
+    Returns:
+        A tuple of the path (list of node indices) and the total cost (float)
+    """
+
     # HEURISTIC
     # Straight line 3D euclidean distance from node n to the goal
     # This guides A* toward the goal efficiently
