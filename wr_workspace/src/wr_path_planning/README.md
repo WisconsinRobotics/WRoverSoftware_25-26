@@ -45,7 +45,6 @@ python3 laz_merge.py <laz1> <laz2> ... <lazN> <output>
       </a>
       <br/>ROS2 Interface Implementation
     </td>
-
     <td align="center">
       <a href="https://github.com/Arshjeet13">
         <img src="https://github.com/Arshjeet13.png" width="100px;" /><br />
@@ -53,7 +52,6 @@ python3 laz_merge.py <laz1> <laz2> ... <lazN> <output>
       </a>
       <br/>Path Planning Algorithm Implementation
     </td>
-
     <td align="center">
       <a href="https://github.com/shreyas22112006">
         <img src="https://github.com/shreyas22112006.png" width="100px;" /><br />
