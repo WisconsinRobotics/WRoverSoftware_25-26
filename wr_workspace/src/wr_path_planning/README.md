@@ -36,32 +36,30 @@ python3 laz_merge.py <laz1> <laz2> ... <lazN> <output>
 
 # Contributors
 
-<div style="display: flex; flex-direction: row; justify-content: space-evenly">
-    <div style="width: 30%; margin: 0; padding: 0;">
-        <a href="https://github.com/username1">
-        <img src="https://github.com/wizkio.png" width="100px;" alt="Sungkar Bolat"/>
-        <br />
-        <sub><b>Sungkar Bolat</b></sub>
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/wizkio">
+        <img src="https://github.com/wizkio.png" width="100px;" /><br />
+        <b>Sungkar Bolat</b>
       </a>
-      <br />
-      ROS2 Interface Implementation
-    </div>
-    <div style="width: 30%; margin: 0; padding: 0;">
-        <a href="https://github.com/Arshjeet13">
-        <img src="https://github.com/Arshjeet13.png" width="100px;" alt="Sungkar Bolat"/>
-        <br />
-        <sub><b>Arshjeet</b></sub>
+      <br/>ROS2 Interface Implementation
+    </td>
+
+    <td align="center">
+      <a href="https://github.com/Arshjeet13">
+        <img src="https://github.com/Arshjeet13.png" width="100px;" /><br />
+        <b>Arshjeet</b>
       </a>
-      <br />
-      Path Planning Algorihtm Implementation
-    </div>
-    <div style="width: 30%; margin: 0; padding: 0;">
-        <a href="https://github.com/shreyas22112006">
-        <img src="https://github.com/shreyas22112006.png" width="100px;" alt="Sungkar Bolat"/>
-        <br />
-        <sub><b>Shreyas Rao Karbar</b></sub>
+      <br/>Path Planning Algorithm Implementation
+    </td>
+
+    <td align="center">
+      <a href="https://github.com/shreyas22112006">
+        <img src="https://github.com/shreyas22112006.png" width="100px;" /><br />
+        <b>Shreyas Rao Karbar</b>
       </a>
-      <br />
-      Path Planning Algorihtm Implementation
-    </div>
-</div>
+      <br/>Path Planning Algorithm Implementation
+    </td>
+  </tr>
+</table>
