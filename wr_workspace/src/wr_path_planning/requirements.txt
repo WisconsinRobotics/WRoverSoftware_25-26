@@ -1,2 +1,5 @@
 laspy
+lazrs
+laszip
 pyproj
+pdal

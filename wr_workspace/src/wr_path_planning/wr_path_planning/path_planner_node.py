@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node 
 from wr_interfaces.srv import PathPlan
+from wr_interfaces.srv import MultiPathPlan
 from geographic_msgs.msg import GeoPoint
 
 from wr_path_planning.point_cloud.load_clean import load_and_clean_lidar
@@ -9,8 +10,11 @@ from wr_path_planning.path_planning.graph_builder import build_graph_vectorized
 from wr_path_planning.path_planning.astar import astar
 from wr_path_planning.utils.nearest_point import find_nearest_node
 from wr_path_planning.utils.point_conversion import *
+from wr_path_planning.utils.geo_helpers import compute_gnss_distance
 
 import random
+from itertools import permutations
+from typing import List
 
 class PathPlannerNode(Node):
     def __init__(self):
@@ -36,39 +40,18 @@ class PathPlannerNode(Node):
         self.declare_parameter("test_mode", False)
         self.test_mode = self.get_parameter("test_mode").get_parameter_value().bool_value
         if self.test_mode:
-            # Pick two random points in lidar dataset
-            i, j = random.sample(range(len(self.points)), 2)
-            start_x, start_y = self.points[i][0], self.points[i][1]
-            goal_x, goal_y = self.points[j][0], self.points[j][1]
-
-            start = GeoPoint()
-            start.longitude, start.latitude = xy_to_gps(start_x, start_y, self.espg)
-            goal = GeoPoint()
-            goal.longitude, goal.latitude = xy_to_gps(goal_x, goal_y, self.espg)
-            self.get_logger().info(f"Entering test mode. Start: {(start.latitude, start.longitude)}; Goal: {(goal.latitude, goal.longitude)}")
-
-            request = PathPlan.Request()
-            request.start = start
-            request.goal = goal
-            response = PathPlan.Response()
-            self.find_path_callback(request, response)
-
-            points = response.path
-            self.get_logger().info(f"Found the following path to follow. Number of points on the path: {len(points)}")
-            for i in range(0, len(points)):
-                point = points[i]
-                self.get_logger().info(f"Point {i}: {(point.latitude, point.longitude)}")
-
-        if self.test_mode:
+            self._test_implementation()
             self.get_logger().info("Finished building and testing the graph. Starting the server")
         else:
             self.get_logger().info("Finished building the graph. Starting the server")
-        self.srv = self.create_service(PathPlan, "path_plan", self.find_path_callback)
+        
+        self.path_srv = self.create_service(PathPlan, "path_plan", self.find_path_callback)
+        self.multi_path_srv = self.create_service(MultiPathPlan, "multi_path_plan", self.find_multi_path_callback)
         
 
     def find_path_callback(self, request, response):
-        start = request.start
-        goal = request.goal 
+        start: GeoPoint = request.start
+        goal: GeoPoint = request.goal 
 
         # Convert points to x, y
         start_lon, start_lat = start.longitude, start.latitude
@@ -95,12 +78,113 @@ class PathPlannerNode(Node):
 
             path.append(point)
 
-
         # Package data
         response.path = path
         response.message = ""
         response.success = True
 
+    def find_multi_path_callback(self, request, response):        
+        start: GeoPoint = request.start
+        targets: List[GeoPoint] = request.targets
+
+        # We are going to use very simple heuristic to order targets
+        # We are going to check every possible arrangement of targets and find the arrangement that will have shortest overall path
+        indexes = range(len(targets))
+        best_permutation = None
+        best_length = None
+        for p in permutations(indexes):
+            length = 0
+            current_point = start
+            for indx in p:
+                next_point = targets[indx]
+                length += compute_gnss_distance(current_point, next_point)
+                current_point = next_point
+            
+            if best_permutation is None or length < best_length:
+                best_permutation = p
+                best_length = length
+        
+        targets_ordered: List[GeoPoint] = [targets[indx] for indx in best_permutation]
+        path: List[GeoPoint] = []
+        current_point = start
+        for target in targets_ordered:
+            _request = PathPlan.Request()
+            _request.start = current_point
+            _request.goal = target
+
+            _response = PathPlan.Response()
+            self.find_path_callback(_request, _response)
+            for point in _response.path:
+                path.append(point)
+
+            current_point = target
+
+        response.targets_ordered = targets_ordered
+        response.path = path
+        response.message = ""
+        response.success = True 
+    
+    def _test_implementation(self):
+        self.get_logger().info("Entering test mode")
+
+        # Pick two random points in lidar dataset
+        i, j = random.sample(range(len(self.points)), 2)
+        start_x, start_y = self.points[i][0], self.points[i][1]
+        goal_x, goal_y = self.points[j][0], self.points[j][1]
+
+        start = GeoPoint()
+        start.longitude, start.latitude = xy_to_gps(start_x, start_y, self.espg)
+        goal = GeoPoint()
+        goal.longitude, goal.latitude = xy_to_gps(goal_x, goal_y, self.espg)
+        self.get_logger().info(f"Testing single target. Start: {(start.latitude, start.longitude)}; Goal: {(goal.latitude, goal.longitude)}")
+
+        request = PathPlan.Request()
+        request.start = start
+        request.goal = goal
+        response = PathPlan.Response()
+        self.find_path_callback(request, response)
+
+        path = response.path
+        self.get_logger().info(f"Found the following path to follow. Number of points on the path: {len(path)}")
+        for i in range(0, len(path)):
+            point = path[i]
+            self.get_logger().info(f"Point {i}: {(point.latitude, point.longitude)}")
+
+        # Test multipath following
+        indexes = random.sample(range(len(self.points)), 5)
+        i = indexes[0]
+        js = indexes[1:]
+        
+        start_x, start_y = self.points[i][0], self.points[i][1]
+        start = GeoPoint()
+        start.longitude, start.latitude = xy_to_gps(start_x, start_y, self.espg)
+
+        msg = f"Testing multi target. Start: {(start.latitude, start.longitude)}; Targets: "
+        targets = []
+        for i, j in enumerate(js):
+            target_x, target_y = self.points[j][0], self.points[j][1]
+            target = GeoPoint()
+            target.longitude, target.latitude = xy_to_gps(target_x, target_y, self.espg)
+            targets.append(target)
+            msg += f"{i + 1}) {(target.latitude, target.longitude)}, "
+
+        self.get_logger().info(msg)
+        request = MultiPathPlan.Request()
+        request.start = start
+        request.targets = targets
+        response = MultiPathPlan.Response()
+        self.find_multi_path_callback(request, response)
+
+        self.get_logger().info("Found the following arrangement of targets: ")
+        targets_ordered = response.targets_ordered
+        for i, target in enumerate(targets_ordered):
+            self.get_logger().info(f"Target {i + 1}): {(target.latitude, target.longitude)}")
+        
+        path = response.path
+        self.get_logger().info(f"Found the following path to follow. Number of points on the path: {len(path)}")
+        for i in range(0, len(path)):
+            point = path[i]
+            self.get_logger().info(f"Point {i}: {(point.latitude, point.longitude)}")
 
 
 def main(args=None):

@@ -1,5 +1,6 @@
 import numpy as np
 from wr_path_planning.configs.settings import MAX_SLOPE_DEG, SLOPE_MULTIPLIER
+from geographic_msgs.msg import GeoPoint
 
 from typing import List, Tuple
 
@@ -57,3 +58,27 @@ def compute_edge_weight_vectorized(i_indices: List[int], j_indices: List[int], d
     edge_weight[~mask] = np.nan
 
     return edge_weight
+
+def compute_gnss_distance(a: GeoPoint, b: GeoPoint):
+    """Computes distance between two GNSS points using Harvesine formula
+
+    Args:
+        a - first gnss point
+        b - second gnss point
+    Returns:
+        Distance between two GNSS points in meters using spherical Earth model
+    """
+    a_lon, a_lat = a.longitude, a.latitude
+    b_lon, b_lat = b.longitude, b.latitude
+
+    d_lat = np.radians(b_lat - a_lat)
+    d_lon = np.radians(b_lon - a_lon)
+
+    a_lat_rad = np.radians(a_lat)
+    b_lat_rad = np.radians(b_lat)
+    
+    a = np.sin(d_lat / 2)**2 + np.cos(a_lat_rad) * np.cos(b_lat_rad) * np.sin(d_lon / 2)**2
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+    R = 6371000  # Earth radius in meters
+    distance = R * c
+    return distance

@@ -28,5 +28,40 @@ ros2 launch path_planner_launch.py lidar_path:=<path/to/lidar/file> test_mode:=<
 - `test_mode` — set to `true` to enable extra debugging output (default: `false`)
 
 # Usage
-To use this server in ros2 nodes, check `wr_workspace/src/wr_path_planning/wr_path_planning/example_client_node.py` to see how to use this server
+To use this server in ros2 nodes, refer to `wr_workspace/src/wr_path_planning/wr_path_planning/example_client_node.py` for an example.
+If you have laz files from USGS website to merge, you can use script at `utilities` folder by running the following command
+```bash
+python3 laz_merge.py <laz1> <laz2> ... <lazN> <output>
+```
 
+# Contributors
+
+<div style="display: flex; flex-direction: row; justify-content: space-evenly">
+    <div style="width: 30%; margin: 0; padding: 0;">
+        <a href="https://github.com/username1">
+        <img src="https://github.com/wizkio.png" width="100px;" alt="Sungkar Bolat"/>
+        <br />
+        <sub><b>Sungkar Bolat</b></sub>
+      </a>
+      <br />
+      ROS2 Interface Implementation
+    </div>
+    <div style="width: 30%; margin: 0; padding: 0;">
+        <a href="https://github.com/Arshjeet13">
+        <img src="https://github.com/Arshjeet13.png" width="100px;" alt="Sungkar Bolat"/>
+        <br />
+        <sub><b>Arshjeet</b></sub>
+      </a>
+      <br />
+      Path Planning Algorihtm Implementation
+    </div>
+    <div style="width: 30%; margin: 0; padding: 0;">
+        <a href="https://github.com/shreyas22112006">
+        <img src="https://github.com/shreyas22112006.png" width="100px;" alt="Sungkar Bolat"/>
+        <br />
+        <sub><b>Shreyas Rao Karbar</b></sub>
+      </a>
+      <br />
+      Path Planning Algorihtm Implementation
+    </div>
+</div>
