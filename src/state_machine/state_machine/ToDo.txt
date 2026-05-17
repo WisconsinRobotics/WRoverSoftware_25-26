@@ -1,0 +1,6 @@
+Add flashing state
+Add manual control state
+Put waypoint information in waypoints.txt for GUI, maybe other stuff too like current state
+Add object detection/aruco circle generation code into state machine
+Dance-off
+Simple JS GUI for control (?)

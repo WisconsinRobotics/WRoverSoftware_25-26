@@ -1,0 +1,27 @@
+running egg_info
+writing ../../build/autonomous/autonomous.egg-info/PKG-INFO
+writing dependency_links to ../../build/autonomous/autonomous.egg-info/dependency_links.txt
+writing entry points to ../../build/autonomous/autonomous.egg-info/entry_points.txt
+writing requirements to ../../build/autonomous/autonomous.egg-info/requires.txt
+writing top-level names to ../../build/autonomous/autonomous.egg-info/top_level.txt
+reading manifest file '../../build/autonomous/autonomous.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file '../../build/autonomous/autonomous.egg-info/SOURCES.txt'
+running build
+running build_py
+copying autonomous/aruco_class.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous
+copying autonomous/autonomous_node.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous
+running install
+running install_lib
+copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous/aruco_class.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous
+copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous/autonomous_node.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous
+byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous/aruco_class.py to aruco_class.cpython-312.pyc
+Sorry: TabError: inconsistent use of tabs and spaces in indentation (aruco_class.py, line 617)
+byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous/autonomous_node.py to autonomous_node.cpython-312.pyc
+running install_data
+running install_egg_info
+removing '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous-0.0.0-py3.12.egg-info' (and everything under it)
+Copying ../../build/autonomous/autonomous.egg-info to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous-0.0.0-py3.12.egg-info
+running install_scripts
+Installing autonomous_node script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/autonomous
+writing list of installed files to '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/install.log'

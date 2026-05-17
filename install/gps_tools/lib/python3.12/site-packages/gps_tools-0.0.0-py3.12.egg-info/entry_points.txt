@@ -1,0 +1,3 @@
+[console_scripts]
+heading = gps_tools.heading:main
+local_grapher = gps_tools.local_grapher:main

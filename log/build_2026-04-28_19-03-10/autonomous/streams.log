@@ -1,0 +1,26 @@
+[1.329s] Invoking command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/src/autonomous': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/autonomous build --build-base /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build install --record /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/install.log --single-version-externally-managed install_data
+[1.507s] running egg_info
+[1.518s] writing ../../build/autonomous/autonomous.egg-info/PKG-INFO
+[1.518s] writing dependency_links to ../../build/autonomous/autonomous.egg-info/dependency_links.txt
+[1.518s] writing entry points to ../../build/autonomous/autonomous.egg-info/entry_points.txt
+[1.518s] writing requirements to ../../build/autonomous/autonomous.egg-info/requires.txt
+[1.518s] writing top-level names to ../../build/autonomous/autonomous.egg-info/top_level.txt
+[1.541s] reading manifest file '../../build/autonomous/autonomous.egg-info/SOURCES.txt'
+[1.541s] adding license file 'LICENSE'
+[1.542s] writing manifest file '../../build/autonomous/autonomous.egg-info/SOURCES.txt'
+[1.542s] running build
+[1.542s] running build_py
+[1.542s] copying autonomous/aruco_class.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous
+[1.542s] running install
+[1.546s] running install_lib
+[1.558s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous/aruco_class.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous
+[1.558s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous/aruco_class.py to aruco_class.cpython-312.pyc
+[1.561s] Sorry: TabError: inconsistent use of tabs and spaces in indentation (aruco_class.py, line 623)
+[1.561s] running install_data
+[1.561s] running install_egg_info
+[1.573s] removing '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous-0.0.0-py3.12.egg-info' (and everything under it)
+[1.573s] Copying ../../build/autonomous/autonomous.egg-info to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous-0.0.0-py3.12.egg-info
+[1.574s] running install_scripts
+[1.668s] Installing autonomous_node script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/autonomous
+[1.668s] writing list of installed files to '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/install.log'
+[1.713s] Invoked command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/src/autonomous' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/autonomous build --build-base /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build install --record /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/install.log --single-version-externally-managed install_data

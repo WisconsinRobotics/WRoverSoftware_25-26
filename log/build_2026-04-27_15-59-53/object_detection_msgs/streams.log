@@ -1,0 +1,22 @@
+[0.017s] Invoking command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs -- -j12 -l12
+[0.109s] -- Found rosidl_default_generators: 1.6.0 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)
+[0.184s] Traceback (most recent call last):
+[0.184s]   File "/opt/ros/jazzy/share/ament_cmake_core/cmake/package_templates/templates_2_cmake.py", line 21, in <module>
+[0.184s]     from ament_package.templates import get_environment_hook_template_path
+[0.185s] ModuleNotFoundError: No module named 'ament_package'
+[0.188s] [31mCMake Error at /opt/ros/jazzy/share/ament_cmake_core/cmake/ament_cmake_package_templates-extras.cmake:41 (message):
+[0.189s]   execute_process(/home/david-wang/.venv/bin/python3
+[0.189s]   /opt/ros/jazzy/share/ament_cmake_core/cmake/package_templates/templates_2_cmake.py
+[0.189s]   /home/david-wang/Desktop/Projects/Wisconsin
+[0.189s]   Robotics/WRoverSoftware_25-26/build/object_detection_msgs/ament_cmake_package_templates/templates.cmake)
+[0.189s]   returned error code 1
+[0.189s] Call Stack (most recent call first):
+[0.189s]   /opt/ros/jazzy/share/ament_cmake_core/cmake/ament_cmake_coreConfig.cmake:41 (include)
+[0.189s]   /opt/ros/jazzy/share/rosidl_default_generators/cmake/ament_cmake_export_dependencies-extras.cmake:15 (find_package)
+[0.189s]   /opt/ros/jazzy/share/rosidl_default_generators/cmake/rosidl_default_generatorsConfig.cmake:41 (include)
+[0.190s]   CMakeLists.txt:8 (find_package)
+[0.190s] 
+[0.190s] [0m
+[0.190s] -- Configuring incomplete, errors occurred!
+[0.195s] gmake: *** [Makefile:829: cmake_check_build_system] Error 1
+[0.200s] Invoked command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs' returned '2': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs -- -j12 -l12

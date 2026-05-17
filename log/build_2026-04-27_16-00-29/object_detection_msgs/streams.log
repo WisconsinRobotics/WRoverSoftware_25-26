@@ -1,0 +1,174 @@
+[0.025s] Invoking command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs': CMAKE_PREFIX_PATH=/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(.venv) /usr/bin/cmake --build /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs -- -j12 -l12
+[0.067s] -- Found rosidl_default_generators: 1.6.0 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)
+[0.217s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.300s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.360s] -- Found rosidl_adapter: 4.6.7 (/opt/ros/jazzy/share/rosidl_adapter/cmake)
+[0.710s] -- Found ament_cmake_ros: 0.12.0 (/opt/ros/jazzy/share/ament_cmake_ros/cmake)
+[0.831s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.982s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.984s] -- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)
+[1.410s] -- Found Python3: /home/david-wang/.venv/bin/python3 (found version "3.12.3") found components: Interpreter Development NumPy Development.Module Development.Embed 
+[1.449s] -- Found Python3: /home/david-wang/.venv/bin/python3 (found version "3.12.3") found components: Interpreter 
+[1.451s] -- Found ament_lint_auto: 0.17.5 (/opt/ros/jazzy/share/ament_lint_auto/cmake)
+[1.466s] -- Added test 'lint_cmake' to check CMake code style
+[1.467s] -- Added test 'xmllint' to check XML markup files
+[1.470s] -- Configuring done (1.4s)
+[1.520s] -- Generating done (0.0s)
+[1.530s] -- Build files have been written to: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs
+[1.569s] [  2%] Built target object_detection_msgs__rosidl_generator_type_description
+[1.571s] [  5%] Built target object_detection_msgs__rs
+[1.579s] [  5%] Built target ament_cmake_python_copy_object_detection_msgs
+[1.587s] [  8%] Built target object_detection_msgs__cpp
+[1.593s] [ 22%] Built target object_detection_msgs__rosidl_generator_c
+[1.618s] [ 65%] Built target object_detection_msgs__rosidl_typesupport_introspection_cpp
+[1.618s] [ 65%] Built target object_detection_msgs__rosidl_typesupport_cpp
+[1.618s] [ 65%] Built target object_detection_msgs__rosidl_typesupport_introspection_c
+[1.619s] [ 65%] Built target object_detection_msgs__rosidl_typesupport_fastrtps_c
+[1.619s] [ 65%] Built target object_detection_msgs__rosidl_typesupport_c
+[1.619s] [ 74%] Built target object_detection_msgs__rosidl_typesupport_fastrtps_cpp
+[1.638s] [ 74%] Built target object_detection_msgs
+[1.658s] [ 77%] Built target object_detection_msgs__py
+[1.685s] [ 82%] Built target object_detection_msgs__rosidl_generator_py
+[1.704s] [100%] Built target object_detection_msgs_s__rosidl_typesupport_introspection_c
+[1.704s] [100%] Built target object_detection_msgs_s__rosidl_typesupport_c
+[1.704s] [100%] Built target object_detection_msgs_s__rosidl_typesupport_fastrtps_c
+[1.771s] running egg_info
+[1.786s] writing object_detection_msgs.egg-info/PKG-INFO
+[1.787s] writing dependency_links to object_detection_msgs.egg-info/dependency_links.txt
+[1.787s] writing top-level names to object_detection_msgs.egg-info/top_level.txt
+[1.834s] reading manifest file 'object_detection_msgs.egg-info/SOURCES.txt'
+[1.835s] writing manifest file 'object_detection_msgs.egg-info/SOURCES.txt'
+[1.856s] [100%] Built target ament_cmake_python_build_object_detection_msgs_egg
+[1.868s] Invoked command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs' returned '0': CMAKE_PREFIX_PATH=/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(.venv) /usr/bin/cmake --build /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs -- -j12 -l12
+[1.877s] Invoking command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs': CMAKE_PREFIX_PATH=/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(.venv) /usr/bin/cmake --install /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs
+[1.883s] -- Install configuration: ""
+[1.884s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/ament_index/resource_index/rosidl_interfaces/object_detection_msgs
+[1.884s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/msg/Detection.json
+[1.884s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs
+[1.884s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg
+[1.884s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/rosidl_generator_c__visibility_control.h
+[1.884s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail
+[1.884s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__struct.h
+[1.884s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__functions.h
+[1.885s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__description.c
+[1.885s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__type_support.c
+[1.885s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__functions.c
+[1.885s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__type_support.h
+[1.885s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detection.h
+[1.885s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/environment/library_path.sh
+[1.885s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/environment/library_path.dsv
+[1.885s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/libobject_detection_msgs__rosidl_generator_c.so
+[1.886s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs
+[1.886s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg
+[1.886s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[1.886s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail
+[1.886s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__rosidl_typesupport_fastrtps_c.h
+[1.887s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/libobject_detection_msgs__rosidl_typesupport_fastrtps_c.so
+[1.887s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs
+[1.887s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg
+[1.887s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail
+[1.887s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__type_support.c
+[1.887s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__rosidl_typesupport_introspection_c.h
+[1.887s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[1.887s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/libobject_detection_msgs__rosidl_typesupport_introspection_c.so
+[1.888s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/libobject_detection_msgs__rosidl_typesupport_c.so
+[1.888s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs
+[1.888s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg
+[1.888s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detection.hpp
+[1.888s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__builder.hpp
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__traits.hpp
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__type_support.hpp
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__struct.hpp
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/rosidl_generator_cpp__visibility_control.hpp
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/dds_fastrtps
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__rosidl_typesupport_fastrtps_cpp.hpp
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/libobject_detection_msgs__rosidl_typesupport_fastrtps_cpp.so
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg
+[1.889s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail
+[1.890s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__rosidl_typesupport_introspection_cpp.hpp
+[1.890s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/include/object_detection_msgs/object_detection_msgs/msg/detail/detection__type_support.cpp
+[1.890s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/libobject_detection_msgs__rosidl_typesupport_introspection_cpp.so
+[1.890s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/libobject_detection_msgs__rosidl_typesupport_cpp.so
+[1.890s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/environment/pythonpath.sh
+[1.891s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/environment/pythonpath.dsv
+[1.891s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs-0.0.0-py3.12.egg-info
+[1.891s] -- Installing: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs-0.0.0-py3.12.egg-info/dependency_links.txt
+[1.891s] -- Installing: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs-0.0.0-py3.12.egg-info/SOURCES.txt
+[1.891s] -- Installing: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs-0.0.0-py3.12.egg-info/PKG-INFO
+[1.891s] -- Installing: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs-0.0.0-py3.12.egg-info/top_level.txt
+[1.891s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs
+[1.891s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/object_detection_msgs_s__rosidl_typesupport_fastrtps_c.so
+[1.891s] -- Installing: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/__init__.py
+[1.891s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/_object_detection_msgs_s.ep.rosidl_typesupport_introspection_c.c
+[1.891s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/object_detection_msgs_s__rosidl_typesupport_introspection_c.so
+[1.891s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/_object_detection_msgs_s.ep.rosidl_typesupport_c.c
+[1.892s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/_object_detection_msgs_s.ep.rosidl_typesupport_fastrtps_c.c
+[1.892s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/object_detection_msgs_s__rosidl_typesupport_c.so
+[1.892s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/msg
+[1.892s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/msg/_detection.py
+[1.892s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/msg/__init__.py
+[1.892s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/msg/_detection_s.c
+[1.923s] Listing '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs'...
+[1.923s] Compiling '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/__init__.py'...
+[1.923s] Listing '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/msg'...
+[1.927s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/object_detection_msgs_s__rosidl_typesupport_fastrtps_c.so
+[1.928s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/object_detection_msgs_s__rosidl_typesupport_introspection_c.so
+[1.929s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages/object_detection_msgs/object_detection_msgs_s__rosidl_typesupport_c.so
+[1.929s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/libobject_detection_msgs__rosidl_generator_py.so
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/ament_index/resource_index/rust_packages/object_detection_msgs
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/rust
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/rust/build.rs
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/rust/src
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/rust/src/lib.rs
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/rust/src/msg
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/rust/src/msg/rmw.rs
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/rust/src/msg.rs
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/rust/Cargo.toml
+[1.930s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/msg/Detection.idl
+[1.931s] -- Installing: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/msg/Detection.msg
+[1.931s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/ament_index/resource_index/package_run_dependencies/object_detection_msgs
+[1.931s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/ament_index/resource_index/parent_prefix_path/object_detection_msgs
+[1.931s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/environment/ament_prefix_path.sh
+[1.931s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/environment/ament_prefix_path.dsv
+[1.931s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/environment/path.sh
+[1.931s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/environment/path.dsv
+[1.931s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/local_setup.bash
+[1.931s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/local_setup.sh
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/local_setup.zsh
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/local_setup.dsv
+[1.932s] -- Installing: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/package.dsv
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/ament_index/resource_index/packages/object_detection_msgs
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_generator_cExport.cmake
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_generator_cExport-noconfig.cmake
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_typesupport_fastrtps_cExport.cmake
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgs__rosidl_typesupport_introspection_cExport.cmake
+[1.932s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgs__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[1.933s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgs__rosidl_typesupport_cExport.cmake
+[1.933s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgs__rosidl_typesupport_cExport-noconfig.cmake
+[1.933s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_generator_cppExport.cmake
+[1.933s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_typesupport_fastrtps_cppExport.cmake
+[1.933s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[1.933s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgs__rosidl_typesupport_introspection_cppExport.cmake
+[1.933s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgs__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgs__rosidl_typesupport_cppExport.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgs__rosidl_typesupport_cppExport-noconfig.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_generator_pyExport.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/export_object_detection_msgs__rosidl_generator_pyExport-noconfig.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/rosidl_cmake-extras.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/ament_cmake_export_include_directories-extras.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/ament_cmake_export_libraries-extras.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/ament_cmake_export_targets-extras.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/ament_cmake_export_dependencies-extras.cmake
+[1.934s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[1.935s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgsConfig.cmake
+[1.935s] -- Up-to-date: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/cmake/object_detection_msgsConfig-version.cmake
+[1.935s] -- Installing: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/share/object_detection_msgs/package.xml
+[1.937s] Invoked command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs' returned '0': CMAKE_PREFIX_PATH=/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(.venv) /usr/bin/cmake --install /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs

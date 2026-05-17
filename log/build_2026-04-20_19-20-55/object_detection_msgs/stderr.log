@@ -1,0 +1,31 @@
+TransientParseError when expanding 'rmw.rs.em' into '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_generator_rs/object_detection_msgs/rust/src/msg/rmw.rs': not enough data to read
+Traceback (most recent call last):
+  File "/opt/ros/jazzy/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs", line 43, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/opt/ros/jazzy/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs", line 36, in main
+    return generate_rs(
+           ^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_generator_rs/__init__.py", line 165, in generate_rs
+    rosidl_pycommon.expand_template(
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_pycommon/__init__.py", line 191, in expand_template
+    interpreter.string(template_content, locals=data)
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5141, in string
+    while not self.safe(scanner, True, locals, dispatcher):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5154, in safe
+    return self.parse(scanner, locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5181, in parse
+    token = scanner.one()
+            ^^^^^^^^^^^^^
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 4198, in one
+    first = self.chop(1)
+            ^^^^^^^^^^^^
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 3927, in chop
+    raise TransientParseError("not enough data to read")
+em.TransientParseError: not enough data to read
+gmake[2]: *** [/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/object_detection_msgs__rs/CMakeFiles/object_detection_msgs__rs.dir/build.make:90: rosidl_generator_rs/object_detection_msgs/rust/src/lib.rs] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:666: object_detection_msgs__rs/CMakeFiles/object_detection_msgs__rs.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+gmake: *** [Makefile:146: all] Error 2

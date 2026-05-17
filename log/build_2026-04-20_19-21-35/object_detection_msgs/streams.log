@@ -1,0 +1,51 @@
+[0.017s] Invoking command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(.venv) /usr/bin/cmake --build /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs -- -j12 -l12
+[0.102s] [  2%] [34m[1mGenerating Rust code for ROS interfaces[0m
+[0.103s] [  5%] Built target object_detection_msgs__rosidl_generator_type_description
+[0.118s] [  5%] Built target ament_cmake_python_copy_object_detection_msgs
+[0.134s] [  8%] Built target object_detection_msgs__cpp
+[0.135s] [ 22%] Built target object_detection_msgs__rosidl_generator_c
+[0.173s] [ 40%] Built target object_detection_msgs__rosidl_typesupport_cpp
+[0.173s] [ 40%] Built target object_detection_msgs__rosidl_typesupport_c
+[0.174s] [ 57%] Built target object_detection_msgs__rosidl_typesupport_fastrtps_c
+[0.174s] [ 57%] Built target object_detection_msgs__rosidl_typesupport_introspection_c
+[0.174s] [ 65%] Built target object_detection_msgs__rosidl_typesupport_introspection_cpp
+[0.174s] [ 74%] Built target object_detection_msgs__rosidl_typesupport_fastrtps_cpp
+[0.397s] TransientParseError when expanding 'rmw.rs.em' into '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_generator_rs/object_detection_msgs/rust/src/msg/rmw.rs': not enough data to read
+[0.397s] Traceback (most recent call last):
+[0.397s]   File "/opt/ros/jazzy/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs", line 43, in <module>
+[0.397s]     sys.exit(main())
+[0.398s]              ^^^^^^
+[0.398s]   File "/opt/ros/jazzy/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs", line 36, in main
+[0.398s]     return generate_rs(
+[0.398s]            ^^^^^^^^^^^^
+[0.398s]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_generator_rs/__init__.py", line 165, in generate_rs
+[0.398s]     rosidl_pycommon.expand_template(
+[0.399s]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_pycommon/__init__.py", line 191, in expand_template
+[0.399s]     interpreter.string(template_content, locals=data)
+[0.399s]   File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5141, in string
+[0.399s]     while not self.safe(scanner, True, locals, dispatcher):
+[0.400s]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[0.400s]   File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5154, in safe
+[0.400s]     return self.parse(scanner, locals)
+[0.400s]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[0.400s]   File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5181, in parse
+[0.400s]     token = scanner.one()
+[0.401s]             ^^^^^^^^^^^^^
+[0.401s]   File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 4198, in one
+[0.401s]     first = self.chop(1)
+[0.401s]             ^^^^^^^^^^^^
+[0.401s]   File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 3927, in chop
+[0.401s]     raise TransientParseError("not enough data to read")
+[0.402s] em.TransientParseError: not enough data to read
+[0.434s] gmake[2]: *** [/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/object_detection_msgs__rs/CMakeFiles/object_detection_msgs__rs.dir/build.make:90: rosidl_generator_rs/object_detection_msgs/rust/src/lib.rs] Error 1
+[0.435s] gmake[1]: *** [CMakeFiles/Makefile2:666: object_detection_msgs__rs/CMakeFiles/object_detection_msgs__rs.dir/all] Error 2
+[0.435s] gmake[1]: *** Waiting for unfinished jobs....
+[0.473s] running egg_info
+[0.502s] writing object_detection_msgs.egg-info/PKG-INFO
+[0.503s] writing dependency_links to object_detection_msgs.egg-info/dependency_links.txt
+[0.503s] writing top-level names to object_detection_msgs.egg-info/top_level.txt
+[0.594s] reading manifest file 'object_detection_msgs.egg-info/SOURCES.txt'
+[0.595s] writing manifest file 'object_detection_msgs.egg-info/SOURCES.txt'
+[0.651s] [ 74%] Built target ament_cmake_python_build_object_detection_msgs_egg
+[0.653s] gmake: *** [Makefile:146: all] Error 2
+[0.657s] Invoked command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(.venv) /usr/bin/cmake --build /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs -- -j12 -l12

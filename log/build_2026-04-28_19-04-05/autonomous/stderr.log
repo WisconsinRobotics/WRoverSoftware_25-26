@@ -1,0 +1,5 @@
+  File "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous/aruco_class.py", line 624
+    current_orientation = math.degrees(math.atan2(siny_cosp, cosy_cosp)) + 360) % 360
+                                                                              ^
+SyntaxError: unmatched ')'
+

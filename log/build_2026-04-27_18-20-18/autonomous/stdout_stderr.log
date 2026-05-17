@@ -1,0 +1,38 @@
+running egg_info
+creating ../../build/autonomous/autonomous.egg-info
+writing ../../build/autonomous/autonomous.egg-info/PKG-INFO
+writing dependency_links to ../../build/autonomous/autonomous.egg-info/dependency_links.txt
+writing entry points to ../../build/autonomous/autonomous.egg-info/entry_points.txt
+writing requirements to ../../build/autonomous/autonomous.egg-info/requires.txt
+writing top-level names to ../../build/autonomous/autonomous.egg-info/top_level.txt
+writing manifest file '../../build/autonomous/autonomous.egg-info/SOURCES.txt'
+reading manifest file '../../build/autonomous/autonomous.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file '../../build/autonomous/autonomous.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous
+copying autonomous/obstacle_avoidance_class.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous
+copying autonomous/aruco_class.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous
+copying autonomous/autonomous_node.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous
+copying autonomous/__init__.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous
+running install
+running install_lib
+creating /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous
+copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous/obstacle_avoidance_class.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous
+copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous/aruco_class.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous
+copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous/autonomous_node.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous
+copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/build/lib/autonomous/__init__.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous
+byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous/obstacle_avoidance_class.py to obstacle_avoidance_class.cpython-312.pyc
+byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous/aruco_class.py to aruco_class.cpython-312.pyc
+byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous/autonomous_node.py to autonomous_node.cpython-312.pyc
+byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous/__init__.py to __init__.cpython-312.pyc
+running install_data
+creating /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/share/ament_index/resource_index/packages
+copying resource/autonomous -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/share/ament_index/resource_index/packages
+copying package.xml -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/share/autonomous
+running install_egg_info
+Copying ../../build/autonomous/autonomous.egg-info to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/python3.12/site-packages/autonomous-0.0.0-py3.12.egg-info
+running install_scripts
+Installing autonomous_node script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/autonomous/lib/autonomous
+writing list of installed files to '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/autonomous/install.log'

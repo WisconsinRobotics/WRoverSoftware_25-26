@@ -1,0 +1,5 @@
+  File "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages/object_detection/object_detection.py", line 98
+    if (self.get_parameter('model').value == "bottle")
+                                                      ^
+SyntaxError: expected ':'
+

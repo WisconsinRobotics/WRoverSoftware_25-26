@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: autonomous
+Version: 0.0.0
+Summary: COmbines obstacle avoidance and object detection.
+Maintainer: Rodrigo
+Maintainer-email: rochisigo@gmail.com
+License: Apache-2.0
+Provides-Extra: test
+License-File: LICENSE

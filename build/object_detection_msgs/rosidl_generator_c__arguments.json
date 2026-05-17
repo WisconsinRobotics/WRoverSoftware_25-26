@@ -1,0 +1,36 @@
+{
+  "package_name": "object_detection_msgs",
+  "output_dir": "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_generator_c/object_detection_msgs",
+  "template_dir": "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource",
+  "idl_tuples": [
+    "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_adapter/object_detection_msgs:msg/Detection.idl"
+  ],
+  "ros_interface_files": [
+    "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/src/object_detection_msgs/msg/Detection.msg"
+  ],
+  "target_dependencies": [
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../../../lib/python3.12/site-packages/rosidl_generator_c/__init__.py",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/action__type_support.h.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/action__type_support.c.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/empty__description.c.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/full__description.c.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/idl.h.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/idl__description.c.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/idl__functions.c.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/idl__functions.h.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/idl__struct.h.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/idl__type_support.c.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/idl__type_support.h.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/msg__functions.c.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/msg__functions.h.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/msg__struct.h.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/msg__type_support.h.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/srv__type_support.c.em",
+    "/opt/ros/jazzy/share/rosidl_generator_c/cmake/../resource/srv__type_support.h.em",
+    "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_adapter/object_detection_msgs/msg/Detection.idl"
+  ],
+  "type_description_tuples": [
+    "msg/Detection.idl:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_generator_type_description/object_detection_msgs/msg/Detection.json"
+  ]
+}

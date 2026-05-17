@@ -1,0 +1,102 @@
+[0.000000] (-) TimerEvent: {}
+[0.000280] (object_detection_msgs) JobQueued: {'identifier': 'object_detection_msgs', 'dependencies': OrderedDict()}
+[0.000360] (object_detection) JobQueued: {'identifier': 'object_detection', 'dependencies': OrderedDict({'object_detection_msgs': '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs'})}
+[0.000431] (object_detection_msgs) JobStarted: {'identifier': 'object_detection_msgs'}
+[0.020250] (object_detection_msgs) JobProgress: {'identifier': 'object_detection_msgs', 'progress': 'cmake'}
+[0.021458] (object_detection_msgs) JobProgress: {'identifier': 'object_detection_msgs', 'progress': 'build'}
+[0.022333] (object_detection_msgs) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs', '--', '-j12', '-l12'], 'cwd': '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs', 'env': OrderedDict({'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'david-wang', 'XDG_SESSION_TYPE': 'wayland', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/lib', 'HOME': '/home/david-wang', 'DESKTOP_SESSION': 'ubuntu', 'NVM_BIN': '/home/david-wang/.nvm/versions/node/v23.2.0/bin', 'NVM_INC': '/home/david-wang/.nvm/versions/node/v23.2.0/include/node', 'ROS_PYTHON_VERSION': '3', 'GNOME_SHELL_SESSION_MODE': 'ubuntu', 'GTK_MODULES': 'gail:atk-bridge', 'PS1': '(.venv) \\[\\e]0;\\u@\\h: \\w\\a\\]${debian_chroot:+($debian_chroot)}\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$', 'DBUS_STARTER_BUS_TYPE': 'session', 'SYSTEMD_EXEC_PID': '3936', 'GSM_SKIP_SSH_AGENT_WORKAROUND': 'true', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus,guid=2a7d199b62160200eccc0b4569e63e3b', 'COLORTERM': 'truecolor', 'NVM_DIR': '/home/david-wang/.nvm', 'DEBUGINFOD_URLS': 'https://debuginfod.ubuntu.com', 'IM_CONFIG_PHASE': '1', 'WAYLAND_DISPLAY': 'wayland-0', 'ROS_DISTRO': 'jazzy', 'LOGNAME': 'david-wang', '_': '/home/david-wang/.venv/bin/colcon', 'ROS_VERSION': '2', 'MEMORY_PRESSURE_WATCH': '/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/app-gnome\\x2dsession\\x2dmanager.slice/gnome-session-manager@ubuntu.service/memory.pressure', 'XDG_SESSION_CLASS': 'user', 'USERNAME': 'david-wang', 'TERM': 'xterm-256color', 'GNOME_DESKTOP_SESSION_ID': 'this-is-deprecated', 'PATH': '/opt/ros/jazzy/bin:/home/david-wang/.venv/bin:/home/david-wang/.nvm/versions/node/v23.2.0/bin:/home/david-wang/.local/bin:/home/david-wang/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/david-wang/ardu_ws/Micro-XRCE-DDS-Gen/scripts:/home/david-wang/Desktop/Projects/BadgerFly/ardu_ws/Micro-XRCE-DDS-Gen/scripts:/home/david-wang/Desktop/Projects/BadgerFly/ardu_ws/Micro-XRCE-DDS-Gen/scripts', 'SESSION_MANAGER': 'local/AbsoluteZero:@/tmp/.ICE-unix/3936,unix/AbsoluteZero:/tmp/.ICE-unix/3936', 'XDG_MENU_PREFIX': 'gnome-', 'GNOME_TERMINAL_SCREEN': '/org/gnome/Terminal/screen/d8846ec8_9261_419e_93cd_9deff2f23022', 'GNOME_SETUP_DISPLAY': ':1', 'XDG_RUNTIME_DIR': '/run/user/1000', 'DISPLAY': ':0', 'LANG': 'en_US.UTF-8', 'XDG_CURRENT_DESKTOP': 'ubuntu:GNOME', 'VIRTUAL_ENV_PROMPT': '(.venv)', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'ubuntu', 'XAUTHORITY': '/run/user/1000/.mutter-Xwaylandauth.HAW9N3', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:', 'GNOME_TERMINAL_SERVICE': ':1.107', 'SSH_AUTH_SOCK': '/run/user/1000/keyring/ssh', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'SHELL': '/bin/bash', 'QT_ACCESSIBILITY': '1', 'GDMSESSION': 'ubuntu', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'VIRTUAL_ENV': '/home/david-wang/.venv', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'QT_IM_MODULE': 'ibus', 'PWD': '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-ubuntu:/etc/xdg', 'NVM_CD_FLAGS': '', 'DBUS_STARTER_ADDRESS': 'unix:path=/run/user/1000/bus,guid=2a7d199b62160200eccc0b4569e63e3b', 'XDG_DATA_DIRS': '/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages::/home/david-wang/.venv/lib/python3.12/site-packages', 'COLCON': '1', 'MEMORY_PRESSURE_WRITE': 'c29tZSAyMDAwMDAgMjAwMDAwMAA=', 'VTE_VERSION': '7600', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy'}), 'shell': False}
+[0.098844] (-) TimerEvent: {}
+[0.101107] (object_detection_msgs) StdoutLine: {'line': b'-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)\n'}
+[0.140989] (object_detection_msgs) StdoutLine: {'line': b'-- Found Python3: /home/david-wang/.venv/bin/python3 (found version "3.12.3") found components: Interpreter \n'}
+[0.199040] (-) TimerEvent: {}
+[0.276386] (object_detection_msgs) StdoutLine: {'line': b'-- Found rosidl_default_generators: 1.6.0 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)\n'}
+[0.280768] (object_detection_msgs) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.299193] (-) TimerEvent: {}
+[0.350803] (object_detection_msgs) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.399334] (-) TimerEvent: {}
+[0.410413] (object_detection_msgs) StdoutLine: {'line': b'-- Found rosidl_adapter: 4.6.7 (/opt/ros/jazzy/share/rosidl_adapter/cmake)\n'}
+[0.499522] (-) TimerEvent: {}
+[0.599965] (-) TimerEvent: {}
+[0.700428] (-) TimerEvent: {}
+[0.777158] (object_detection_msgs) StdoutLine: {'line': b'-- Found ament_cmake_ros: 0.12.0 (/opt/ros/jazzy/share/ament_cmake_ros/cmake)\n'}
+[0.800603] (-) TimerEvent: {}
+[0.894991] (object_detection_msgs) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.900761] (-) TimerEvent: {}
+[0.998318] (object_detection_msgs) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[1.000007] (object_detection_msgs) StdoutLine: {'line': b'-- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)\n'}
+[1.000912] (-) TimerEvent: {}
+[1.101292] (-) TimerEvent: {}
+[1.201744] (-) TimerEvent: {}
+[1.266851] (object_detection_msgs) StdoutLine: {'line': b'-- Found Python3: /home/david-wang/.venv/bin/python3 (found version "3.12.3") found components: Interpreter Development NumPy Development.Module Development.Embed \n'}
+[1.298934] (object_detection_msgs) StdoutLine: {'line': b'-- Found Python3: /home/david-wang/.venv/bin/python3 (found version "3.12.3") found components: Interpreter \n'}
+[1.300223] (object_detection_msgs) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.17.5 (/opt/ros/jazzy/share/ament_lint_auto/cmake)\n'}
+[1.301834] (-) TimerEvent: {}
+[1.315301] (object_detection_msgs) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[1.316271] (object_detection_msgs) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[1.319387] (object_detection_msgs) StdoutLine: {'line': b'-- Configuring done (1.2s)\n'}
+[1.370061] (object_detection_msgs) StdoutLine: {'line': b'-- Generating done (0.0s)\n'}
+[1.381646] (object_detection_msgs) StdoutLine: {'line': b'-- Build files have been written to: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs\n'}
+[1.402033] (-) TimerEvent: {}
+[1.418240] (object_detection_msgs) StdoutLine: {'line': b'[  2%] Built target object_detection_msgs__rosidl_generator_type_description\n'}
+[1.418573] (object_detection_msgs) StdoutLine: {'line': b'[  5%] \x1b[34m\x1b[1mGenerating Rust code for ROS interfaces\x1b[0m\n'}
+[1.428401] (object_detection_msgs) StdoutLine: {'line': b'[  5%] Built target ament_cmake_python_copy_object_detection_msgs\n'}
+[1.437530] (object_detection_msgs) StdoutLine: {'line': b'[  8%] Built target object_detection_msgs__cpp\n'}
+[1.440675] (object_detection_msgs) StdoutLine: {'line': b'[ 11%] \x1b[32m\x1b[1mLinking C shared library libobject_detection_msgs__rosidl_generator_c.so\x1b[0m\n'}
+[1.490226] (object_detection_msgs) StdoutLine: {'line': b'[ 22%] Built target object_detection_msgs__rosidl_generator_c\n'}
+[1.502173] (-) TimerEvent: {}
+[1.513122] (object_detection_msgs) StdoutLine: {'line': b'[ 31%] \x1b[32m\x1b[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_cpp.so\x1b[0m\n'}
+[1.513394] (object_detection_msgs) StdoutLine: {'line': b'[ 31%] \x1b[32m\x1b[1mLinking C shared library libobject_detection_msgs__rosidl_typesupport_introspection_c.so\x1b[0m\n'}
+[1.513490] (object_detection_msgs) StdoutLine: {'line': b'[ 31%] \x1b[32m\x1b[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_c.so\x1b[0m\n'}
+[1.513636] (object_detection_msgs) StdoutLine: {'line': b'[ 34%] \x1b[32m\x1b[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_introspection_cpp.so\x1b[0m\n'}
+[1.514447] (object_detection_msgs) StdoutLine: {'line': b'[ 37%] \x1b[32m\x1b[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_fastrtps_c.so\x1b[0m\n'}
+[1.514629] (object_detection_msgs) StdoutLine: {'line': b'[ 40%] \x1b[32m\x1b[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_fastrtps_cpp.so\x1b[0m\n'}
+[1.549216] (object_detection_msgs) StdoutLine: {'line': b'[ 45%] Built target object_detection_msgs__rosidl_typesupport_introspection_c\n'}
+[1.555926] (object_detection_msgs) StdoutLine: {'line': b'[ 57%] Built target object_detection_msgs__rosidl_typesupport_c\n'}
+[1.556194] (object_detection_msgs) StdoutLine: {'line': b'[ 57%] Built target object_detection_msgs__rosidl_typesupport_cpp\n'}
+[1.559600] (object_detection_msgs) StdoutLine: {'line': b'[ 62%] Built target object_detection_msgs__rosidl_typesupport_introspection_cpp\n'}
+[1.566994] (object_detection_msgs) StdoutLine: {'line': b'[ 74%] Built target object_detection_msgs__rosidl_typesupport_fastrtps_cpp\n'}
+[1.567205] (object_detection_msgs) StdoutLine: {'line': b'[ 74%] Built target object_detection_msgs__rosidl_typesupport_fastrtps_c\n'}
+[1.595172] (object_detection_msgs) StderrLine: {'line': b"TransientParseError when expanding 'rmw.rs.em' into '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_generator_rs/object_detection_msgs/rust/src/msg/rmw.rs': not enough data to read\n"}
+[1.595514] (object_detection_msgs) StderrLine: {'line': b'Traceback (most recent call last):\n'}
+[1.595661] (object_detection_msgs) StderrLine: {'line': b'  File "/opt/ros/jazzy/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs", line 43, in <module>\n'}
+[1.595803] (object_detection_msgs) StderrLine: {'line': b'    sys.exit(main())\n'}
+[1.595933] (object_detection_msgs) StderrLine: {'line': b'             ^^^^^^\n'}
+[1.596036] (object_detection_msgs) StderrLine: {'line': b'  File "/opt/ros/jazzy/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs", line 36, in main\n'}
+[1.596147] (object_detection_msgs) StderrLine: {'line': b'    return generate_rs(\n'}
+[1.596204] (object_detection_msgs) StderrLine: {'line': b'           ^^^^^^^^^^^^\n'}
+[1.596258] (object_detection_msgs) StderrLine: {'line': b'  File "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_generator_rs/__init__.py", line 165, in generate_rs\n'}
+[1.596314] (object_detection_msgs) StderrLine: {'line': b'    rosidl_pycommon.expand_template(\n'}
+[1.596370] (object_detection_msgs) StderrLine: {'line': b'  File "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_pycommon/__init__.py", line 191, in expand_template\n'}
+[1.596476] (object_detection_msgs) StderrLine: {'line': b'    interpreter.string(template_content, locals=data)\n'}
+[1.596536] (object_detection_msgs) StderrLine: {'line': b'  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5141, in string\n'}
+[1.596599] (object_detection_msgs) StderrLine: {'line': b'    while not self.safe(scanner, True, locals, dispatcher):\n'}
+[1.596654] (object_detection_msgs) StderrLine: {'line': b'              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'}
+[1.596708] (object_detection_msgs) StderrLine: {'line': b'  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5154, in safe\n'}
+[1.596764] (object_detection_msgs) StderrLine: {'line': b'    return self.parse(scanner, locals)\n'}
+[1.596827] (object_detection_msgs) StderrLine: {'line': b'           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'}
+[1.596932] (object_detection_msgs) StderrLine: {'line': b'  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5181, in parse\n'}
+[1.596989] (object_detection_msgs) StderrLine: {'line': b'    token = scanner.one()\n'}
+[1.597042] (object_detection_msgs) StderrLine: {'line': b'            ^^^^^^^^^^^^^\n'}
+[1.597095] (object_detection_msgs) StderrLine: {'line': b'  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 4198, in one\n'}
+[1.597256] (object_detection_msgs) StderrLine: {'line': b'    first = self.chop(1)\n'}
+[1.597359] (object_detection_msgs) StderrLine: {'line': b'            ^^^^^^^^^^^^\n'}
+[1.597427] (object_detection_msgs) StderrLine: {'line': b'  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 3927, in chop\n'}
+[1.597616] (object_detection_msgs) StderrLine: {'line': b'    raise TransientParseError("not enough data to read")\n'}
+[1.597681] (object_detection_msgs) StderrLine: {'line': b'em.TransientParseError: not enough data to read\n'}
+[1.602309] (-) TimerEvent: {}
+[1.615222] (object_detection_msgs) StderrLine: {'line': b'gmake[2]: *** [/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/object_detection_msgs__rs/CMakeFiles/object_detection_msgs__rs.dir/build.make:90: rosidl_generator_rs/object_detection_msgs/rust/src/lib.rs] Error 1\n'}
+[1.615752] (object_detection_msgs) StderrLine: {'line': b'gmake[1]: *** [CMakeFiles/Makefile2:666: object_detection_msgs__rs/CMakeFiles/object_detection_msgs__rs.dir/all] Error 2\n'}
+[1.616047] (object_detection_msgs) StderrLine: {'line': b'gmake[1]: *** Waiting for unfinished jobs....\n'}
+[1.641495] (object_detection_msgs) StdoutLine: {'line': b'running egg_info\n'}
+[1.657026] (object_detection_msgs) StdoutLine: {'line': b'writing object_detection_msgs.egg-info/PKG-INFO\n'}
+[1.657539] (object_detection_msgs) StdoutLine: {'line': b'writing dependency_links to object_detection_msgs.egg-info/dependency_links.txt\n'}
+[1.657899] (object_detection_msgs) StdoutLine: {'line': b'writing top-level names to object_detection_msgs.egg-info/top_level.txt\n'}
+[1.702438] (-) TimerEvent: {}
+[1.704899] (object_detection_msgs) StdoutLine: {'line': b"reading manifest file 'object_detection_msgs.egg-info/SOURCES.txt'\n"}
+[1.705600] (object_detection_msgs) StdoutLine: {'line': b"writing manifest file 'object_detection_msgs.egg-info/SOURCES.txt'\n"}
+[1.735002] (object_detection_msgs) StdoutLine: {'line': b'[ 74%] Built target ament_cmake_python_build_object_detection_msgs_egg\n'}
+[1.736758] (object_detection_msgs) StderrLine: {'line': b'gmake: *** [Makefile:146: all] Error 2\n'}
+[1.739496] (object_detection_msgs) CommandEnded: {'returncode': 2}
+[1.760007] (object_detection_msgs) JobEnded: {'identifier': 'object_detection_msgs', 'rc': 2}
+[1.771652] (object_detection) JobSkipped: {'identifier': 'object_detection'}
+[1.771755] (-) EventReactorShutdown: {}

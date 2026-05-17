@@ -1,0 +1,19 @@
+{
+  "package_name": "object_detection_msgs",
+  "output_dir": "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_typesupport_introspection_c/object_detection_msgs",
+  "template_dir": "/opt/ros/jazzy/share/rosidl_typesupport_introspection_c/resource",
+  "idl_tuples": [
+    "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_adapter/object_detection_msgs:msg/Detection.idl"
+  ],
+  "target_dependencies": [
+    "/opt/ros/jazzy/lib/rosidl_typesupport_introspection_c/rosidl_typesupport_introspection_c",
+    "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_typesupport_introspection_c/__init__.py",
+    "/opt/ros/jazzy/share/rosidl_typesupport_introspection_c/resource/idl__rosidl_typesupport_introspection_c.h.em",
+    "/opt/ros/jazzy/share/rosidl_typesupport_introspection_c/resource/idl__type_support.c.em",
+    "/opt/ros/jazzy/share/rosidl_typesupport_introspection_c/resource/msg__rosidl_typesupport_introspection_c.h.em",
+    "/opt/ros/jazzy/share/rosidl_typesupport_introspection_c/resource/msg__type_support.c.em",
+    "/opt/ros/jazzy/share/rosidl_typesupport_introspection_c/resource/srv__rosidl_typesupport_introspection_c.h.em",
+    "/opt/ros/jazzy/share/rosidl_typesupport_introspection_c/resource/srv__type_support.c.em",
+    "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_adapter/object_detection_msgs/msg/Detection.idl"
+  ]
+}

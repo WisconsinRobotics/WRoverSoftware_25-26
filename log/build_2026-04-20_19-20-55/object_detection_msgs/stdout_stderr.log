@@ -1,0 +1,74 @@
+-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found Python3: /home/david-wang/.venv/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Found rosidl_default_generators: 1.6.0 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rosidl_adapter: 4.6.7 (/opt/ros/jazzy/share/rosidl_adapter/cmake)
+-- Found ament_cmake_ros: 0.12.0 (/opt/ros/jazzy/share/ament_cmake_ros/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)
+-- Found Python3: /home/david-wang/.venv/bin/python3 (found version "3.12.3") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found Python3: /home/david-wang/.venv/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Found ament_lint_auto: 0.17.5 (/opt/ros/jazzy/share/ament_lint_auto/cmake)
+-- Added test 'lint_cmake' to check CMake code style
+-- Added test 'xmllint' to check XML markup files
+-- Configuring done (1.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs
+[  2%] Built target object_detection_msgs__rosidl_generator_type_description
+[  5%] [34m[1mGenerating Rust code for ROS interfaces[0m
+[  5%] Built target ament_cmake_python_copy_object_detection_msgs
+[  8%] Built target object_detection_msgs__cpp
+[ 11%] [32m[1mLinking C shared library libobject_detection_msgs__rosidl_generator_c.so[0m
+[ 22%] Built target object_detection_msgs__rosidl_generator_c
+[ 31%] [32m[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_cpp.so[0m
+[ 31%] [32m[1mLinking C shared library libobject_detection_msgs__rosidl_typesupport_introspection_c.so[0m
+[ 31%] [32m[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_c.so[0m
+[ 34%] [32m[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_introspection_cpp.so[0m
+[ 37%] [32m[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_fastrtps_c.so[0m
+[ 40%] [32m[1mLinking CXX shared library libobject_detection_msgs__rosidl_typesupport_fastrtps_cpp.so[0m
+[ 45%] Built target object_detection_msgs__rosidl_typesupport_introspection_c
+[ 57%] Built target object_detection_msgs__rosidl_typesupport_c
+[ 57%] Built target object_detection_msgs__rosidl_typesupport_cpp
+[ 62%] Built target object_detection_msgs__rosidl_typesupport_introspection_cpp
+[ 74%] Built target object_detection_msgs__rosidl_typesupport_fastrtps_cpp
+[ 74%] Built target object_detection_msgs__rosidl_typesupport_fastrtps_c
+TransientParseError when expanding 'rmw.rs.em' into '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/rosidl_generator_rs/object_detection_msgs/rust/src/msg/rmw.rs': not enough data to read
+Traceback (most recent call last):
+  File "/opt/ros/jazzy/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs", line 43, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/opt/ros/jazzy/share/rosidl_generator_rs/cmake/../../../lib/rosidl_generator_rs/rosidl_generator_rs", line 36, in main
+    return generate_rs(
+           ^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_generator_rs/__init__.py", line 165, in generate_rs
+    rosidl_pycommon.expand_template(
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rosidl_pycommon/__init__.py", line 191, in expand_template
+    interpreter.string(template_content, locals=data)
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5141, in string
+    while not self.safe(scanner, True, locals, dispatcher):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5154, in safe
+    return self.parse(scanner, locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 5181, in parse
+    token = scanner.one()
+            ^^^^^^^^^^^^^
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 4198, in one
+    first = self.chop(1)
+            ^^^^^^^^^^^^
+  File "/home/david-wang/.venv/lib/python3.12/site-packages/em.py", line 3927, in chop
+    raise TransientParseError("not enough data to read")
+em.TransientParseError: not enough data to read
+gmake[2]: *** [/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection_msgs/object_detection_msgs__rs/CMakeFiles/object_detection_msgs__rs.dir/build.make:90: rosidl_generator_rs/object_detection_msgs/rust/src/lib.rs] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:666: object_detection_msgs__rs/CMakeFiles/object_detection_msgs__rs.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+running egg_info
+writing object_detection_msgs.egg-info/PKG-INFO
+writing dependency_links to object_detection_msgs.egg-info/dependency_links.txt
+writing top-level names to object_detection_msgs.egg-info/top_level.txt
+reading manifest file 'object_detection_msgs.egg-info/SOURCES.txt'
+writing manifest file 'object_detection_msgs.egg-info/SOURCES.txt'
+[ 74%] Built target ament_cmake_python_build_object_detection_msgs_egg
+gmake: *** [Makefile:146: all] Error 2

@@ -1,0 +1,35 @@
+[0.998s] Invoking command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/src/object_detection': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/prefix_override:/home/david-wang/.venv/lib/python3.12/site-packages/colcon_core/task/python/colcon_distutils_commands:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages:/home/david-wang/.venv/lib/python3.12/site-packages VIRTUAL_ENV_PROMPT=(.venv) /home/david-wang/.venv/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/object_detection build --build-base /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/build install --record /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/install.log --single-version-externally-managed install_data
+[1.216s] running egg_info
+[1.230s] writing ../../build/object_detection/object_detection.egg-info/PKG-INFO
+[1.230s] writing dependency_links to ../../build/object_detection/object_detection.egg-info/dependency_links.txt
+[1.230s] writing entry points to ../../build/object_detection/object_detection.egg-info/entry_points.txt
+[1.231s] writing requirements to ../../build/object_detection/object_detection.egg-info/requires.txt
+[1.231s] writing top-level names to ../../build/object_detection/object_detection.egg-info/top_level.txt
+[1.262s] reading manifest file '../../build/object_detection/object_detection.egg-info/SOURCES.txt'
+[1.262s] adding license file 'LICENSE'
+[1.262s] writing manifest file '../../build/object_detection/object_detection.egg-info/SOURCES.txt'
+[1.263s] running build
+[1.263s] running build_py
+[1.263s] copying object_detection/bottle.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/build/lib/object_detection
+[1.263s] copying object_detection/__init__.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/build/lib/object_detection
+[1.263s] copying object_detection/mallet.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/build/lib/object_detection
+[1.263s] copying object_detection/hammer.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/build/lib/object_detection
+[1.264s] running install
+[1.267s] running install_lib
+[1.283s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/build/lib/object_detection/bottle.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages/object_detection
+[1.283s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages/object_detection/bottle.py to bottle.cpython-312.pyc
+[1.284s] running install_data
+[1.284s] copying resource/object_detection -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/share/ament_index/resource_index/packages
+[1.285s] copying package.xml -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/share/object_detection
+[1.285s] copying resource/mallet.blob -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/share/object_detection/resource
+[1.294s] copying resource/hammer.blob -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/share/object_detection/resource
+[1.305s] copying resource/bottle.blob -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/share/object_detection/resource
+[1.314s] running install_egg_info
+[1.332s] removing '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages/object_detection-0.0.0-py3.12.egg-info' (and everything under it)
+[1.332s] Copying ../../build/object_detection/object_detection.egg-info to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages/object_detection-0.0.0-py3.12.egg-info
+[1.333s] running install_scripts
+[1.414s] Installing bottle script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/object_detection
+[1.415s] Installing hammer script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/object_detection
+[1.415s] Installing mallet script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/object_detection
+[1.415s] writing list of installed files to '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/install.log'
+[1.444s] Invoked command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/src/object_detection' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/prefix_override:/home/david-wang/.venv/lib/python3.12/site-packages/colcon_core/task/python/colcon_distutils_commands:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection_msgs/lib/python3.12/site-packages:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/object_detection/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages:/home/david-wang/.venv/lib/python3.12/site-packages VIRTUAL_ENV_PROMPT=(.venv) /home/david-wang/.venv/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/object_detection build --build-base /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/build install --record /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/object_detection/install.log --single-version-externally-managed install_data

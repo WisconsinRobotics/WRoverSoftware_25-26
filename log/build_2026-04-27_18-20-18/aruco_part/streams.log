@@ -1,0 +1,65 @@
+[1.163s] Invoking command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/src/aruco_part': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/prefix_override:/home/david-wang/.venv/lib/python3.12/site-packages/colcon_core/task/python/colcon_distutils_commands:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(.venv) /home/david-wang/.venv/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/aruco_part build --build-base /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build install --record /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/install.log --single-version-externally-managed install_data
+[1.382s] running egg_info
+[1.397s] creating ../../build/aruco_part/aruco_part.egg-info
+[1.399s] writing ../../build/aruco_part/aruco_part.egg-info/PKG-INFO
+[1.399s] writing dependency_links to ../../build/aruco_part/aruco_part.egg-info/dependency_links.txt
+[1.399s] writing entry points to ../../build/aruco_part/aruco_part.egg-info/entry_points.txt
+[1.399s] writing requirements to ../../build/aruco_part/aruco_part.egg-info/requires.txt
+[1.399s] writing top-level names to ../../build/aruco_part/aruco_part.egg-info/top_level.txt
+[1.399s] writing manifest file '../../build/aruco_part/aruco_part.egg-info/SOURCES.txt'
+[1.431s] reading manifest file '../../build/aruco_part/aruco_part.egg-info/SOURCES.txt'
+[1.432s] writing manifest file '../../build/aruco_part/aruco_part.egg-info/SOURCES.txt'
+[1.432s] running build
+[1.432s] running build_py
+[1.432s] creating /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/fake_sensors.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/combined.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/path_visualizer.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/combined_2.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/keyboard.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/__init__.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/camera_info.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/finding_tag.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/fake_tag.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.433s] copying aruco_part/driving_logic.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part
+[1.434s] running install
+[1.436s] running install_lib
+[1.451s] creating /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.452s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/fake_sensors.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.452s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/combined.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.453s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/path_visualizer.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.453s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/combined_2.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.454s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/keyboard.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.454s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/__init__.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.454s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/camera_info.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.454s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/finding_tag.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.454s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/fake_tag.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.454s] copying /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build/lib/aruco_part/driving_logic.py -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part
+[1.454s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/fake_sensors.py to fake_sensors.cpython-312.pyc
+[1.454s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/combined.py to combined.cpython-312.pyc
+[1.458s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/path_visualizer.py to path_visualizer.cpython-312.pyc
+[1.459s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/combined_2.py to combined_2.cpython-312.pyc
+[1.462s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/keyboard.py to keyboard.cpython-312.pyc
+[1.463s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/__init__.py to __init__.cpython-312.pyc
+[1.464s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/camera_info.py to camera_info.cpython-312.pyc
+[1.464s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/finding_tag.py to finding_tag.cpython-312.pyc
+[1.465s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/fake_tag.py to fake_tag.cpython-312.pyc
+[1.465s] byte-compiling /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part/driving_logic.py to driving_logic.cpython-312.pyc
+[1.467s] running install_data
+[1.467s] creating /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/share/ament_index/resource_index/packages
+[1.468s] copying resource/aruco_part -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/share/ament_index/resource_index/packages
+[1.468s] copying package.xml -> /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/share/aruco_part
+[1.468s] running install_egg_info
+[1.482s] Copying ../../build/aruco_part/aruco_part.egg-info to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages/aruco_part-0.0.0-py3.12.egg-info
+[1.483s] running install_scripts
+[1.561s] Installing camera_info script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.561s] Installing combined script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.562s] Installing combined_2 script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.562s] Installing driving_logic script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.562s] Installing fake_sensors script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.562s] Installing fake_tag script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.562s] Installing finding_tag script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.562s] Installing keyboard script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.562s] Installing path_visualizer script to /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/aruco_part
+[1.562s] writing list of installed files to '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/install.log'
+[1.584s] Invoked command in '/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/src/aruco_part' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/prefix_override:/home/david-wang/.venv/lib/python3.12/site-packages/colcon_core/task/python/colcon_distutils_commands:/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/install/aruco_part/lib/python3.12/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(.venv) /home/david-wang/.venv/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/aruco_part build --build-base /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/build install --record /home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/build/aruco_part/install.log --single-version-externally-managed install_data
