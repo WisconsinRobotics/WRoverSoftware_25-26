@@ -1,10 +1,11 @@
 import os
 import rclpy
 from rclpy.node import Node
-from wr_interfaces.srv import MultiPathPlan
+from std_msgs.msg import String
 from ublox_ubx_msgs.msg import UBXNavPVT
 from geographic_msgs.msg import GeoPoint
 from std_msgs.msg import Float32MultiArray
+from wr_interfaces.srv import MultiPathPlan
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -13,10 +14,14 @@ class StateMachine(Node):
     def __init__(self):
         # Initialization
         super().__init__('state_machine')
+        self.get_logger().info("Starting Autonomous Mission")
         
         # Create subscribers for gnss coordinates
         self.rover1_subscriber = self.create_subscription(UBXNavPVT, '/rover1/ubx_nav_pvt', self.rover1_callback, 10)
         self.rover2_subscriber = self.create_subscription(UBXNavPVT, '/rover2/ubx_nav_pvt', self.rover2_callback, 10)
+        
+        # Create subscriber to state machine controller
+        self.state_machine_controller_subscriber = self.create_subscription(String, '/state_machine_controller', self.state_machine_controller_callback, 10)
         
         # Create client for path planning
         self.multipathplan_client = self.create_client(MultiPathPlan, 'multi_path_plan')
@@ -28,6 +33,7 @@ class StateMachine(Node):
         self.led_publisher = self.create_publisher(Float32MultiArray, 'led', 1)
         
         # Initialize global variables
+        self.state_machine_controller = ""       # State machine controller command
         self.waypoint_msg = Float32MultiArray()  # Waypoint msg
         self.led_msg = Float32MultiArray()       # Led msg
         self.rover1_lat = None                   # Gnss coordinates
@@ -60,16 +66,24 @@ class StateMachine(Node):
                 
                 # Store them in the points dictionary with (lat, lon) as key and label as value
                 self.points[(lat, lon)] = label
-        
+                
         # Set led to red
+        self.get_logger().info("Successfully read target points")
         self.led_msg.data = [255.0, 0.0, 0.0]
         self.led_publisher.publish(self.led_msg)
         
         # Set state to planning
+        self.get_logger().info("Waiting for path planning result")
         self.state = "PLANNING"
         
         # Timer callback at 20 Hz
         self.timer = self.create_timer(self.interval, self.timer_callback)
+        
+        
+        
+    # Callback function for state machine controller
+    def state_machine_controller_callback(self, cmd):
+        self.state_machine_controller = cmd.data
 
 
     
@@ -97,7 +111,10 @@ class StateMachine(Node):
     
     # Main loop
     def timer_callback(self):
-        # TODO: If stop, Change state to manual
+        # If stop, Change state to manual
+        if self.state_machine_controller == "stop":
+            self.state_machine_controller = ""
+            self.state = "MANUAL"
         
         if self.state == "PLANNING":
             self.planning()
@@ -125,8 +142,8 @@ class StateMachine(Node):
     # Currently waiting for path planning to generate waypoints
     def planning(self):
         # If still waiting for location
-        if self.loc == None:
-            return
+        # if self.loc == None:
+        #    return
             
         # If waiting for path, skip
         if self.waiting_for_path:
@@ -137,8 +154,10 @@ class StateMachine(Node):
         
         # Starting point
         req.start = GeoPoint()
-        req.start.latitude = self.loc[0]
-        req.start.longitude = self.loc[1]
+        # req.start.latitude = self.loc[0]
+        # req.start.longitude = self.loc[1]
+        req.start.latitude = 38.39925417620823
+        req.start.longitude = -110.79526161409899
         
         # All points
         targets = []
@@ -164,6 +183,8 @@ class StateMachine(Node):
         
     # Callback function that runs when we receive the result from path planning
     def path_callback(self, future):
+        self.get_logger().info("sus")
+        
         # Get the result
         result = future.result()
         
@@ -179,6 +200,7 @@ class StateMachine(Node):
         self.waypoint_publisher.publish(self.waypoint_msg)
         
         # Set waiting_for_path to false and state to nav
+        self.get_logger().info("Path received, starting normal navigation")
         self.waiting_for_path = False
         self.state = "NAV"
         
@@ -199,12 +221,15 @@ class StateMachine(Node):
     
     
     def flashing(self):
-        # TODO: If continue
-        if False:
+        # If continue
+        if self.state_machine_controller == "continue":
+            self.state_machine_controller = ""
+            
             # If reached the end of the waypoints list
             if self.current_waypoint == len(self.waypoints):
                 # Change state to manual
-                self.get_logger().info("Autonomous mission complete! Switching to manual mode.")
+                self.get_logger().info("Autonomous Mission complete!")
+                self.get_logger().info("Switching to manual mode")
                 self.state = "MANUAL"
             
             else:
@@ -213,6 +238,7 @@ class StateMachine(Node):
                 self.led_publisher.publish(self.led_msg)
                 
                 # Change state to nav
+                self.get_logger().info("Continuing normal navigation")
                 self.state = "NAV"
             
             return
@@ -245,11 +271,11 @@ class StateMachine(Node):
 def main(args=None):
     rclpy.init(args=args)
     
-    publisher = StateMachine()
+    state_machine = StateMachine()
     
-    rclpy.spin(publisher)
+    rclpy.spin(state_machine)
     
-    publisher.destroy_node()
+    state_machine.destroy_node()
     rclpy.shutdown()
 
 
