@@ -187,19 +187,20 @@ class StateMachine(Node):
     
     
     def nav(self):
-    
+        return
     
     
     def aruco_nav(self):
-    
+        return
     
     
     def object_nav(self):
-    
+        return
     
     
     def flashing(self):
         # TODO: If continue
+        if False:
             # If reached the end of the waypoints list
             if self.current_waypoint == len(self.waypoints):
                 # Change state to manual
@@ -231,7 +232,7 @@ class StateMachine(Node):
     
     
     def dance_off(self):
-    
+        return
     
     
     def manual(self):
