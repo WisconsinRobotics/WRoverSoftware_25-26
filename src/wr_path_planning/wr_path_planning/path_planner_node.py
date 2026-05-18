@@ -82,6 +82,8 @@ class PathPlannerNode(Node):
         response.path = path
         response.message = ""
         response.success = True
+        
+        return response
 
     def find_multi_path_callback(self, request, response):        
         start: GeoPoint = request.start
@@ -123,6 +125,8 @@ class PathPlannerNode(Node):
         response.path = path
         response.message = ""
         response.success = True 
+        
+        return response
     
     def _test_implementation(self):
         self.get_logger().info("Entering test mode")
