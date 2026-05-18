@@ -1,6 +1,0 @@
-{
-  "package_name": "object_detection_msgs",
-  "non_idl_tuples": [
-    "/home/david-wang/Desktop/Projects/Wisconsin Robotics/WRoverSoftware_25-26/src/object_detection_msgs:msg/Detection.msg"
-  ]
-}

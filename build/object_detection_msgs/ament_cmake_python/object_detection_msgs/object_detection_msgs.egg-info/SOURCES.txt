@@ -1,8 +1,0 @@
-setup.py
-object_detection_msgs/__init__.py
-object_detection_msgs.egg-info/PKG-INFO
-object_detection_msgs.egg-info/SOURCES.txt
-object_detection_msgs.egg-info/dependency_links.txt
-object_detection_msgs.egg-info/top_level.txt
-object_detection_msgs/msg/__init__.py
-object_detection_msgs/msg/_detection.py

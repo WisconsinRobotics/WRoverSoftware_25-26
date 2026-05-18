@@ -1,2 +1,0 @@
-[console_scripts]
-autonomous_node = autonomous.autonomous_node:main
