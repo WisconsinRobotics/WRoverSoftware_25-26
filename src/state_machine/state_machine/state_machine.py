@@ -4,10 +4,14 @@ import signal
 import subprocess
 from rclpy.node import Node
 from std_msgs.msg import String
-from ublox_ubx_msgs.msg import UBXNavPVT
+from geographic_msgs.msg import GeoPath
+from geographic_msgs.msg import GeoPose
 from geographic_msgs.msg import GeoPoint
+from ublox_ubx_msgs.msg import UBXNavPVT
 from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float64MultiArray
 from wr_interfaces.srv import MultiPathPlan
+from geographic_msgs.msg import GeoPoseStamped
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -22,9 +26,13 @@ class StateMachine(Node):
         # self.swerve_control = subprocess.Popen(["ros2", "run", "wr_swerve_control", "swerve_control"])
         # self.swerve_motor = subprocess.Popen(["ros2", "run", "wr_swerve_motor", "swerve_motor"])
         
+        # Create publisher and subscriber for spiral path generation node
+        self.spiral_publisher = self.create_publisher(Float64MultiArray, 'spiral_request', 10)
+        self.spiral_subscriber = self.create_subscription(GeoPath, 'spiral_path', self.spiral_callback, 10)
+        
         # Create subscribers for gnss coordinates
-        self.rover1_subscriber = self.create_subscription(UBXNavPVT, '/rover1/ubx_nav_pvt', self.rover1_callback, 10)
-        self.rover2_subscriber = self.create_subscription(UBXNavPVT, '/rover2/ubx_nav_pvt', self.rover2_callback, 10)
+        self.rover1_subscriber = self.create_subscription(UBXNavPVT, 'rover1/ubx_nav_pvt', self.rover1_callback, 10)
+        self.rover2_subscriber = self.create_subscription(UBXNavPVT, 'rover2/ubx_nav_pvt', self.rover2_callback, 10)
         
         # Create subscriber to state machine controller
         self.state_machine_controller_subscriber = self.create_subscription(String, '/state_machine_controller', self.state_machine_controller_callback, 10)
@@ -40,6 +48,7 @@ class StateMachine(Node):
         
         # Initialize global variables
         self.xbox_controller = None              # Xbox controller node
+        self.spiral = None                       # Spiral GeoPath
         self.state_machine_controller = ""       # State machine controller command
         self.waypoint_msg = Float32MultiArray()  # Waypoint msg
         self.led_msg = Float32MultiArray()       # Led msg
@@ -49,9 +58,9 @@ class StateMachine(Node):
         self.rover2_lon = None
         self.loc = None                          # Current location
         self.points = {}                         # Input points
-        self.waiting_for_path = False            # Waiting for path planning to generate path
-        self.waypoints = []                      # Generated waypoints
-        self.current_waypoint = 0                # Current waypoint index
+        self.paths = []                          # Each target has a path (list of lists)
+        self.curr_target = 0                     # Current target index
+        self.curr_waypoint = 0                   # Current waypoint index
         self.interval = 0.05                     # Timer callback interval (20 Hz)
         self.counter = 0                         # Control led flashing frequency
         
@@ -79,6 +88,31 @@ class StateMachine(Node):
         self.led_msg.data = [255.0, 0.0, 0.0]
         self.led_publisher.publish(self.led_msg)
         
+        # Path planning request
+        req = MultiPathPlan.Request()
+        
+        # Starting point
+        req.start = GeoPoint()
+        # TODO
+        # req.start.latitude = self.loc[0]
+        # req.start.longitude = self.loc[1]
+        req.start.latitude = 38.39925417620823
+        req.start.longitude = -110.79526161409899
+        
+        # Target points
+        targets = []
+        for key, value in self.points.items():
+            point = GeoPoint()
+            point.latitude = key[0]
+            point.longitude = key[1]
+            targets.append(point)
+        req.targets = targets
+        
+        # Asynchronous service call to path planning
+        self.multipathplan_client.wait_for_service(timeout_sec=5.0)
+        future = self.multipathplan_client.call_async(req)
+        future.add_done_callback(self.path_callback)
+        
         # Set state to planning
         self.get_logger().info("Waiting for path planning result")
         self.state = "PLANNING"
@@ -88,11 +122,27 @@ class StateMachine(Node):
         
         
         
+    # Callback function for path
+    def path_callback(self, future):
+        result = future.result()
+        self.get_logger().info("Path planning result received")
+        
+        # Get paths
+        for p in result.path:
+            path = []
+            
+            for pose in p.poses:
+                path.append((pose.pose.position.latitude, pose.pose.position.longitude))
+                
+            self.paths.append(path)
+        
+    # Callback function for spiral path
+    def spiral_callback(self, path):
+        self.spiral = path
+        
     # Callback function for state machine controller
     def state_machine_controller_callback(self, cmd):
         self.state_machine_controller = cmd.data
-
-
     
     # Callback function for first antenna
     def rover1_callback(self, loc_msg):
@@ -127,6 +177,9 @@ class StateMachine(Node):
         if self.state == "PLANNING":
             self.planning()
             
+        elif self.state == "SPIRAL_PLANNING":
+            self.spiral_planning()
+            
         elif self.state == "NAV":
             self.nav()
             
@@ -147,72 +200,30 @@ class StateMachine(Node):
     
     
     
-    # Currently waiting for path planning to generate waypoints
+    # Waiting for path planning to generate path
     def planning(self):
-        # If still waiting for location
-        # TODO
-        # if self.loc == None:
-        #    return
+        if len(self.paths) != 0:
+            # Set state to spiral planning
+            self.get_logger().info("Waiting for spiral search path planning result")
+            self.state = "SPIRAL_PLANNING"
+    
+    
+    
+    # Waiting for spiral search path planning to generate path
+    def spiral_planning(self):
+        # TODO: Get spiral search paths for aruco1, aruco2, mallet, hammer, and bottle
+        
+        # Iterated through all the targets
+        if self.curr_target == len(self.paths):
+            # Publish the first waypoint
+            self.waypoint_msg.data = [self.paths[0][0][0], self.paths[0][0][1]]
+            self.waypoint_publisher.publish(self.waypoint_msg)
             
-        # If waiting for path, skip
-        if self.waiting_for_path:
-            return
-        
-        # Send request to path planning
-        req = MultiPathPlan.Request()
-        
-        # Starting point
-        req.start = GeoPoint()
-        # TODO
-        # req.start.latitude = self.loc[0]
-        # req.start.longitude = self.loc[1]
-        req.start.latitude = 38.39925417620823
-        req.start.longitude = -110.79526161409899
-        
-        # All points
-        targets = []
-        
-        for key, value in self.points.items():
-            point = GeoPoint()
-            point.latitude = key[0]
-            point.longitude = key[1]
-            targets.append(point)
+            # TODO: Launch the autonomous navigation node in another terminal
             
-        req.targets = targets
-        
-        # Set waiting_for_path to true
-        self.waiting_for_path = True
-        
-        # Async call
-        future = self.multipathplan_client.call_async(req)
-        
-        # When we receive the result
-        future.add_done_callback(self.path_callback)
-        
-        
-        
-    # Callback function that runs when we receive the result from path planning
-    def path_callback(self, future):
-        # Get the result
-        result = future.result()
-        
-        # If for some reason the result is nonr or the generated path is empty
-        if result == None or len(result.path) == 0:
-            return
-        
-        # Get waypoints from generated path
-        self.waypoints = [(waypoint.latitude, waypoint.longitude) for waypoint in result.path]
-        
-        # Publish the first waypoint
-        self.waypoint_msg.data = [self.waypoints[0][0], self.waypoints[0][1]]
-        self.waypoint_publisher.publish(self.waypoint_msg)
-        
-        # Set waiting_for_path to false and state to nav
-        self.get_logger().info("Path received, starting normal navigation")
-        self.waiting_for_path = False
-        self.state = "NAV"
-        
-        # TODO: Launch the autonomous navigation node in another terminal
+            # Set state to nav
+            self.get_logger().info("Spiral search paths received, starting normal navigation")
+            self.state = "NAV"
     
     
     
@@ -220,12 +231,15 @@ class StateMachine(Node):
         return
     
     
+    
     def aruco_nav(self):
         return
     
     
+    
     def object_nav(self):
         return
+    
     
     
     def flashing(self):
@@ -233,8 +247,8 @@ class StateMachine(Node):
         if self.state_machine_controller == "continue":
             self.state_machine_controller = ""
             
-            # If reached the end of the waypoints list
-            if self.current_waypoint == len(self.waypoints):
+            # If reached the end of the targets
+            if self.curr_target == len(self.paths):
                 # Change state to manual
                 self.get_logger().info("Autonomous Mission complete!")
                 self.get_logger().info("Switching to manual mode")
@@ -280,7 +294,6 @@ class StateMachine(Node):
         # self.xbox_controller  = subprocess.Popen(["ros2", "run", "wr_xbox_controller", "drive_controller"])
         
     
-        
         
 def main(args=None):
     rclpy.init(args=args)
