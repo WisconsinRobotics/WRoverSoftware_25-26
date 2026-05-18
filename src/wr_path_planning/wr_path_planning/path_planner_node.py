@@ -3,6 +3,9 @@ from rclpy.node import Node
 from wr_interfaces.srv import PathPlan
 from wr_interfaces.srv import MultiPathPlan
 from geographic_msgs.msg import GeoPoint
+from geographic_msgs.msg import GeoPath
+from geographic_msgs.msg import GeoPoseStamped
+from geographic_msgs.msg import GeoPose
 
 from wr_path_planning.point_cloud.load_clean import load_and_clean_lidar
 from wr_path_planning.point_cloud.knn_builder import build_knn
@@ -107,7 +110,7 @@ class PathPlannerNode(Node):
                 best_length = length
         
         targets_ordered: List[GeoPoint] = [targets[indx] for indx in best_permutation]
-        path: List[GeoPoint] = []
+        path: List[GeoPath] = []
         current_point = start
         for target in targets_ordered:
             _request = PathPlan.Request()
@@ -116,8 +119,15 @@ class PathPlannerNode(Node):
 
             _response = PathPlan.Response()
             self.find_path_callback(_request, _response)
+            
+            segment = GeoPath()
             for point in _response.path:
-                path.append(point)
+                pose = GeoPose()
+                gps = GeoPoseStamped()
+                pose.position = point
+                gps.pose = pose
+                segment.poses.append(gps)
+            path.append(segment)
 
             current_point = target
 
