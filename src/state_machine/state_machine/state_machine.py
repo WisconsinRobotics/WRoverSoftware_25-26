@@ -1,5 +1,7 @@
 import os
 import rclpy
+import signal
+import subprocess
 from rclpy.node import Node
 from std_msgs.msg import String
 from ublox_ubx_msgs.msg import UBXNavPVT
@@ -15,6 +17,10 @@ class StateMachine(Node):
         # Initialization
         super().__init__('state_machine')
         self.get_logger().info("Starting Autonomous Mission")
+        
+        # TODO: Start swerve nodes
+        # self.swerve_control = subprocess.Popen(["ros2", "run", "wr_swerve_control", "swerve_control"])
+        # self.swerve_motor = subprocess.Popen(["ros2", "run", "wr_swerve_motor", "swerve_motor"])
         
         # Create subscribers for gnss coordinates
         self.rover1_subscriber = self.create_subscription(UBXNavPVT, '/rover1/ubx_nav_pvt', self.rover1_callback, 10)
@@ -33,6 +39,7 @@ class StateMachine(Node):
         self.led_publisher = self.create_publisher(Float32MultiArray, 'led', 1)
         
         # Initialize global variables
+        self.xbox_controller = None              # Xbox controller node
         self.state_machine_controller = ""       # State machine controller command
         self.waypoint_msg = Float32MultiArray()  # Waypoint msg
         self.led_msg = Float32MultiArray()       # Led msg
@@ -59,7 +66,7 @@ class StateMachine(Node):
                 # Get rid of white spaces and split with spaces
                 vals = line.strip().split()
                 
-                # Get the latitude, longitude, and point label (gnss, aruco, bottle, mallet, hammer)
+                # Get the latitude, longitude, and point label (gnss, aruco1, aruco2, mallet, hammer, bottle)
                 lat = float(vals[0])
                 lon = float(vals[1])
                 label = vals[2]
@@ -114,6 +121,7 @@ class StateMachine(Node):
         # If stop, Change state to manual
         if self.state_machine_controller == "stop":
             self.state_machine_controller = ""
+            self.get_logger().info("Autonomous operation stopped, switching to manual mode")
             self.state = "MANUAL"
         
         if self.state == "PLANNING":
@@ -142,6 +150,7 @@ class StateMachine(Node):
     # Currently waiting for path planning to generate waypoints
     def planning(self):
         # If still waiting for location
+        # TODO
         # if self.loc == None:
         #    return
             
@@ -154,6 +163,7 @@ class StateMachine(Node):
         
         # Starting point
         req.start = GeoPoint()
+        # TODO
         # req.start.latitude = self.loc[0]
         # req.start.longitude = self.loc[1]
         req.start.latitude = 38.39925417620823
@@ -183,8 +193,6 @@ class StateMachine(Node):
         
     # Callback function that runs when we receive the result from path planning
     def path_callback(self, future):
-        self.get_logger().info("sus")
-        
         # Get the result
         result = future.result()
         
@@ -265,6 +273,12 @@ class StateMachine(Node):
         # Set led to blue
         self.led_msg.data = [0.0, 0.0, 255.0] 
         self.led_publisher.publish(self.led_msg)
+        
+        # TODO: Stop any autonomous node
+        
+        # TODO: Start Xbox controller node in another terminal
+        # self.xbox_controller  = subprocess.Popen(["ros2", "run", "wr_xbox_controller", "drive_controller"])
+        
     
         
         
