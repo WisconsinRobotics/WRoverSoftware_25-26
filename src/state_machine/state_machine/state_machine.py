@@ -52,6 +52,7 @@ class StateMachine(Node):
         self.state_machine_controller = ""       # State machine controller command
         self.waypoint_msg = Float32MultiArray()  # Waypoint msg
         self.led_msg = Float32MultiArray()       # Led msg
+        self.spiral_msg = Float64MultiArray()    # Spiral msg
         self.rover1_lat = None                   # Gnss coordinates
         self.rover1_lon = None
         self.rover2_lat = None
@@ -211,10 +212,11 @@ class StateMachine(Node):
     
     # Waiting for spiral search path planning to generate path
     def spiral_planning(self):
-        # TODO: Get spiral search paths for aruco1, aruco2, mallet, hammer, and bottle
-        
         # Iterated through all the targets
         if self.curr_target == len(self.paths):
+            # Set current target back to 0
+            self.curr_target = 0
+            
             # Publish the first waypoint
             self.waypoint_msg.data = [self.paths[0][0][0], self.paths[0][0][1]]
             self.waypoint_publisher.publish(self.waypoint_msg)
@@ -224,7 +226,59 @@ class StateMachine(Node):
             # Set state to nav
             self.get_logger().info("Spiral search paths received, starting normal navigation")
             self.state = "NAV"
-    
+            
+            return
+            
+        # Get spiral search paths for aruco1, aruco2, mallet, hammer, and bottle
+        if self.spiral == None:
+            target = (self.paths[self.curr_target][-1][0], self.paths[self.curr_target][-1][1])
+            
+            # Check current target type
+            if target in self.points and len(self.spiral_msg.data) == 0:
+                # aruco1
+                if self.points[target] == 'aruco1':
+                    self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 5.0, 10.0]
+                    self.spiral_publisher.publish(self.spiral_msg)
+                    
+                # aruco2
+                elif self.points[target] == 'aruco2':
+                    self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 10.0, 20.0]
+                    self.spiral_publisher.publish(self.spiral_msg)
+                    
+                # mallet
+                elif self.points[target] == 'mallet':
+                    self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 0.0, 3.0]
+                    self.spiral_publisher.publish(self.spiral_msg)
+                    
+                # hammer
+                elif self.points[target] == 'hammer':
+                    self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 0.0, 3.0]
+                    self.spiral_publisher.publish(self.spiral_msg)
+                    
+                # bottle
+                elif self.points[target] == 'bottle':
+                    self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 0.0, 10.0]
+                    self.spiral_publisher.publish(self.spiral_msg)
+                
+                # Increment current target
+                else:
+                    self.curr_target += 1
+                    
+        # Spiral path received 
+        else:
+            # Append path to the end of the current target path
+            for pose in self.spiral.poses:
+                self.paths[self.curr_target].append((pose.pose.position.latitude, pose.pose.position.longitude))
+                
+            # Reset spiral msg data to empty
+            self.spiral_msg.data = []
+                
+            # Reset spiral path to none
+            self.spiral = None
+                
+            # Increment current target
+            self.curr_target += 1
+            
     
     
     def nav(self):
