@@ -233,8 +233,8 @@ class StateMachine(Node):
         if self.spiral == None:
             target = (self.paths[self.curr_target][-1][0], self.paths[self.curr_target][-1][1])
             
-            # Check current target type
-            if target in self.points and len(self.spiral_msg.data) == 0:
+            # If we didn't publish yet
+            if len(self.spiral_msg.data) == 0:
                 # aruco1
                 if self.points[target] == 'aruco1':
                     self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 5.0, 10.0]
@@ -312,6 +312,9 @@ class StateMachine(Node):
                 # Set led to red
                 self.led_msg.data = [255.0, 0.0, 0.0]
                 self.led_publisher.publish(self.led_msg)
+                
+                # Increment target
+                self.curr_target += 1
                 
                 # Change state to nav
                 self.get_logger().info("Continuing normal navigation")
