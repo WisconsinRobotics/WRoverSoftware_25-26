@@ -1,6 +1,5 @@
 # Core logic stuff
 import math
-import numpy as np
 from geographiclib.geodesic import Geodesic
 
 # ROS stuff
@@ -55,7 +54,7 @@ class PathGeneration:
         b = self.loop_spacing / (2 * math.pi)
 
         # Total angle to reach r_max (upper bound)
-        theta_max = (self.r_max - a) / b
+        theta_max = ((self.r_max - a) / b) + 1
         theta_min = 0.0
         pose = self._create_geo_pose(self.target_lat, self.target_lon)
         path_msg.poses.append(pose)
