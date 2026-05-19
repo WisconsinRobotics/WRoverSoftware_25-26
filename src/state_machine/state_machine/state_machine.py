@@ -41,7 +41,7 @@ class StateMachine(Node):
         self.multipathplan_client = self.create_client(MultiPathPlan, 'multi_path_plan')
         
         # Create waypoint publisher
-        self.waypoint_publisher = self.create_publisher(Float32MultiArray, 'waypoint', 10)
+        self.waypoint_publisher = self.create_publisher(Float64MultiArray, 'waypoint', 10)
         
         # Create led publisher
         self.led_publisher = self.create_publisher(Float32MultiArray, 'led', 1)
@@ -50,7 +50,7 @@ class StateMachine(Node):
         self.xbox_controller = None              # Xbox controller node
         self.spiral = None                       # Spiral GeoPath
         self.state_machine_controller = ""       # State machine controller command
-        self.waypoint_msg = Float32MultiArray()  # Waypoint msg
+        self.waypoint_msg = Float64MultiArray()  # Waypoint msg
         self.led_msg = Float32MultiArray()       # Led msg
         self.spiral_msg = Float64MultiArray()    # Spiral msg
         self.rover1_lat = None                   # Gnss coordinates
@@ -84,6 +84,9 @@ class StateMachine(Node):
                 # Store them in the points dictionary with (lat, lon) as key and label as value
                 self.points[(lat, lon)] = label
                 
+        for key, value in self.points.items():
+            print(key, value)
+                
         # Set led to red
         self.get_logger().info("Successfully read target points")
         self.led_msg.data = [255.0, 0.0, 0.0]
@@ -97,8 +100,8 @@ class StateMachine(Node):
         # TODO
         # req.start.latitude = self.loc[0]
         # req.start.longitude = self.loc[1]
-        req.start.latitude = 38.39925417620823
-        req.start.longitude = -110.79526161409899
+        req.start.latitude = 43.07061877920905
+        req.start.longitude = -89.40977230012103
         
         # Target points
         targets = []
@@ -129,13 +132,20 @@ class StateMachine(Node):
         self.get_logger().info("Path planning result received")
         
         # Get paths
-        for p in result.path:
+        for i in range(len(result.path)):
             path = []
-            
-            for pose in p.poses:
-                path.append((pose.pose.position.latitude, pose.pose.position.longitude))
+            for j in range(len(result.path[i].poses)):
+                if i == 0 or j > 0:
+                    path.append(result.path[i].poses[j].pose.position.latitude, result.path[i].poses[j].pose.position.latitude)
+                self.paths.append(path)
                 
-            self.paths.append(path)
+        #for p in result.path:
+        #    path = []
+        #    
+        #    for pose in p.poses:
+         #       path.append((pose.pose.position.latitude , pose.pose.position.longitude))
+                
+        #    self.paths.append(path)
         
     # Callback function for spiral path
     def spiral_callback(self, path):
@@ -231,6 +241,10 @@ class StateMachine(Node):
             
         # Get spiral search paths for aruco1, aruco2, mallet, hammer, and bottle
         if self.spiral == None:
+            for path in self.paths:
+                for waypoint in path:
+                    print(waypoint[0], waypoint[1])
+                    
             target = (self.paths[self.curr_target][-1][0], self.paths[self.curr_target][-1][1])
             
             # If we didn't publish yet
