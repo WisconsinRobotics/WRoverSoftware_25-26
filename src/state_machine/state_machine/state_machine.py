@@ -1,4 +1,5 @@
 import os
+import csv
 import rclpy
 import signal
 import subprocess
@@ -201,16 +202,12 @@ class StateMachine(Node):
         elif self.state == "MANUAL":
             self.manual()
     
-    
-    
     # Waiting for path planning to generate path
     def planning(self):
         if len(self.paths) != 0:
             # Set state to spiral planning
             self.get_logger().info("Waiting for spiral search path planning result")
             self.state = "SPIRAL_PLANNING"
-    
-    
     
     # Waiting for spiral search path planning to generate path
     def spiral_planning(self):
@@ -220,13 +217,14 @@ class StateMachine(Node):
             self.curr_target = 0
             
             # Publish the first waypoint
-            self.waypoint_msg.data = [self.paths[0][0][0], self.paths[0][0][1]]
+            self.waypoint_msg.data = [self.paths[0][1][0], self.paths[0][1][1]]
             self.waypoint_publisher.publish(self.waypoint_msg)
             
             # TODO: Launch the autonomous navigation node in another terminal
             
-            # Set state to nav
-            self.get_logger().info("Spiral search paths received, starting normal navigation")
+            # Export paths and set state to nav
+            self.export_paths_to_csv()
+            self.get_logger().info("Starting normal navigation")
             self.state = "NAV"
             
             return
@@ -354,6 +352,28 @@ class StateMachine(Node):
         # TODO: Start Xbox controller node in another terminal
         # self.xbox_controller  = subprocess.Popen(["ros2", "run", "wr_xbox_controller", "drive_controller"])
         
+        
+        
+    def export_paths_to_csv(self):
+        # Define file path to write to
+        path_filepath = os.path.expanduser('~/path.csv')
+
+        with open(path_filepath, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["lat", "lon", "label"])
+
+            for path in self.paths:
+                # Write all waypoints
+                for p in path[:-1]:
+                    writer.writerow([p[0], p[1], "waypoint"])
+
+                # Match and write target
+                target = path[-1]
+                target = min(self.points.keys(), key = lambda k: (k[0] - target[0])**2 + (k[1] - target[1])**2)
+                writer.writerow([path[-1][0], path[-1][1], self.points[target]])
+
+        self.get_logger().info(f"Spiral search paths received, path exported to {path_filepath}")
+        
     
         
 def main(args=None):
@@ -365,8 +385,6 @@ def main(args=None):
     
     state_machine.destroy_node()
     rclpy.shutdown()
-
-
 
 if __name__ == '__main__':
     main()
