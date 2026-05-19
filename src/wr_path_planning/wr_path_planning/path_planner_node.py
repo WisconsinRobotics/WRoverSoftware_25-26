@@ -14,6 +14,7 @@ from wr_path_planning.path_planning.astar import astar
 from wr_path_planning.utils.nearest_point import find_nearest_node
 from wr_path_planning.utils.point_conversion import *
 from wr_path_planning.utils.geo_helpers import compute_gnss_distance
+from wr_path_planning.utils.point_conversion import UTAH_EPSG
 
 import random
 from itertools import permutations
@@ -31,8 +32,17 @@ class PathPlannerNode(Node):
             return
         
         self.get_logger().info(f"Loading and cleaning LiDAR data from: {self.lidar_file}")
-        self.espg = get_epsg(self.lidar_file)
-        self.get_logger().info(f"EPSG of the lidar file: {self.espg}")
+
+        # Launch EPSG code over overwrites the epsg code of the lidar file
+        self.declare_parameter("epsg", 0)
+        self.epsg = self.get_parameter("epsg").get_parameter_value().integer_value
+        if self.epsg == 0:
+            # If not provided a launch EPSG code, try to read it from lidar file otherwise use UTAH_EPSG as an EPSG code
+            self.epsg = get_epsg(self.lidar_file)
+            if self.epsg is None:
+                self.epsg = UTAH_EPSG
+
+        self.get_logger().info(f"EPSG of the lidar file: {self.epsg}")
         self.points = load_and_clean_lidar(self.lidar_file, logger=self.get_logger())
 
         self.get_logger().info("Constructing an adjacency graph from LiDAR data")
@@ -58,10 +68,10 @@ class PathPlannerNode(Node):
 
         # Convert points to x, y
         start_lon, start_lat = start.longitude, start.latitude
-        start_x, start_y = gps_to_xy(start_lon, start_lat, self.espg)
+        start_x, start_y = gps_to_xy(start_lon, start_lat, self.epsg)
 
         goal_lon, goal_lat = goal.longitude, goal.latitude
-        goal_x, goal_y = gps_to_xy(goal_lon, goal_lat, self.espg)
+        goal_x, goal_y = gps_to_xy(goal_lon, goal_lat, self.epsg)
 
         # Find indices in our graph that are closest to start and end
         start_idx, _ = find_nearest_node((start_x, start_y), self.points, self.graph)
@@ -69,10 +79,16 @@ class PathPlannerNode(Node):
         
         # Run Astar algorithmn and convert points to GeoPoint format
         path_indixes, _ = astar(self.graph, self.points, start_idx, goal_idx)
+        if path_indixes is None:
+            response.path = []
+            response.message = "No path found between start and goal"
+            response.success = False
+            return response
+
         path = []
         for indx in path_indixes:
             x, y, altitude = self.points[indx]
-            lon, lat = xy_to_gps(x, y, self.espg)
+            lon, lat = xy_to_gps(x, y, self.epsg)
 
             point = GeoPoint()
             point.latitude = lat
@@ -85,7 +101,7 @@ class PathPlannerNode(Node):
         response.path = path
         response.message = ""
         response.success = True
-        
+
         return response
 
     def find_multi_path_callback(self, request, response):        
@@ -147,9 +163,9 @@ class PathPlannerNode(Node):
         goal_x, goal_y = self.points[j][0], self.points[j][1]
 
         start = GeoPoint()
-        start.longitude, start.latitude = xy_to_gps(start_x, start_y, self.espg)
+        start.longitude, start.latitude = xy_to_gps(start_x, start_y, self.epsg)
         goal = GeoPoint()
-        goal.longitude, goal.latitude = xy_to_gps(goal_x, goal_y, self.espg)
+        goal.longitude, goal.latitude = xy_to_gps(goal_x, goal_y, self.epsg)
         self.get_logger().info(f"Testing single target. Start: {(start.latitude, start.longitude)}; Goal: {(goal.latitude, goal.longitude)}")
 
         request = PathPlan.Request()
@@ -171,14 +187,14 @@ class PathPlannerNode(Node):
         
         start_x, start_y = self.points[i][0], self.points[i][1]
         start = GeoPoint()
-        start.longitude, start.latitude = xy_to_gps(start_x, start_y, self.espg)
+        start.longitude, start.latitude = xy_to_gps(start_x, start_y, self.epsg)
 
         msg = f"Testing multi target. Start: {(start.latitude, start.longitude)}; Targets: "
         targets = []
         for i, j in enumerate(js):
             target_x, target_y = self.points[j][0], self.points[j][1]
             target = GeoPoint()
-            target.longitude, target.latitude = xy_to_gps(target_x, target_y, self.espg)
+            target.longitude, target.latitude = xy_to_gps(target_x, target_y, self.epsg)
             targets.append(target)
             msg += f"{i + 1}) {(target.latitude, target.longitude)}, "
 
@@ -194,11 +210,13 @@ class PathPlannerNode(Node):
         for i, target in enumerate(targets_ordered):
             self.get_logger().info(f"Target {i + 1}): {(target.latitude, target.longitude)}")
         
-        path = response.path
-        self.get_logger().info(f"Found the following path to follow. Number of points on the path: {len(path)}")
-        for i in range(0, len(path)):
-            point = path[i]
-            self.get_logger().info(f"Point {i}: {(point.latitude, point.longitude)}")
+        path: List[GeoPath] = response.path
+        self.get_logger().info(f"Found the following path to follow. Number of segments on the path: {len(path)}")
+        for i, segment in enumerate(path):
+            self.get_logger().info(f"Segment {i + 1}")
+            for j, gps in enumerate(segment.poses):
+                point = gps.pose.position
+                self.get_logger().info(f"Point {j}: {(point.latitude, point.longitude)}")
 
 
 def main(args=None):
