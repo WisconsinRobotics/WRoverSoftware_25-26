@@ -84,9 +84,6 @@ class StateMachine(Node):
                 # Store them in the points dictionary with (lat, lon) as key and label as value
                 self.points[(lat, lon)] = label
                 
-        for key, value in self.points.items():
-            print(key, value)
-                
         # Set led to red
         self.get_logger().info("Successfully read target points")
         self.led_msg.data = [255.0, 0.0, 0.0]
@@ -134,18 +131,13 @@ class StateMachine(Node):
         # Get paths
         for i in range(len(result.path)):
             path = []
+            
             for j in range(len(result.path[i].poses)):
+                # Remove duplicate targets at the start of a path
                 if i == 0 or j > 0:
-                    path.append(result.path[i].poses[j].pose.position.latitude, result.path[i].poses[j].pose.position.latitude)
-                self.paths.append(path)
-                
-        #for p in result.path:
-        #    path = []
-        #    
-        #    for pose in p.poses:
-         #       path.append((pose.pose.position.latitude , pose.pose.position.longitude))
-                
-        #    self.paths.append(path)
+                    path.append((result.path[i].poses[j].pose.position.latitude, result.path[i].poses[j].pose.position.longitude))
+                    
+            self.paths.append(path)
         
     # Callback function for spiral path
     def spiral_callback(self, path):
@@ -240,12 +232,10 @@ class StateMachine(Node):
             return
             
         # Get spiral search paths for aruco1, aruco2, mallet, hammer, and bottle
-        if self.spiral == None:
-            for path in self.paths:
-                for waypoint in path:
-                    print(waypoint[0], waypoint[1])
-                    
-            target = (self.paths[self.curr_target][-1][0], self.paths[self.curr_target][-1][1])
+        if self.spiral == None:   
+            # Match with the closest target
+            target = self.paths[self.curr_target][-1]
+            target = min(self.points.keys(), key = lambda k: (k[0] - target[0])**2 + (k[1] - target[1])**2)
             
             # If we didn't publish yet
             if len(self.spiral_msg.data) == 0:
