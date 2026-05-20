@@ -87,6 +87,8 @@ class CameraHandler(Node):
             distance = self._calculate_distance(best_corners[0])
 
             return (x_offset, distance, int(best_id[0][0]))
+        else: # Neeed for detection check in control loop
+            return None
     
     def _get_best_tag(self, frame, corners, ids):
         if ids is None or len(corners) == 0:
@@ -140,18 +142,25 @@ class CameraHandler(Node):
 
     def control_loop(self):
         detection = self.get_latest_detection()
-        is_tag_tracking = False
+        # is_tag_tracking = False
         distance = None
         error = 0.0
         sgnl_msg = Bool()
 
+        # Define swerve Neutral state
+        linear_x = 0.0
+        linear_y = 0.0
+        rot_left = -1.0
+        rot_right = -1.0
+
+        # First case is when we see Aruco, we must drive to it - so signal that to the State Machine, and override GPS follower
         if detection is not None:
             # We see a tag
             ux, distance, tag_id = detection
             angle_deg = math.degrees(math.atan((ux)/self.K[0, 0]))
             # positive = right
             error = angle_deg 
-            is_tag_tracking = True
+            # is_tag_tracking = True
 
             # Handle case when distance <=1.0 here too
             if distance <= 1.0:
@@ -193,58 +202,70 @@ class CameraHandler(Node):
             bearing_diff = target_bearing - self.heading
             
             # Normalize to [-180, 180]
-            bearing_diff = (bearing_diff + 180) % 360 - 180
-            
-            # positive = right, negative = left
-            error = bearing_diff 
+            error = (bearing_diff + 180) % 360 - 180 # positive = right, negative = left
+
+            rotation_effort = min(abs(error) / 45.0, 1.0)
+
+            if error > 2.0:
+                rot_right = -1.0 + (rotation_effort * 2.0)
+            elif error < -2.0:
+                rot_left = -1.0 + (rotation_effort * 2.0)
+            else:
+                # Keep a 2 degree deadband, maintain neutral resolution
+                pass
+
+            if abs(error < 20.0):
+                linear_x = min(distance / 2.0, 1.5)
+            else:
+                linear_x = 0.0
         else:
-            # Missing data dont move
+            # Missing data dont move - SM handles it
             return
         
-        if is_tag_tracking and distance is not None and distance <= 1.0:
-            cmd = [0.0, 0.0, -1.0, -1.0] 
-            out_msg = Float32MultiArray()
-            out_msg.data = cmd
+        # if is_tag_tracking and distance is not None and distance <= 1.0:
+        #     cmd = [0.0, 0.0, -1.0, -1.0] # No forward, sideways or rotational message
+        #     out_msg = Float32MultiArray()
+        #     out_msg.data = cmd
             
-            sgnl_msg.data = True
-            self.signal_pub.publish(sgnl_msg)
-            self.drive_pub.publish(out_msg)
-            return
+        #     sgnl_msg.data = True
+        #     self.signal_pub.publish(sgnl_msg)
+        #     self.drive_pub.publish(out_msg)
+        #     return
 
-        if self.is_aligning:
-            # If we are currently turning, keep turning until we are highly accurate 
-            if abs(error) <= 3.0:
-                self.is_aligning = False
-        else:
-            # If we are driving, allow some slop. Only stop to fix it if we drift past 8°
-            if abs(error) > 8.0:
-                self.is_aligning = True
+        # if self.is_aligning:
+        #     # If we are currently turning, keep turning until we are highly accurate 
+        #     if abs(error) <= 3.0:
+        #         self.is_aligning = False
+        # else:
+        #     # If we are driving, allow some slop. Only stop to fix it if we drift past 8°
+        #     if abs(error) > 8.0:
+        #         self.is_aligning = True
 
-        KP = 0.02   
-        MAX_FORWARD = 0.8
-        MAX_TURN = 0.8
+        # KP = 0.02   
+        # MAX_FORWARD = 0.8
+        # MAX_TURN = 0.8
 
         
         
-        if self.is_aligning:
-            forward_speed = 0.0
-            turn_speed = max(min(abs(error) * KP, MAX_TURN), 0.2)
-        else:
-            # Pure Forward Drive
-            forward_speed = MAX_FORWARD
-            turn_speed = -1.0
+        # if self.is_aligning:
+        #     forward_speed = 0.0
+        #     turn_speed = max(min(abs(error) * KP, MAX_TURN), 0.2)
+        # else:
+        #     # Pure Forward Drive
+        #     forward_speed = MAX_FORWARD
+        #     turn_speed = -1.0
 
         # Positive error means the target is to the right.
-        if error > 0:
-            cmd = [forward_speed, 0.0, -1.0, turn_speed]  # Turn Right
-        else:
-            cmd = [forward_speed, 0.0, turn_speed, -1.0]  # Turn Left
+        # if error > 0:
+        #     cmd = [forward_speed, 0.0, -1.0, turn_speed]  # Turn Right
+        # else:
+        #     cmd = [forward_speed, 0.0, turn_speed, -1.0]  # Turn Left
 
         # Publish the command
         sgnl_msg.data = False
         self.signal_pub.publish(sgnl_msg)
         out_msg = Float32MultiArray()
-        out_msg.data = cmd
+        out_msg.data = [linear_x, linear_y, rot_left, rot_right]
         self.drive_pub.publish(out_msg)
 
 
