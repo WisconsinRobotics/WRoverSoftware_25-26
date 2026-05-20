@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name = "right_drive">
+    <xacro:macro name = "left_drive">
         <!-- Imports -->
          <!-- I dont understand why but ROS1 imports only work for imports T_T -->
         <xacro:include filename="$(find simulation)/urdf/util/materials.xacro"/>
@@ -12,19 +12,19 @@
         <!-- =====================-->
         <!--     RIGHT CHASIS     -->
         <!-- =====================-->
-        <xacro:property name="rc_pos_x" value = "0.292"/>
-        <xacro:property name="rc_pos_y" value = "-0.115"/>
-        <xacro:property name="rc_pos_z" value = "-0.0125"/>
+        <xacro:property name="lc_pos_x" value = "0.292"/>
+        <xacro:property name="lc_pos_y" value = "-0.115"/>
+        <xacro:property name="lc_pos_z" value = "-0.0125"/>
 
-        <xacro:property name="rc_col_x" value = "0.044"/>
-        <xacro:property name="rc_col_y" value = "1.1"/>
-        <xacro:property name="rc_col_z" value = "0.25"/>
+        <xacro:property name="lc_col_x" value = "0.044"/>
+        <xacro:property name="lc_col_y" value = "1.1"/>
+        <xacro:property name="lc_col_z" value = "0.25"/>
 
-        <link name = "right_chasis">
+        <link name = "left_chasis">
             <!-- Inertial Values-->
             <inertial>
                 <mass value="6.019"/>
-                <origin xyz = "${rc_pos_x} ${rc_pos_y} ${rc_pos_z}"/>
+                <origin xyz = "${lc_pos_x} ${lc_pos_y} ${lc_pos_z}"/>
                 <inertia
                     ixx="0.919"
                     ixy="-0.00008998"
@@ -35,31 +35,31 @@
             </inertial>
 
             <!-- Visuals -->
-            <visual name = "rd_chasis_visual">
+            <visual name = "ld_chasis_visual">
                 <geometry>
                     <!-- And ros2 imports only work for meshes T_T -->
                     <mesh filename = "package://simulation/meshes/rd_chasis.stl"/>
                 </geometry>
-                <xacro:body_mat link_name = "rd_chasis"/>
+                <xacro:body_mat link_name = "ld_chasis"/>
             </visual>
 
             <!-- Collisions-->
-            <collision name = "rd_chasis_collision">
+            <collision name = "ld_chasis_collision">
                 <geometry>
-                    <box size="${rc_col_x} ${rc_col_y} ${rc_col_z}"/>
+                    <box size="${lc_col_x} ${lc_col_y} ${lc_col_z}"/>
                 </geometry>
-                <origin xyz="${rc_pos_x} ${rc_pos_y} ${rc_pos_z}" rpy="0 0 0"/>
+                <origin xyz="${lc_pos_x} ${lc_pos_y} ${lc_pos_z}" rpy="0 0 0"/>
             </collision>
         </link>
 
         <!-- =====================-->
         <!--     BACK SWIVEL      -->
         <!-- =====================-->
-        <xacro:property name="bs_pos_x" value = "0.292"/>
-        <xacro:property name="bs_pos_y" value = "0.343"/>
-        <xacro:property name="bs_pos_z" value = "-0.211"/>
+        <xacro:property name="left_bs_pos_x" value = "0.292"/>
+        <xacro:property name="left_bs_pos_y" value = "0.343"/>
+        <xacro:property name="left_bs_pos_z" value = "-0.211"/>
 
-        <link name = "back_swivel">
+        <link name = "ld_back_swivel">
             <inertial>
                 <mass value="0.227"/>
                 <!-- -->
@@ -74,20 +74,20 @@
             </inertial>
 
             <!-- Visuals -->
-            <visual name = "rd_back_swivel_visual">
-                <origin xyz="${-bs_pos_x} ${-bs_pos_y} ${-bs_pos_z}" rpy="0 0 0"/>
+            <visual name = "ld_back_swivel_visual">
+                <origin xyz="${-left_bs_pos_x} ${-left_bs_pos_y} ${-left_bs_pos_z}" rpy="0 0 0"/>
                 <geometry>
                     <!-- And ros2 imports only work for meshes T_T -->
                     <mesh filename = "package://simulation/meshes/rd_back_swivel.stl"/>
                 </geometry>
-                <xacro:body_mat link_name = "rd_back_swivel"/>
+                <xacro:body_mat link_name = "ld_back_swivel"/>
             </visual>
         </link>
 
-        <joint name="rd_to_bw" type="continuous">
-            <parent link="right_chasis"/>
-            <child link="back_swivel"/>
-            <origin xyz="${bs_pos_x} ${bs_pos_y} ${bs_pos_z}" rpy="0 0 0"/>
+        <joint name="ld_to_bw" type="continuous">
+            <parent link="left_chasis"/>
+            <child link="ld_back_swivel"/>
+            <origin xyz="${left_bs_pos_x} ${left_bs_pos_y} ${left_bs_pos_z}" rpy="0 0 0"/>
             <axis xyz = "0 0 1"/>
         </joint>  
         
@@ -97,11 +97,11 @@
         <!-- =====================-->
         <!--     FRONT SWIVEL      -->
         <!-- =====================-->
-        <xacro:property name="fs_pos_x" value = "0.292"/>
-        <xacro:property name="fs_pos_y" value = "-0.574"/>
-        <xacro:property name="fs_pos_z" value = "-0.211"/>
+        <xacro:property name="ld_fs_pos_x" value = "0.292"/>
+        <xacro:property name="ld_fs_pos_y" value = "-0.574"/>
+        <xacro:property name="ld_fs_pos_z" value = "-0.211"/>
 
-        <link name = "front_swivel">
+        <link name = "ld_front_swivel">
             <inertial>
                 <mass value="0.227"/>
                 <!-- -->
@@ -117,30 +117,30 @@
 
             <!-- Visuals -->
             <visual name = "rd_back_swivel_visual">
-                <origin xyz="${-fs_pos_x} ${-fs_pos_y} ${-fs_pos_z}" rpy="0 0 0"/>
+                <origin xyz="${-ld_fs_pos_x} ${-ld_fs_pos_y} ${-ld_fs_pos_z}" rpy="0 0 0"/>
                 <geometry>
                     <!-- And ros2 imports only work for meshes T_T -->
                     <mesh filename = "package://simulation/meshes/rd_front_swivel.stl"/>
                 </geometry>
-                <xacro:body_mat link_name = "rd_back_swivel"/>
+                <xacro:body_mat link_name = "ld_back_swivel"/>
             </visual>
         </link>
 
         <joint name="rd_to_fw" type="continuous">
-            <parent link="right_chasis"/>
-            <child link="front_swivel"/>
-            <origin xyz="${fs_pos_x} ${fs_pos_y} ${fs_pos_z}" rpy="0 0 0"/>
+            <parent link="left_chasis"/>
+            <child link="ld_front_swivel"/>
+            <origin xyz="${ld_fs_pos_x} ${ld_fs_pos_y} ${ld_fs_pos_z}" rpy="0 0 0"/>
             <axis xyz = "0 0 1"/>
         </joint>  
 
         <!-- =====================-->
         <!--     FRONT WHEEL      -->
         <!-- =====================-->
-        <xacro:property name="fw_pos_x" value = "0.292"/>
-        <xacro:property name="fw_pos_y" value = "-.574"/>
-        <xacro:property name="fw_pos_z" value = "-0.25"/>
+        <xacro:property name="ld_fw_pos_x" value = "0.292"/>
+        <xacro:property name="ld_fw_pos_y" value = "-.574"/>
+        <xacro:property name="ld_fw_pos_z" value = "-0.25"/>
 
-        <link name = "front_wheel">
+        <link name = "ld_front_wheel">
             <inertial>
                 <origin xyz = "0 0 0"/>
                 <mass value = "0.25"/>
@@ -154,16 +154,16 @@
             </inertial>
 
             <!-- Visuals -->
-            <visual name = "rd_front_wheel_visual">
-                <origin xyz="${-fw_pos_x} ${-fw_pos_y} ${-fw_pos_z}" rpy="0 0 0"/>
+            <visual name = "ld_front_wheel_visual">
+                <origin xyz="${-ld_fw_pos_x} ${-ld_fw_pos_y} ${-ld_fw_pos_z}" rpy="0 0 0"/>
                 <geometry>
                     <!-- And ros2 imports only work for meshes T_T -->
                     <mesh filename = "package://simulation/meshes/rd_front_wheel.stl"/>
                 </geometry>
-                <xacro:body_mat link_name = "rw_back_swivel"/>
+                <xacro:body_mat link_name = "ld_back_swivel"/>
             </visual>
 
-            <collision name = "rd_front_wheel_collision">
+            <collision name = "ld_front_wheel_collision">
                 <origin xyz="0 0 0" rpy = "-1.5707 0 0"/>
                 <geometry>
                     <cylinder 
@@ -174,12 +174,12 @@
             </collision>
         </link>
 
-        <joint name = "fw_to_fs" type = "continuous">
-            <parent link = "front_swivel"/>
-            <child link = "front_wheel"/>
+        <joint name = "ld_fw_to_fs" type = "continuous">
+            <parent link = "ld_front_swivel"/>
+            <child link = "ld_front_wheel"/>
 
             <!-- I dont understand why mathematically this works T_T-->
-            <origin xyz="${fw_pos_x - fs_pos_x} ${fw_pos_y - fs_pos_y} ${fw_pos_z - fs_pos_z}" rpy="0 0 0"/>
+            <origin xyz="${ld_fw_pos_x - ld_fs_pos_x} ${ld_fw_pos_y - ld_fs_pos_y} ${ld_fw_pos_z - ld_fs_pos_z}" rpy="0 0 0"/>
             <axis xyz = "0 1 0"/>
         </joint>
 
@@ -187,11 +187,11 @@
         <!-- =====================-->
         <!--     BACK WHEEL       -->
         <!-- =====================-->
-        <xacro:property name="bw_pos_x" value = "0.292"/>
-        <xacro:property name="bw_pos_y" value = ".344"/>
-        <xacro:property name="bw_pos_z" value = "-0.25"/>
+        <xacro:property name="ld_bw_pos_x" value = "0.292"/>
+        <xacro:property name="ld_bw_pos_y" value = ".344"/>
+        <xacro:property name="ld_bw_pos_z" value = "-0.25"/>
 
-        <link name = "back_wheel">
+        <link name = "ld_back_wheel">
             <inertial>
                 <origin xyz = "0 0 0"/>
                 <mass value = "0.25"/>
@@ -205,16 +205,16 @@
             </inertial>
 
             <!-- Visuals -->
-            <visual name = "rd_back_wheel_visual">
-                <origin xyz="${-bw_pos_x} ${-bw_pos_y} ${-bw_pos_z}" rpy="0 0 0"/>
+            <visual name = "ld_back_wheel_visual">
+                <origin xyz="${-ld_bw_pos_x} ${-ld_bw_pos_y} ${-ld_bw_pos_z}" rpy="0 0 0"/>
                 <geometry>
                     <!-- And ros2 imports only work for meshes T_T -->
                     <mesh filename = "package://simulation/meshes/rd_back_wheel.stl"/>
                 </geometry>
-                <xacro:body_mat link_name = "rw_back_swivel"/>
+                <xacro:body_mat link_name = "ld_back_swivel"/>
             </visual>
 
-            <collision name = "rd_back_wheel_collision">
+            <collision name = "ld_back_wheel_collision">
                 <origin xyz="0 0 0" rpy = "-1.5707 0 0"/>
                 <geometry>
                     <cylinder 
@@ -225,12 +225,12 @@
             </collision>
         </link>
 
-        <joint name = "bw_to_bs" type = "continuous">
-            <parent link = "back_swivel"/>
-            <child link = "back_wheel"/>
+        <joint name = "ld_bw_to_bs" type = "continuous">
+            <parent link = "ld_back_swivel"/>
+            <child link = "ld_back_wheel"/>
 
             <!-- I dont understand why mathematically this works T_T-->
-            <origin xyz="${bw_pos_x - bs_pos_x} ${bw_pos_y - bs_pos_y} ${bw_pos_z - bs_pos_z}" rpy="0 0 0"/>
+            <origin xyz="${ld_bw_pos_x - left_bs_pos_x} ${ld_bw_pos_y - left_bs_pos_y} ${ld_bw_pos_z - left_bs_pos_z}" rpy="0 0 0"/>
             <axis xyz = "0 1 0"/>
         </joint>
     </xacro:macro>
