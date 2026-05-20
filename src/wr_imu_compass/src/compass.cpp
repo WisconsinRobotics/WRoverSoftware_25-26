@@ -21,7 +21,7 @@ class CompassDataPublisher : public rclcpp::Node {
         {
             publisher_ = this->create_publisher<std_msgs::msg::Float64>("compass_data_topic", 10);
             timer_ = this->create_wall_timer(
-                500ms, std::bind(&CompassDataPublisher::timer_callback, this));
+                10ms, std::bind(&CompassDataPublisher::timer_callback, this));
         }
 
     private:
@@ -30,6 +30,7 @@ class CompassDataPublisher : public rclcpp::Node {
             std_msgs::msg::Float64 message; // this is potentially wrong
             StatusSignal<units::angle::degree_t> &sig = pigeon2imu.GetYaw(); // this should fix the warnings theoretically
             //auto &sig = pigeon2imu.GetYaw();
+            sig.Refresh();
             message.data = sig.GetValue().value();
             publisher_->publish(message);
         }
