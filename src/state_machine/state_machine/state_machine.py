@@ -1,9 +1,11 @@
 import os
 import csv
+import math
 import rclpy
 import signal
 import subprocess
 from rclpy.node import Node
+from std_msgs.msg import Bool
 from std_msgs.msg import String
 from geographic_msgs.msg import GeoPath
 from geographic_msgs.msg import GeoPose
@@ -38,6 +40,9 @@ class StateMachine(Node):
         # Create subscriber to state machine controller
         self.state_machine_controller_subscriber = self.create_subscription(String, '/state_machine_controller', self.state_machine_controller_callback, 10)
         
+        # Create subscriber for aruco/object reached
+        self.reached_signal = self.create_subscription(Bool, "reached_signal", self.reached_signal_callback, 10)
+        
         # Create client for path planning
         self.multipathplan_client = self.create_client(MultiPathPlan, 'multi_path_plan')
         
@@ -49,6 +54,10 @@ class StateMachine(Node):
         
         # Initialize global variables
         self.xbox_controller = None              # Xbox controller node
+        self.nav_node = None                     # Normal navigation node
+        self.aruco_nav_node = None               # Navigation with aruco node
+        self.objecy_nav_node = None              # Navigation with object node
+        self.reached_signal = False              # If aruco/object reached
         self.spiral = None                       # Spiral GeoPath
         self.state_machine_controller = ""       # State machine controller command
         self.waypoint_msg = Float64MultiArray()  # Waypoint msg
@@ -147,6 +156,10 @@ class StateMachine(Node):
     # Callback function for state machine controller
     def state_machine_controller_callback(self, cmd):
         self.state_machine_controller = cmd.data
+        
+    # Callback function for aruco/object reached
+    def reached_signal_callback(self, sig):
+        self.reached_signal = sig.data
     
     # Callback function for first antenna
     def rover1_callback(self, loc_msg):
@@ -213,19 +226,25 @@ class StateMachine(Node):
     def spiral_planning(self):
         # Iterated through all the targets
         if self.curr_target == len(self.paths):
-            # Set current target back to 0
+            # Set current target back to 0 and set current waypoint to 1
             self.curr_target = 0
+            self.curr_waypoint = 1
             
-            # Publish the first waypoint
-            self.waypoint_msg.data = [self.paths[0][1][0], self.paths[0][1][1]]
-            self.waypoint_publisher.publish(self.waypoint_msg)
-            
-            # TODO: Launch the autonomous navigation node in another terminal
+            # TODO: Launch the nav node
+            self.nav_node = subprocess.Popen(["ros2", "run", "nav", "nav"])
             
             # Export paths and set state to nav
             self.export_paths_to_csv()
             self.get_logger().info("Starting normal navigation")
             self.state = "NAV"
+            
+            # Publish the first waypoint
+            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
+            self.waypoint_publisher.publish(self.waypoint_msg)
+            self.get_logger().info(f"Published waypoint [{self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]}]")
+            
+            # Increment current waypoint (assuming each path has at least 3 total points)
+            self.curr_waypoint += 1
             
             return
             
@@ -233,7 +252,7 @@ class StateMachine(Node):
         if self.spiral == None:   
             # Match with the closest target
             target = self.paths[self.curr_target][-1]
-            target = min(self.points.keys(), key = lambda k: (k[0] - target[0])**2 + (k[1] - target[1])**2)
+            target = min(self.points.keys(), key=lambda k: self.haversine(k[0], k[1], target[0], target[1]))
             
             # If we didn't publish yet
             if len(self.spiral_msg.data) == 0:
@@ -281,24 +300,192 @@ class StateMachine(Node):
             # Increment current target
             self.curr_target += 1
             
-    
-    
     def nav(self):
-        return
-    
-    
-    
+        # If reached end of path (this would only happen if reached gnss target since added spiral path)
+        if self.curr_waypoint == len(self.paths[self.curr_target]):
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+            
+            # Stop nav node
+            self.nav_node.send_signal(signal.SIGINT)
+            self.nav_node = None
+            
+            # Change state to flashing
+            self.get_logger().info("Gnss point reached, switching to flashing mode")
+            self.state = "FLASHING"
+            
+            return
+            
+        # Match with the closest target
+        target = self.paths[self.curr_target][self.curr_waypoint]
+        target = min(self.points.keys(), key=lambda k: self.haversine(k[0], k[1], target[0], target[1])) 
+        
+        # If within 20m of aruco/object (assuming aruco/object points are at least 40m apart)
+        if self.haversine(self.loc[0], self.loc[1], target[0], target[1]) < 20 and self.points[target] != "gnss":
+            # Stop nav node
+            if self.nav_node != None:
+                self.nav_node.send_signal(signal.SIGINT)
+                self.nav_node = None
+                
+            # Aruco
+            if self.points[target] == "aruco1" or self.points[target] == "aruco2":
+                # TODO: Start aruco nav node
+                self.aruco_nav_node = subprocess.Popen(["ros2", "run", "nav", "aruco"])
+                
+                # Change state to aruco nav
+                self.get_logger().info("Approaching aruco point, switching to aruco navigation")
+                self.state = "ARUCO_NAV"
+                
+                return
+            
+            # Mallet
+            if self.points[target] == "mallet":
+                # TODO: Start object nav node
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "mallet"])
+                
+                # Change state to object nav
+                self.get_logger().info("Approaching mallet point, switching to object navigation")
+                self.state = "OBJECT_NAV"
+                
+                return
+            
+            # Hammer
+            if self.points[target] == "hammer":
+                # TODO: Start object nav node
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "hammer"])
+                
+                # Change state to object nav
+                self.get_logger().info("Approaching hammer point, switching to object navigation")
+                self.state = "OBJECT_NAV"
+                
+                return
+            
+            # Bottle
+            if self.points[target] == "bottle":
+                # TODO: Start object nav node
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "bottle"])
+                
+                # Change state to object nav
+                self.get_logger().info("Approaching bottle point, switching to object navigation")
+                self.state = "OBJECT_NAV"
+                
+                return
+                
+        # If distance between current location and waypoint is within 0.6m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 0.6:
+            # Increment current waypoint
+            self.curr_waypoint += 1
+            
+            # Publish the next waypoint
+            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
+            self.waypoint_publisher.publish(self.waypoint_msg)
+            self.get_logger().info(f"Published waypoint [{self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]}]")
+     
     def aruco_nav(self):
-        return
-    
-    
+        # If reached end of path but no aruco found
+        if self.curr_waypoint == len(self.paths[self.curr_target]) and self.reached_signal == False:
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+            
+            # Stop aruco nav node
+            self.aruco_nav_node.send_signal(signal.SIGINT)
+            self.aruco_nav_node = None
+            
+            # Change state to nav
+            self.get_logger().info("Traversed entire search spiral but no aruco tag found, switching to normal navigation")
+            self.state = "NAV"
+            
+            return
+            
+        # If reached aruco
+        if self.reached_signal:
+            self.reached_signal = False
+            
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+            
+            # Stop aruco nav node
+            self.aruco_nav_node.send_signal(signal.SIGINT)
+            self.aruco_nav_node = None
+            
+            # Change state to flashing
+            self.get_logger().info("Aruco tag reached, switching to flashing mode")
+            self.state = "FLASHING"
+            
+            return
+            
+        # If distance between current location and waypoint is within 0.6m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 0.6:
+            # Increment current waypoint
+            self.curr_waypoint += 1
+            
+            # Publish the next waypoint
+            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
+            self.waypoint_publisher.publish(self.waypoint_msg)
+            self.get_logger().info(f"Published waypoint [{self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]}]")
     
     def object_nav(self):
-        return
-    
-    
+        # If reached end of path but no object found
+        if self.curr_waypoint == len(self.paths[self.curr_target]) and self.reached_signal == False:
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+            
+            # Stop object nav node
+            self.object_nav_node.send_signal(signal.SIGINT)
+            self.object_nav_node = None
+            
+            # Change state to nav
+            self.get_logger().info("Traversed entire search spiral but no object found, switching to normal navigation")
+            self.state = "NAV"
+            
+            return
+            
+        # If reached object
+        if self.reached_signal:
+            self.reached_signal = False
+            
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+            
+            # Stop object nav node
+            self.object_nav_node.send_signal(signal.SIGINT)
+            self.object_nav_node = None
+            
+            # Change state to flashing
+            self.get_logger().info("Object reached, switching to flashing mode")
+            self.state = "FLASHING"
+            
+            return
+            
+        # If distance between current location and waypoint is within 0.6m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 0.6:
+            # Increment current waypoint
+            self.curr_waypoint += 1
+            
+            # Publish the next waypoint
+            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
+            self.waypoint_publisher.publish(self.waypoint_msg)
+            self.get_logger().info(f"Published waypoint [{self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]}]")
     
     def flashing(self):
+        # Stop any nav node
+        if self.nav_node != None:
+            self.nav_node.send_signal(signal.SIGINT)
+            self.nav_node = None
+            
+        if self.aruco_nav_node != None:
+            self.aruco_nav_node.send_signal(signal.SIGINT)
+            self.aruco_nav_node = None
+            
+        if self.object_nav_node != None:
+            self.object_nav_node.send_signal(signal.SIGINT)
+            self.object_nav_node = None
+            
         # If continue
         if self.state_machine_controller == "continue":
             self.state_machine_controller = ""
@@ -318,6 +505,9 @@ class StateMachine(Node):
                 # Increment target
                 self.curr_target += 1
                 
+                # TODO: Start nav node
+                self.nav_node = subprocess.Popen(["ros2", "run", "nav", "nav"])
+                
                 # Change state to nav
                 self.get_logger().info("Continuing normal navigation")
                 self.state = "NAV"
@@ -336,21 +526,46 @@ class StateMachine(Node):
                 
             self.led_publisher.publish(self.led_msg)
     
-    
-    
     def dance_off(self):
         return
-    
     
     def manual(self):
         # Set led to blue
         self.led_msg.data = [0.0, 0.0, 255.0] 
         self.led_publisher.publish(self.led_msg)
         
-        # TODO: Stop any autonomous node
+        # Stop any nav node
+        if self.nav_node != None:
+            self.nav_node.send_signal(signal.SIGINT)
+            self.nav_node = None
+            
+        if self.aruco_nav_node != None:
+            self.aruco_nav_node.send_signal(signal.SIGINT)
+            self.aruco_nav_node = None
+            
+        if self.object_nav_node != None:
+            self.object_nav_node.send_signal(signal.SIGINT)
+            self.object_nav_node = None
         
-        # TODO: Start Xbox controller node in another terminal
-        # self.xbox_controller  = subprocess.Popen(["ros2", "run", "wr_xbox_controller", "drive_controller"])
+        # Start Xbox controller node
+        if self.xbox_controller == None:
+            self.xbox_controller = subprocess.Popen(["ros2", "run", "wr_xbox_controller", "drive_controller"])
+        
+        # If continue
+        if self.state_machine_controller == "continue":
+            self.state_machine_controller = ""
+            
+            # Stop Xbox controller node
+            if self.xbox_controller != None:
+                self.xbox_controller.send_signal(signal.SIGINT)
+                self.xbox_controller = None
+                
+            # TODO: Start nav node
+            self.nav_node = subprocess.Popen(["ros2", "run", "nav", "nav"])
+            
+            # Change state to nav
+            self.get_logger().info("Continuing normal navigation")
+            self.state = "NAV"
         
         
         
@@ -369,10 +584,27 @@ class StateMachine(Node):
 
                 # Match and write target
                 target = path[-1]
-                target = min(self.points.keys(), key = lambda k: (k[0] - target[0])**2 + (k[1] - target[1])**2)
+                target = min(self.points.keys(), key=lambda k: self.haversine(k[0], k[1], target[0], target[1]))
                 writer.writerow([path[-1][0], path[-1][1], self.points[target]])
 
-        self.get_logger().info(f"Spiral search paths received, path exported to {path_filepath}")
+        self.get_logger().info(f"Spiral search paths received, exported to {path_filepath}")
+        
+    # TODO: check if this is correct
+    def haversine(self, lat1, lon1, lat2, lon2):
+        R = 6371000.0
+
+        phi1 = math.radians(lat1)
+        phi2 = math.radians(lat2)
+        dphi = math.radians(lat2 - lat1)
+        dlambda = math.radians(lon2 - lon1)
+
+        a = (math.sin(dphi / 2) ** 2 +
+             math.cos(phi1) * math.cos(phi2) *
+             math.sin(dlambda / 2) ** 2)
+
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        return R * c
         
     
         
