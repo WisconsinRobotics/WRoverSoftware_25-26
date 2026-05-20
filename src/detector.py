@@ -1,8 +1,10 @@
 import cv2 as cv
 import depthai as dai
 import numpy as np
-import rclpy
 import math
+from geographiclib.geodesic import Geodesic
+
+import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Float32MultiArray
@@ -37,7 +39,6 @@ class CameraHandler(Node):
         self.drive_pub = self.create_publisher(Float32MultiArray, "/swerve", 10)
         self.signal_pub = self.create_publisher(Bool, "/reached_signal", 10)
 
-
         self.curr_waypoint = (None, None)
         self.curr_pos = (None, None)
         self.heading = None
@@ -47,6 +48,9 @@ class CameraHandler(Node):
         self.arucoDict = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_4X4_50)
         self.arucoParams = cv.aruco.DetectorParameters()
         self.arucoDetector = cv.aruco.ArucoDetector(self.arucoDict, self.arucoParams)
+
+        # Define the Geodesic datum for computations:
+        self.geodesic = Geodesic.WGS84
         
         # Depth AI pipeline - init here or get it passed in from SM?
         self.pipeline = dai.Pipeline()
@@ -62,6 +66,8 @@ class CameraHandler(Node):
         """
             Polls the depth camera and returns an (offset_x, distance, id) of the detected best tag, or None
         """
+
+        # Checks if video has frame.
         if not self.video_queue.has():
             return None
         
@@ -110,15 +116,16 @@ class CameraHandler(Node):
         return float(np.linalg.norm([tVec[0], tVec[2]]))
     
 
-    @staticmethod
-    def compute_bearing(p1, p2):
-        lat1 = math.radians(p1[0]);  lon1 = math.radians(p1[1])
-        lat2 = math.radians(p2[0]);  lon2 = math.radians(p2[1])
-        dlon = lon2 - lon1
-        x    = math.sin(dlon) * math.cos(lat2)
-        y    = (math.cos(lat1) * math.sin(lat2)
-                - math.sin(lat1) * math.cos(lat2) * math.cos(dlon))
-        return (math.degrees(math.atan2(x, y)) + 360) % 360
+    # DEPRECATED - uses Haversine approximations, replaced with Geodesic computation.
+    # @staticmethod
+    # def compute_bearing(p1, p2):
+    #     lat1 = math.radians(p1[0]);  lon1 = math.radians(p1[1])
+    #     lat2 = math.radians(p2[0]);  lon2 = math.radians(p2[1])
+    #     dlon = lon2 - lon1
+    #     x    = math.sin(dlon) * math.cos(lat2)
+    #     y    = (math.cos(lat1) * math.sin(lat2)
+    #             - math.sin(lat1) * math.cos(lat2) * math.cos(dlon))
+    #     return (math.degrees(math.atan2(x, y)) + 360) % 360
 
 
     def waypoint_cb(self, msg):
@@ -146,9 +153,42 @@ class CameraHandler(Node):
             error = angle_deg 
             is_tag_tracking = True
 
-        elif self.curr_pos[0] is not None and self.curr_waypoint[0] is not None and self.heading is not None:
-            target_bearing = self.compute_bearing(self.curr_pos, self.curr_waypoint)
+            # Handle case when distance <=1.0 here too
+            if distance <= 1.0:
+                sgnl_msg.data = True
+                self.signal_pub.publish(sgnl_msg)
+
+                out_msg = Float32MultiArray()
+                out_msg.data = [0.0, 0.0, -1.0, -1.0]
+                self.drive_pub.publish(out_msg) # Stop rover
+                return
             
+            if self.is_aligning:
+                if abs(error) <= 3.0:
+                    self.is_aligning = False
+            else:
+                if abs(error) > 8.0:
+                    self.is_aligning = True # If significant deviation, realign
+            
+            if self.is_aligning:
+                rotation_effort = min(abs(error) / 30.0, 1.0)
+                if error > 0:
+                    rot_right = -1.0 + (rotation_effort * 2.0)
+                else:
+                    rot_left = -1.0 + (rotation_effort * 2.0)
+                linear_x = 0.0
+            else:
+                rot_left = -1.0
+                rot_right = -1.0
+                linear_x = min(distance / 2.0, 0.8)
+
+        elif self.curr_pos[0] is not None and self.curr_pos[1] is not None and self.curr_waypoint[0] is not None and self.curr_waypoint[1] is not None and self.heading is not None:
+            # target_bearing = self.compute_bearing(self.curr_pos, self.curr_waypoint)
+            self.is_aligning = False # Now we are not aligning to a tag, rather following spiral path
+            
+            inv = self.geodesic.Inverse(self.curr_pos[0], self.curr_pos[1], self.curr_waypoint[0], self.curr_waypoint[1])
+            distance = inv['s12']
+            target_bearing = inv['azi1'] # Is -180 to 180 degrees
             # Compass heading: 0=N Clockwise
             bearing_diff = target_bearing - self.heading
             
