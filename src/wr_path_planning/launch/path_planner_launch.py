@@ -11,10 +11,16 @@ import os
 def generate_launch_description():
     # Define the path to the LiDAR data file in the config file
     lidar_path = LaunchConfiguration("lidar_path")
+    epsg = LaunchConfiguration("epsg")
     test_mode = LaunchConfiguration("test_mode")
     return LaunchDescription([
         DeclareLaunchArgument(
             "lidar_path"
+        ),
+        DeclareLaunchArgument(
+            "epsg",
+            default_value="0",
+            description="EPSG code, 0 means unspecified"
         ),
         DeclareLaunchArgument(
             "test_mode",
@@ -27,6 +33,7 @@ def generate_launch_description():
             parameters=[
                 {
                     "lidar_file": lidar_path,
+                    "epsg": epsg,
                     "test_mode": test_mode
                 }
             ]

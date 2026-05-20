@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node 
 from wr_interfaces.srv import PathPlan, MultiPathPlan
-from geographic_msgs.msg import GeoPoint
+from geographic_msgs.msg import GeoPoint, GeoPath
 
 from typing import List
 
@@ -67,11 +67,13 @@ def main(args=None):
     for i, target in enumerate(targets_ordered):
         client_node.get_logger().info(f"Target {i + 1}): {(target.latitude, target.longitude)}")
     
-    path: List[GeoPoint] = result.path
-    client_node.get_logger().info(f"Found the following path to follow. Number of points on the path: {len(path)}")
-    for i in range(0, len(path)):
-        point = path[i]
-        client_node.get_logger().info(f"Point {i}: {(point.latitude, point.longitude)}")
+    path: List[GeoPath] = result.path
+    client_node.get_logger().info(f"Found the following path to follow. Number of segments on the path: {len(path)}")
+    for i, segment in enumerate(path):
+        client_node.get_logger().info(f"Segment {i + 1}")
+        for j, gps in enumerate(segment.poses):
+            point = gps.pose.position
+            client_node.get_logger().info(f"Point {j}: {(point.latitude, point.longitude)}")
     
     client_node.destroy_node()
     rclpy.shutdown()

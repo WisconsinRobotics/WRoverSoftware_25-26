@@ -1,13 +1,15 @@
 import laspy
 import numpy as np
-from pyproj import Transformer
+from pyproj import Transformer, CRS
+
+import json
 
 UTAH_EPSG = 32612
 WORLD_EPSG = 4326
 
 _transformer_cache = {}
 
-def get_epsg(laz_path):
+def get_epsg(laz_path) -> int | None:
     """
     Reads the EPSG code from the LAZ file header.
     
@@ -23,7 +25,7 @@ def get_epsg(laz_path):
     Args:
         laz_path: path to the LAZ/LAS file
     Returns:
-        epsg: integer EPSG code of the LAZ file's coordinate system
+        epsg: integer EPSG code of the LAZ file's coordinate system or None if it is not defined
     """
 
     # Open the LAZ file in streaming mode to read the header only —
@@ -34,18 +36,30 @@ def get_epsg(laz_path):
 
     # Convert the CRS object to a simple integer EPSG code
     # e.g. 32612 for UTM Zone 12N
-    if crs:
-        epsg = crs.to_epsg()
-    else:
-        epsg = UTAH_EPSG
+    if crs and crs.to_epsg():
+        return crs.to_epsg()
+    
+    return None
 
-    print(f"LAZ file EPSG: {epsg}")
-    return epsg
+    # Try reading the file using pdal instead
+    pipeline_json = [
+        laz_path
+    ]
+
+    pipeline = pdal.Pipeline(json.dumps(pipeline_json))
+    pipeline.execute()
+
+    meta = json.loads(pipeline.metadata)
+    wkt = meta["metadata"]["srs"].get("wkt")
+
+    crs = CRS.from_wkt(wkt)
+    return crs
 
 def xy_to_gps(x, y, epsg=UTAH_EPSG):
-    if WORLD_EPSG not in _transformer_cache:
-        _transformer_cache[WORLD_EPSG] = Transformer.from_crs(f"EPSG:{epsg}", f"EPSG:{WORLD_EPSG}", always_xy=True)
-    transformer = _transformer_cache[WORLD_EPSG]
+    cache_key = (epsg, WORLD_EPSG)
+    if cache_key not in _transformer_cache:
+        _transformer_cache[cache_key] = Transformer.from_crs(f"EPSG:{epsg}", f"EPSG:{WORLD_EPSG}", always_xy=True)
+    transformer = _transformer_cache[cache_key]
 
     lon, lat = transformer.transform(x, y)
     return lon, lat
@@ -74,13 +88,13 @@ def gps_to_xy(lon, lat, epsg=UTAH_EPSG):
     # TO the LAZ file's coordinate system (e.g. EPSG:32612 for UTM Zone 12N)
     # always_xy=True ensures we always pass (longitude, latitude) in that order
     # regardless of what the projection expects — avoids a common axis-swap bug
-    if epsg not in _transformer_cache:
-        _transformer_cache[epsg] = Transformer.from_crs(f"EPSG:{WORLD_EPSG}", f"EPSG:{epsg}", always_xy=True)
-    transformer = _transformer_cache[epsg]
+    cache_key = (WORLD_EPSG, epsg)
+    if cache_key not in _transformer_cache:
+        _transformer_cache[cache_key] = Transformer.from_crs(f"EPSG:{WORLD_EPSG}", f"EPSG:{epsg}", always_xy=True)
+    transformer = _transformer_cache[cache_key]
 
     # Transform longitude and latitude into projected x and y coordinates
     # Note: transformer.transform takes (longitude, latitude) not (latitude, longitude)
     # because always_xy=True enforces x (lon) before y (lat)
     x, y = transformer.transform(lon, lat)
-
     return x, y
