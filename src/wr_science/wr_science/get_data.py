@@ -15,7 +15,7 @@ class SensorsRawNode(Node):
         self.pub_arduino = self.create_publisher(String, '/sci_arduino_messages', 1)
         
         self.serial_data_port = self.declare_parameter('/serial_data_port', '/dev/ttyUSB0').value
-        self.serial_baud_rate = self.declare_parameter('/serial_baud_rate', 115200).value
+        self.serial_baud_rate = self.declare_parameter('/serial_baud_rate', 9600).value
         
         
         self.subscription_buttons = self.create_subscription(
@@ -80,18 +80,20 @@ class SensorsRawNode(Node):
             self.soil_vals.data = [int(val.split(":")[1]) for val in vals]
             self.pub_soil.publish(self.soil_vals)
 
-    def control_arduion(self, a, b, x, y):
+    def control_arduino(self, a, b, x, y, D_PAD_UP):
         if(y==1):
-            self.ser.write("o".encode()) #Turn on and off pump
-        if(b==1):
-            self.ser.write("o".encode()) #Turn on and off pump
+            self.ser.write("o".encode()) #Open
+            self.get_logger().info("OPEN")
         if(x==1):
+            self.ser.write("c".encode()) #Close
+            self.get_logger().info("CLOSE")
+        if(D_PAD_UP==1):
             self.ser.write("p".encode()) #Turn on pump when releasing
        
     def listener_callback_buttons(self, msg):
         buttons = msg.data
     
-        self.control_arduino(buttons[4], buttons[5], buttons[6], buttons[7])
+        self.control_arduino(buttons[4], buttons[5], buttons[6], buttons[7], buttons[0])
 
 def main(args=None):
     try: 
