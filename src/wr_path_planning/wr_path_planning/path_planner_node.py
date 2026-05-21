@@ -15,6 +15,7 @@ from wr_path_planning.utils.nearest_point import find_nearest_node
 from wr_path_planning.utils.point_conversion import *
 from wr_path_planning.utils.geo_helpers import compute_gnss_distance
 from wr_path_planning.utils.point_conversion import UTAH_EPSG
+from wr_path_planning.utils.visualization import visualize_path
 
 import random
 from itertools import permutations
@@ -84,6 +85,10 @@ class PathPlannerNode(Node):
             response.message = "No path found between start and goal"
             response.success = False
             return response
+
+        # In test mode, we want to visualize any path that we found on the map
+        if self.test_mode:
+            visualize_path(path_indixes, self.points, start_idx, [{"index": goal_idx}], self.epsg)
 
         path = []
         for indx in path_indixes:

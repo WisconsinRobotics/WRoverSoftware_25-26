@@ -26,7 +26,7 @@ ros2 launch path_planner_launch.py lidar_path:=<path/to/lidar/file> epsg:=<epsg>
 ```
 - `lidar_path` — path to the LiDAR point cloud file (required)
 - `epsg`- user defined epsg of the lidar file (default: `0`)
-- `test_mode` — set to `true` to enable extra debugging output (default: `false`)
+- `test_mode` — set to `true` to enable extra debugging output and path visualization (default: `false`)
 
 # Usage
 To use this server in ros2 nodes, refer to `wr_workspace/src/wr_path_planning/wr_path_planning/example_client_node.py` for an example.

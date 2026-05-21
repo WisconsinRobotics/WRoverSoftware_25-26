@@ -3,3 +3,4 @@ lazrs
 laszip
 pyproj
 pdal
+folium
