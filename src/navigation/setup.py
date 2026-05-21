@@ -27,7 +27,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'object_detection = navigation.object_detection:main'
+            'object_detection = navigation.object_detection:main',
+            'detector = navigation.detector:main'
         ],
     },
 )
