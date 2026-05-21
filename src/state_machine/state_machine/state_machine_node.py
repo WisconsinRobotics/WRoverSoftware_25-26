@@ -97,7 +97,7 @@ class StateMachineNode(Node):
         self.xbox_controller = None                          # Xbox controller node
         self.nav_node = None                                 # Normal navigation node
         self.aruco_nav_node = None                           # Navigation with aruco node
-        self.objecy_nav_node = None                          # Navigation with object node
+        self.object_nav_node = None                          # Navigation with object node
         self.reached_signal = False                          # If aruco/object reached
         self.spiral = None                                   # Spiral GeoPath
         self.state_machine_controller = ROVER_COMMAND.EMPTY  # State machine controller command
