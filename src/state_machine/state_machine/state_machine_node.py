@@ -162,10 +162,13 @@ class StateMachineNode(Node):
         # Starting point
         req.start = GeoPoint()
         # TODO
-        # req.start.latitude = self.loc[0]
-        # req.start.longitude = self.loc[1]
-        req.start.latitude = 38.371533
-        req.start.longitude = -110.704540
+        while self.loc is None:
+            self.get_logger().info("Waiting for gnss")
+            rclpy.spin_once(self, timeout_sec=1)
+        req.start.latitude = self.loc[0]
+        req.start.longitude = self.loc[1]
+        # req.start.latitude = 38.371533
+        # req.start.longitude = -110.704540
         
         # Target points
         targets = []
