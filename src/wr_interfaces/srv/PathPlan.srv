@@ -1,0 +1,6 @@
+geographic_msgs/GeoPoint start
+geographic_msgs/GeoPoint goal
+---
+geographic_msgs/GeoPoint[] path
+bool success
+string message

@@ -1,0 +1,7 @@
+geographic_msgs/GeoPoint start
+geographic_msgs/GeoPoint[] targets
+---
+geographic_msgs/GeoPath[] path
+geographic_msgs/GeoPoint[] targets_ordered
+bool success
+string message
