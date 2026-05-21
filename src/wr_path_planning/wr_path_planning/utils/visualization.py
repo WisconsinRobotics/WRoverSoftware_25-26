@@ -2,9 +2,20 @@ import folium
 import numpy as np
 from pyproj import Transformer
 
+from typing import List, Tuple
+
 _transformer_cache = {}
 
-def visualize_path(full_path, points, start_idx, target_nodes, epsg):
+def visualize_path(full_path: List[int], points: List[Tuple[float]], start_idx: int, target_idxs: List[int], epsg: int):
+    """Visualizes the whole path from the start to each of the targets
+
+    Args:
+        full_path: list of point indexes
+        points: list of points in format (lat, lon, alt)
+        start_idx: index of the start point on the path
+        target_idxs: list of indexes to the target points
+        epsg: epsg of the lidar file to convert data to gnss coordinates
+    """
 
     if not full_path:
         print("Warning: path is empty, nothing to visualize.")
@@ -53,8 +64,8 @@ def visualize_path(full_path, points, start_idx, target_nodes, epsg):
 
     # ---------- Target markers ----------
     # target_nodes is a list of dicts with "index" and "point" keys
-    for i, target in enumerate(target_nodes):
-        lat, lon = node_to_latlon(target["index"])
+    for i, target_idx in enumerate(target_idxs):
+        lat, lon = node_to_latlon(target_idx)
         folium.CircleMarker(
             (lat, lon),
             radius=7, color="white", fill=True,

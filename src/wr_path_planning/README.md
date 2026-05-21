@@ -11,7 +11,6 @@ pip3 install -r requirements.txt
 ```
 
 **2. Build the ROS 2 package**
-
 From the `wr_workspace` folder, run:
 ```bash
 colcon build

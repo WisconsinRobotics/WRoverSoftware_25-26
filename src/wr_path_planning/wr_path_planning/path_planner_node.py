@@ -88,7 +88,7 @@ class PathPlannerNode(Node):
 
         # In test mode, we want to visualize any path that we found on the map
         if self.test_mode:
-            visualize_path(path_indixes, self.points, start_idx, [{"index": goal_idx}], self.epsg)
+            visualize_path(path_indixes, self.points, start_idx, [goal_idx], self.epsg)
 
         path = []
         for indx in path_indixes:
