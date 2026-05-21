@@ -3,6 +3,7 @@ import os
 import csv
 import math
 import json
+import time
 import rclpy
 import signal
 import subprocess
@@ -10,7 +11,7 @@ from pathlib import Path
 from typing import Tuple
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from enum import StrEnum, auto
+from enum import Enum
 from std_msgs.msg import String
 from geographic_msgs.msg import GeoPath
 from geographic_msgs.msg import GeoPose
@@ -34,23 +35,23 @@ STUCK_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 15      # 15 secs tr
 STUCK_DISTANCE_THRESHOLD = 1                                        # 1 meter trigger threshold
 DANCE_OFF_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 15  # 15 seconds dance off time
 
-class ROVER_STATE(StrEnum):
-    PLANNING = auto(),
-    MANUAL = auto(),
-    SPIRAL_PLANNING = auto(),
-    NAV = auto(),
-    ARUCO_NAV = auto(),
-    OBJECT_NAV = auto(),
-    FLASHING = auto()
-    DANCE_OFF = auto(),
+class ROVER_STATE(str, Enum):
+    PLANNING = "PLANNING",
+    MANUAL = "MANUAL",
+    SPIRAL_PLANNING = "SPIRAL_PLANNING",
+    NAV = "NAV",
+    ARUCO_NAV = "ARUCO_NAV",
+    OBJECT_NAV = "OBJECT_NAV",
+    FLASHING = "FLASHING",
+    DANCE_OFF = "DANCE_OFF"
 
-class ROVER_COMMAND(StrEnum):
+class ROVER_COMMAND(str, Enum):
     EMPTY = "",
     STOP = "stop",
     CONTINUE = "continue",
     SKIP = "skip"
 
-class TARGET_LABEL(StrEnum):
+class TARGET_LABEL(str, Enum):
     ARUCO1 = "aruco1",
     ARUCO2 = "aruco2",
     BOTTLE = "bottle",
@@ -161,10 +162,10 @@ class StateMachineNode(Node):
         # Starting point
         req.start = GeoPoint()
         # TODO
-        req.start.latitude = self.loc[0]
-        req.start.longitude = self.loc[1]
-        # req.start.latitude = 38.371533
-        # req.start.longitude = -110.704540
+        # req.start.latitude = self.loc[0]
+        # req.start.longitude = self.loc[1]
+        req.start.latitude = 38.371533
+        req.start.longitude = -110.704540
         
         # Target points
         targets = []
