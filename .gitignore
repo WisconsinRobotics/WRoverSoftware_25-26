@@ -1,5 +1,6 @@
+install/*
+build/*
+log/*
 **/__pycache__
+*.laz
 venv/
-build/
-log/
-install/
