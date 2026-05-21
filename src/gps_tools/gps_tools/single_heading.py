@@ -88,7 +88,7 @@ class HeadingCalculator(Node):
 
     def imu_callback(self, msg):
         self._raw_imu = float(-1 * (msg.data + 180)) % 360.0
-        print("imu reading = ", self._raw_imu)
+        #print("imu reading = ", self._raw_imu)
         out = Float32()
         if self._has_offset:
             out.data = float((self._raw_imu + self._imu_offset) % 360.0)
