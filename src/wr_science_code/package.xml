@@ -1,10 +1,17 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
+<<<<<<<< HEAD:src/wr_science_data/package.xml
   <name>wr_science_data</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="nicolasdittmarg1@gmail.com">wiscrobo</maintainer>
+========
+  <name>wr_science_code</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="devansh.the.photofreak@gmail.com">wiscrobo</maintainer>
+>>>>>>>> d1663b369896f7fe18f43f3d4d0340b10367e37a:src/wr_science_code/package.xml
   <license>Apache-2.0</license>
 
   <test_depend>ament_copyright</test_depend>
