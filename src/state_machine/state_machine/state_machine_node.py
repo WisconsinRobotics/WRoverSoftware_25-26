@@ -161,10 +161,10 @@ class StateMachineNode(Node):
         # Starting point
         req.start = GeoPoint()
         # TODO
-        # req.start.latitude = self.loc[0]
-        # req.start.longitude = self.loc[1]
-        req.start.latitude = 43.07061877920905
-        req.start.longitude = -89.40977230012103
+        req.start.latitude = self.loc[0]
+        req.start.longitude = self.loc[1]
+        # req.start.latitude = 38.371533
+        # req.start.longitude = -110.704540
         
         # Target points
         targets = []
