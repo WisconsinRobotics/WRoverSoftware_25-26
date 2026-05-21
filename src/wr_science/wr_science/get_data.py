@@ -55,30 +55,51 @@ class SensorsRawNode(Node):
         # self.ser.flushInput()
         # self.ser.readline()
 
-        #timer_period = 0.05  # seconds
-        #self.timer = self.create_timer(timer_period, self.operate)
+        self.green_value = 0
+        self.orange_value = 0
+        self.methane_value = 0.0
+
+        with open("sensor_data.csv", "w") as f:
+            f.write("Green,Orange,Methane\n")
+
+        timer_period = 0.05  # seconds
+        self.timer = self.create_timer(timer_period, self.operate)
 
      
 
         
     def operate(self):
 
-      
-        # Here we read the serial port for a string that looks like "color:123,color:123", "temp:123,moisture:123", or "debug message"
-        line = self.ser.readline().decode().strip() #blocking function, will wait until read entire line
-        vals = line.split(",") # split by commas into individual data points or clauses
-        
-        if len(vals[0].split(":")) == 1: # evaluates to true if there are no colons in the substring
-            arduino_message = String()
-            arduino_message.data = line
-            self.pub_arduino.publish(arduino_message)
-            #self.ser.write("\n".encode()) # send the arduino a newline character so it moves on (hopefully)
-        elif len(vals) == 9: # evaluates to true if we're seeing a fluorometer reading
-            self.fluoro_vals.data[1,:] = [int(val.split(":")[1]) for val in vals]
-            self.pub_fluoro.publish(self.fluoro_vals)
-        else: # evaluates to true if we're seeing a soil temp/moisture reading
-            self.soil_vals.data = [int(val.split(":")[1]) for val in vals]
-            self.pub_soil.publish(self.soil_vals)
+        try:
+            line = self.ser.readline().decode(errors='ignore').strip()
+
+            if not line:
+                return
+
+            print(line)
+
+            # Store latest values
+            if "Green (515nm):" in line:
+                self.green_value = int(line.split(":")[1].strip())
+
+            elif "Orange (590nm):" in line:
+                self.orange_value = int(line.split(":")[1].strip())
+
+            elif "Methane sensor Voltage:" in line:
+                self.methane_value = float(line.split(":")[1].strip())
+
+                # Once methane arrives, save full row to CSV
+                with open("sensor_data.csv", "a") as f:
+                    f.write(f"{self.green_value},{self.orange_value},{self.methane_value}\n")
+
+                self.get_logger().info(
+                    f"Saved: {self.green_value}, "
+                    f"{self.orange_value}, "
+                    f"{self.methane_value}"
+                )
+
+        except Exception as e:
+            self.get_logger().error(f"Parse error: {e}")
 
     def control_arduino(self, a, b, x, y, D_PAD_UP):
         if(y==1):
