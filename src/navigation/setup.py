@@ -29,6 +29,7 @@ setup(
         'console_scripts': [
             'object_detection = navigation.object_detection:main',
             'detector = navigation.detector:main'
+            'nav = navigation.nav:main'
         ],
     },
 )

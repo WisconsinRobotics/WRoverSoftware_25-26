@@ -131,7 +131,7 @@ class ObjectDetection(Node):
             self.lon = current_lon
         else:
             # Smooth out minor RTK jitter (Alpha = 0.6 means trust new reading 60%, old reading 40%)
-            alpha = 0.25 
+            alpha = 0.80 
             self.lat = (alpha * current_lat) + ((1.0 - alpha) * self.lat)
             self.lon = (alpha * current_lon) + ((1.0 - alpha) * self.lon)
 
