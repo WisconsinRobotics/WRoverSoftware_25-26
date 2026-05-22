@@ -361,9 +361,6 @@ class StateMachineNode(Node):
             self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
             self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
             
-            # Increment current waypoint (assuming each path has at least 3 total points)
-            self.curr_waypoint += 1
-            
             return
             
         # Get spiral search paths for aruco1, aruco2, mallet, hammer, and bottle
