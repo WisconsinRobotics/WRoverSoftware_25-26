@@ -27,7 +27,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'state_machine = state_machine.state_machine:main',
+            'state_machine = state_machine.state_machine_node:main',
+            'state_machine_controller = state_machine.state_machine_controller_node:main'
         ],
     },
 )
