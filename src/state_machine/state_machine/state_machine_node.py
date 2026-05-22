@@ -295,6 +295,10 @@ class StateMachineNode(Node):
             self.dance_off_frames = 0
             self.get_logger().info("Rover stuck, starting dance off mode")
 
+        # Publish waypoint
+        if self.waypoint_msg.data != None:
+            self.waypoint_publisher.publish(self.waypoint_msg)
+
         match self.state:
             case ROVER_STATE.PLANNING:
                 self.planning()
