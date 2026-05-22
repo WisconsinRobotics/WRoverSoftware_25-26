@@ -18,7 +18,7 @@ class HeadingCalculator(Node):
         self.sub_rover2 = message_filters.Subscriber(self, UBXNavPVT, '/rover2/ubx_nav_pvt')
         
         self.sub_imu = self.create_subscription(
-            Float64, 'heading',
+            Float64, 'compass_data_topic',
             self.imu_callback, 10,
             callback_group=self.cb_group
         )
@@ -35,8 +35,8 @@ class HeadingCalculator(Node):
         self.has_offset     = False
 
     def synced_gps_callback(self, msg1, msg2):
-        rover1_isRTK = (msg1.carr_soln.status == 2)
-        rover2_isRTK = (msg2.carr_soln.status == 2)
+        rover1_isRTK = (msg1.carr_soln.status >= 0)
+        rover2_isRTK = (msg2.carr_soln.status >= 0)
 
         if not (rover1_isRTK and rover2_isRTK):
             return
@@ -53,7 +53,7 @@ class HeadingCalculator(Node):
 
         # If rover1 is RIGHT antenna, rover2 is LEFT antenna:
         # vector points LEFT - forward is 90° clockwise  
-        MOUNTING_OFFSET_DEG = +90.0
+        #MOUNTING_OFFSET_DEG = +90.0
 
         # Apply it here:
         gps_heading = (450.0 - math.degrees(heading_rad) + MOUNTING_OFFSET_DEG) % 360.0
