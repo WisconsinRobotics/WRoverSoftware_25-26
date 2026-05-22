@@ -602,10 +602,6 @@ class StateMachineNode(Node):
                 self.led_msg.data = [255.0, 0.0, 0.0]
                 self.led_publisher.publish(self.led_msg)
                 
-                # Increment target
-                self.curr_target += 1
-                self.curr_waypoint = 0
-                
                 # Start nav node
                 self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
                 
