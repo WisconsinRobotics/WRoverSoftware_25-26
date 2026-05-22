@@ -17,6 +17,32 @@ from wr_interfaces.srv import MultiPathPlan
 from geographic_msgs.msg import GeoPoseStamped
 from ament_index_python.packages import get_package_share_directory
 
+import json
+from enum import StrEnum, auto
+from pathlib import Path
+
+class ROVER_STATE(StrEnum):
+    PLANNING = auto(),
+    MANUAL = auto(),
+    SPIRAL_PLANNING = auto(),
+    NAV = auto(),
+    ARUCO_NAV = auto(),
+    OBJECT_NAV = auto(),
+    FLASHING = auto()
+    DANCE_OFF = auto(),
+
+class ROVER_COMMAND(StrEnum):
+    EMPTY = "",
+    STOP = "stop",
+    CONTINUE = "continue",
+
+class TARGET_LABEL(StrEnum):
+    ARUCO1 = "aruco1",
+    ARUCO2 = "aruco2",
+    BOTTLE = "bottle",
+    MALLET = "mallet",
+    HAMMER = "hammer",
+    GNSS = "gnss"
 
 
 class StateMachine(Node):
@@ -59,7 +85,7 @@ class StateMachine(Node):
         self.objecy_nav_node = None              # Navigation with object node
         self.reached_signal = False              # If aruco/object reached
         self.spiral = None                       # Spiral GeoPath
-        self.state_machine_controller = ""       # State machine controller command
+        self.state_machine_controller = ROVER_COMMAND.EMPTY      # State machine controller command
         self.waypoint_msg = Float64MultiArray()  # Waypoint msg
         self.led_msg = Float32MultiArray()       # Led msg
         self.spiral_msg = Float64MultiArray()    # Spiral msg
@@ -75,10 +101,38 @@ class StateMachine(Node):
         self.interval = 0.05                     # Timer callback interval (20 Hz)
         self.counter = 0                         # Control led flashing frequency
         
-        # Get the filepath for points.txt
-        points_filepath = os.path.join(get_package_share_directory('state_machine'), 'resource', 'points.txt')
+        # Option to configure different file for reading points
+        default_points_filepath = os.path.join(get_package_share_directory('state_machine'), 'resource', 'points.txt')
+        self.declare_parameter("points_file_path", default_points_filepath)
+        self.points_filepath = self.get_parameter("points_file_path").get_parameter_value().string_value
+        path = Path(self.points_filepath)
+
+        with open(self.points_filepath) as f:
+            match path.suffix:
+                case ".json":
+                    d = json.load(f)
+                    targets = d["targets"]
+                    for target in targets:
+                        lat, lon, label = target["lat"], target["lon"], target["label"]
+                        self.points[(lat, lon)] = label
+                case "_":
+                    lines = f.readlines()
+                    for line in lines:
+                        # Get rid of white spaces and split with spaces
+                        vals = line.strip().split()
+                        
+                        # Get the latitude, longitude, and point label (gnss, aruco1, aruco2, mallet, hammer, bottle)
+                        lat = float(vals[0])
+                        lon = float(vals[1])
+                        label = vals[2]
+                        
+                        # Store them in the points dictionary with (lat, lon) as key and label as value
+                        self.points[(lat, lon)] = label
+                    
+
         
         # Scan the points file
+        """
         with open(points_filepath, 'r') as f:
             lines = f.readlines()
             
@@ -93,6 +147,7 @@ class StateMachine(Node):
                 
                 # Store them in the points dictionary with (lat, lon) as key and label as value
                 self.points[(lat, lon)] = label
+        """
                 
         # Set led to red
         self.get_logger().info("Successfully read target points")
@@ -126,7 +181,7 @@ class StateMachine(Node):
         
         # Set state to planning
         self.get_logger().info("Waiting for path planning result")
-        self.state = "PLANNING"
+        self.state = ROVER_STATE.PLANNING
         
         # Timer callback at 20 Hz
         self.timer = self.create_timer(self.interval, self.timer_callback)
@@ -186,33 +241,33 @@ class StateMachine(Node):
     # Main loop
     def timer_callback(self):
         # If stop, Change state to manual
-        if self.state_machine_controller == "stop":
-            self.state_machine_controller = ""
+        if self.state_machine_controller == ROVER_COMMAND.STOP:
+            self.state_machine_controller = ROVER_COMMAND.EMPTY
             self.get_logger().info("Autonomous operation stopped, switching to manual mode")
-            self.state = "MANUAL"
+            self.state = ROVER_STATE.MANUAL
         
-        if self.state == "PLANNING":
+        if self.state == ROVER_STATE.PLANNING:
             self.planning()
             
-        elif self.state == "SPIRAL_PLANNING":
+        elif self.state == ROVER_STATE.SPIRAL_PLANNING:
             self.spiral_planning()
             
-        elif self.state == "NAV":
+        elif self.state == ROVER_STATE.NAV:
             self.nav()
             
-        elif self.state == "ARUCO_NAV":
+        elif self.state == ROVER_STATE.ARUCO_NAV:
             self.aruco_nav()
             
-        elif self.state == "OBJECT_NAV":
+        elif self.state == ROVER_STATE.OBJECT_NAV:
             self.object_nav()
             
-        elif self.state == "FLASHING":
+        elif self.state == ROVER_STATE.FLASHING:
             self.flashing()
             
-        elif self.state == "DANCE_OFF":
+        elif self.state == ROVER_STATE.DANCE_OFF:
             self.dance_off()
             
-        elif self.state == "MANUAL":
+        elif self.state == ROVER_STATE.MANUAL:
             self.manual()
     
     # Waiting for path planning to generate path
@@ -220,7 +275,7 @@ class StateMachine(Node):
         if len(self.paths) != 0:
             # Set state to spiral planning
             self.get_logger().info("Waiting for spiral search path planning result")
-            self.state = "SPIRAL_PLANNING"
+            self.state = ROVER_STATE.SPIRAL_PLANNING
     
     # Waiting for spiral search path planning to generate path
     def spiral_planning(self):
@@ -236,7 +291,7 @@ class StateMachine(Node):
             # Export paths and set state to nav
             self.export_paths_to_csv()
             self.get_logger().info("Starting normal navigation")
-            self.state = "NAV"
+            self.state = ROVER_STATE.NAV
             
             # Publish the first waypoint
             self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
@@ -257,27 +312,27 @@ class StateMachine(Node):
             # If we didn't publish yet
             if len(self.spiral_msg.data) == 0:
                 # aruco1
-                if self.points[target] == 'aruco1':
+                if self.points[target] == TARGET_LABEL.ARUCO1:
                     self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 5.0, 10.0]
                     self.spiral_publisher.publish(self.spiral_msg)
                     
                 # aruco2
-                elif self.points[target] == 'aruco2':
+                elif self.points[target] == TARGET_LABEL.ARUCO2:
                     self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 10.0, 20.0]
                     self.spiral_publisher.publish(self.spiral_msg)
                     
                 # mallet
-                elif self.points[target] == 'mallet':
+                elif self.points[target] == TARGET_LABEL.MALLET:
                     self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 0.0, 3.0]
                     self.spiral_publisher.publish(self.spiral_msg)
                     
                 # hammer
-                elif self.points[target] == 'hammer':
+                elif self.points[target] == TARGET_LABEL.HAMMER:
                     self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 0.0, 3.0]
                     self.spiral_publisher.publish(self.spiral_msg)
                     
                 # bottle
-                elif self.points[target] == 'bottle':
+                elif self.points[target] == TARGET_LABEL.BOTTLE:
                     self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 0.0, 10.0]
                     self.spiral_publisher.publish(self.spiral_msg)
                 
@@ -313,7 +368,7 @@ class StateMachine(Node):
             
             # Change state to flashing
             self.get_logger().info("Gnss point reached, switching to flashing mode")
-            self.state = "FLASHING"
+            self.state = ROVER_STATE.FLASHING
             
             return
             
@@ -329,46 +384,46 @@ class StateMachine(Node):
                 self.nav_node = None
                 
             # Aruco
-            if self.points[target] == "aruco1" or self.points[target] == "aruco2":
+            if self.points[target] == TARGET_LABEL.ARUCO1 or self.points[target] == TARGET_LABEL.ARUCO2:
                 # TODO: Start aruco nav node
                 self.aruco_nav_node = subprocess.Popen(["ros2", "run", "nav", "aruco"])
                 
                 # Change state to aruco nav
                 self.get_logger().info("Approaching aruco point, switching to aruco navigation")
-                self.state = "ARUCO_NAV"
+                self.state = ROVER_STATE.ARUCO_NAV
                 
                 return
             
             # Mallet
-            if self.points[target] == "mallet":
+            if self.points[target] == TARGET_LABEL.MALLET:
                 # TODO: Start object nav node
                 self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "mallet"])
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching mallet point, switching to object navigation")
-                self.state = "OBJECT_NAV"
+                self.state = ROVER_STATE.OBJECT_NAV
                 
                 return
             
             # Hammer
-            if self.points[target] == "hammer":
+            if self.points[target] == TARGET_LABEL.HAMMER:
                 # TODO: Start object nav node
                 self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "hammer"])
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching hammer point, switching to object navigation")
-                self.state = "OBJECT_NAV"
+                self.state = ROVER_STATE.OBJECT_NAV
                 
                 return
             
             # Bottle
-            if self.points[target] == "bottle":
+            if self.points[target] == TARGET_LABEL.BOTTLE:
                 # TODO: Start object nav node
                 self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "bottle"])
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching bottle point, switching to object navigation")
-                self.state = "OBJECT_NAV"
+                self.state = ROVER_STATE.OBJECT_NAV
                 
                 return
                 
@@ -395,7 +450,7 @@ class StateMachine(Node):
             
             # Change state to nav
             self.get_logger().info("Traversed entire search spiral but no aruco tag found, switching to normal navigation")
-            self.state = "NAV"
+            self.state = ROVER_STATE.NAV
             
             return
             
@@ -413,7 +468,7 @@ class StateMachine(Node):
             
             # Change state to flashing
             self.get_logger().info("Aruco tag reached, switching to flashing mode")
-            self.state = "FLASHING"
+            self.state = ROVER_STATE.FLASHING
             
             return
             
@@ -440,7 +495,7 @@ class StateMachine(Node):
             
             # Change state to nav
             self.get_logger().info("Traversed entire search spiral but no object found, switching to normal navigation")
-            self.state = "NAV"
+            self.state = ROVER_STATE.NAV
             
             return
             
@@ -458,7 +513,7 @@ class StateMachine(Node):
             
             # Change state to flashing
             self.get_logger().info("Object reached, switching to flashing mode")
-            self.state = "FLASHING"
+            self.state = ROVER_STATE.FLASHING
             
             return
             
@@ -487,15 +542,15 @@ class StateMachine(Node):
             self.object_nav_node = None
             
         # If continue
-        if self.state_machine_controller == "continue":
-            self.state_machine_controller = ""
+        if self.state_machine_controller == ROVER_COMMAND.CONTINUE:
+            self.state_machine_controller = ROVER_COMMAND.EMPTY
             
             # If reached the end of the targets
             if self.curr_target == len(self.paths):
                 # Change state to manual
                 self.get_logger().info("Autonomous Mission complete!")
                 self.get_logger().info("Switching to manual mode")
-                self.state = "MANUAL"
+                self.state = ROVER_STATE.MANUAL
             
             else:
                 # Set led to red
@@ -510,7 +565,7 @@ class StateMachine(Node):
                 
                 # Change state to nav
                 self.get_logger().info("Continuing normal navigation")
-                self.state = "NAV"
+                self.state = ROVER_STATE.NAV
             
             return
         
@@ -552,8 +607,8 @@ class StateMachine(Node):
             self.xbox_controller = subprocess.Popen(["ros2", "run", "wr_xbox_controller", "drive_controller"])
         
         # If continue
-        if self.state_machine_controller == "continue":
-            self.state_machine_controller = ""
+        if self.state_machine_controller == ROVER_COMMAND.CONTINUE:
+            self.state_machine_controller = ROVER_COMMAND.EMPTY
             
             # Stop Xbox controller node
             if self.xbox_controller != None:
@@ -565,7 +620,7 @@ class StateMachine(Node):
             
             # Change state to nav
             self.get_logger().info("Continuing normal navigation")
-            self.state = "NAV"
+            self.state = ROVER_STATE.NAV
         
         
         
