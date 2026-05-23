@@ -3,9 +3,7 @@ import threading
 from rclpy.node import Node
 from std_msgs.msg import String
 
-
-
-class StateMachineController(Node):
+class StateMachineControllerNode(Node):
     def __init__(self):
         # Initialization and create publisher
         super().__init__('state_machine_controller')
@@ -15,10 +13,8 @@ class StateMachineController(Node):
         self.thread = threading.Thread(target=self.get_user_input, daemon=True)
         self.thread.start()
         
-        
-
     def get_user_input(self):
-        print("Available Commands: continue, stop")
+        print(f"Available Commands: continue, stop")
         
         # Get user commands
         while rclpy.ok():
@@ -34,7 +30,7 @@ class StateMachineController(Node):
 def main(args=None):
     rclpy.init(args=args)
     
-    state_machine_controller = StateMachineController()
+    state_machine_controller = StateMachineControllerNode()
     
     rclpy.spin(state_machine_controller)
     
