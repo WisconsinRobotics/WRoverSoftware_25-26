@@ -1,8 +1,8 @@
+from setuptools import find_packages, setup
 import os
 from glob import glob
-from setuptools import find_packages, setup
 
-package_name = 'wr_science'
+package_name = 'wr_science_code'
 
 setup(
     name=package_name,
@@ -14,10 +14,11 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*')),
     ],
+
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='nico',
-    maintainer_email='nicolasdittmarg1@gmail.com',
+    maintainer='wiscrobo',
+    maintainer_email='devansh.the.photofreak@gmail.com',
     description='TODO: Package description',
     license='Apache-2.0',
     extras_require={
@@ -27,9 +28,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'get_data = wr_science.get_data:main',
-            'science_control = wr_science.science_control:main',
-            'send_to_can = wr_science.send_to_can:main',
+            'get_data = wr_science_code.get_data:main',
+            'science_control = wr_science_code.science_control:main',
+            'send_to_can = wr_science_code.send_to_can:main',
         ],
     },
 )

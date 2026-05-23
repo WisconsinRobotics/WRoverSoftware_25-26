@@ -25,10 +25,16 @@ class SensorsRawNode(Node):
             10)
         # initiate the serial connection with the arduino
         try:
-            self.ser = serial.Serial(port=self.serial_data_port,baudrate=self.serial_baud_rate,timeout=0.5)
-        except:
-            self.get_logger().warn("USB connection to Arduino unsuccessful :( maybe try turning it off and on again?")
-            rclpy.shutdown()
+            self.ser = serial.Serial(
+                port=self.serial_data_port,
+                baudrate=self.serial_baud_rate,
+                timeout=0.5
+            )
+        except Exception as e:
+            self.get_logger().error(
+                f"USB connection to Arduino unsuccessful: {e}"
+            )
+            raise
 
         # # initialize empty fluorometer message
         # self.fluoro_vals = Int16MultiArray()
@@ -76,14 +82,12 @@ class SensorsRawNode(Node):
 
     def control_arduion(self, a, b, x, y):
         if(y==1):
-            self.ser.write("s".encode()) #Turn on and off pump
-
-
+            self.ser.write("o".encode()) #Turn on and off pump
+        if(b==1):
+            self.ser.write("o".encode()) #Turn on and off pump
         if(x==1):
-            self.ser.write("g_up".encode()) #Turn on pump when releasing
-        elif(x==0):
-            self.ser.write("g_down".encode()) #Turn off pump when releasing
-
+            self.ser.write("p".encode()) #Turn on pump when releasing
+       
     def listener_callback_buttons(self, msg):
         buttons = msg.data
     
