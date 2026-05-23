@@ -220,11 +220,14 @@ class ArmLogic(Node):
         #self.get_logger().info('I heard: "%s"' % msg.data)
         motion = msg.data
 
-        #Turn off autonmous by holding down left and right trigger #TODO check that 1 is actually published when you hold down triggers
-        if(self.D_PAD[7] == 1):
-            self.autonomous = False
-        if(self.D_PAD[7] == 1 and self.D_PAD[6] == 1):
+       
+       #Turn on autonomous by holding down right
+       #Turn off autonomous by holding left bumper
+        
+        if(self.D_PAD[7] == 1 ):
             self.autonomous = True
+        if(self.D_PAD[6] == 1 ):
+            self.autonomous = False
         if(self.autonomous == False):
             #Expecting (left trigger, rigt trigger)
             linear_rail_speed = self.get_linear_rail_speed(motion[3], motion[2])
