@@ -79,41 +79,49 @@ class StateMachineNode(Node):
         self.led_publisher = self.create_publisher(Float32MultiArray, 'led', 1)
         
         # Initialize global variables
-        self.xbox_controller = None              # Xbox controller node
-        self.nav_node = None                     # Normal navigation node
-        self.aruco_nav_node = None               # Navigation with aruco node
-        self.objecy_nav_node = None              # Navigation with object node
-        self.reached_signal = False              # If aruco/object reached
-        self.spiral = None                       # Spiral GeoPath
-        self.state_machine_controller = ROVER_COMMAND.EMPTY      # State machine controller command
-        self.waypoint_msg = Float64MultiArray()  # Waypoint msg
-        self.led_msg = Float32MultiArray()       # Led msg
-        self.spiral_msg = Float64MultiArray()    # Spiral msg
-        self.rover1_lat = None                   # Gnss coordinates
+        self.xbox_controller = None                          # Xbox controller node
+        self.nav_node = None                                 # Normal navigation node
+        self.aruco_nav_node = None                           # Navigation with aruco node
+        self.objecy_nav_node = None                          # Navigation with object node
+        self.reached_signal = False                          # If aruco/object reached
+        self.spiral = None                                   # Spiral GeoPath
+        self.state_machine_controller = ROVER_COMMAND.EMPTY  # State machine controller command
+        self.waypoint_msg = Float64MultiArray()              # Waypoint msg
+        self.led_msg = Float32MultiArray()                   # Led msg
+        self.spiral_msg = Float64MultiArray()                # Spiral msg
+        self.rover1_lat = None                               # Gnss coordinates
         self.rover1_lon = None
         self.rover2_lat = None
         self.rover2_lon = None
-        self.loc = None                          # Current location
-        self.points = {}                         # Input points
-        self.paths = []                          # Each target has a path (list of lists)
-        self.curr_target = 0                     # Current target index
-        self.curr_waypoint = 0                   # Current waypoint index
-        self.interval = 0.05                     # Timer callback interval (20 Hz)
-        self.counter = 0                         # Control led flashing frequency
+        self.loc = None                                      # Current location
+        self.points = {}                                     # Input points
+        self.paths = []                                      # Each target has a path (list of lists)
+        self.curr_target = 0                                 # Current target index
+        self.curr_waypoint = 0                               # Current waypoint index
+        self.interval = 0.05                                 # Timer callback interval (20 Hz)
+        self.counter = 0                                     # Control led flashing frequency
         
-        # Option to configure different file for reading points
+        # Default points file is points.txt in /resource
         default_points_filepath = os.path.join(get_package_share_directory('state_machine'), 'resource', 'points.txt')
+
+        # Option to configure different points file
         self.declare_parameter("points_file_path", default_points_filepath)
         self.points_filepath = self.get_parameter("points_file_path").get_parameter_value().string_value
+
+        # Get the points filepath
         path = Path(self.points_filepath)
+
+        # Scan the points file
         with open(self.points_filepath) as f:
             match path.suffix:
                 case ".json":
                     d = json.load(f)
                     targets = d["targets"]
+
                     for target in targets:
                         lat, lon, label = target["lat"], target["lon"], target["label"]
                         self.points[(lat, lon)] = label
+
                 case ".txt":
                     lines = f.readlines()
                     for line in lines:
@@ -127,26 +135,6 @@ class StateMachineNode(Node):
                         
                         # Store them in the points dictionary with (lat, lon) as key and label as value
                         self.points[(lat, lon)] = label
-                    
-
-        
-        # Scan the points file
-        """
-        with open(points_filepath, 'r') as f:
-            lines = f.readlines()
-            
-            for line in lines:
-                # Get rid of white spaces and split with spaces
-                vals = line.strip().split()
-                
-                # Get the latitude, longitude, and point label (gnss, aruco1, aruco2, mallet, hammer, bottle)
-                lat = float(vals[0])
-                lon = float(vals[1])
-                label = vals[2]
-                
-                # Store them in the points dictionary with (lat, lon) as key and label as value
-                self.points[(lat, lon)] = label
-        """
                 
         # Set led to red
         self.get_logger().info("Successfully read target points")
@@ -197,9 +185,19 @@ class StateMachineNode(Node):
             path = []
             
             for j in range(len(result.path[i].poses)):
+                # Get the latitude and longitude
+                lat = result.path[i].poses[j].pose.position.latitude
+                lon = result.path[i].poses[j].pose.position.longitude
+
                 # Remove duplicate targets at the start of a path
                 if i == 0 or j > 0:
-                    path.append((result.path[i].poses[j].pose.position.latitude, result.path[i].poses[j].pose.position.longitude))
+                    path.append((lat, lon))
+
+                # Replace the inaccurate target at the end of each path with the actual target
+                if j == len(result.path[i].poses) - 1:
+                    target = (lat, lon)
+                    target = min(self.points.keys(), key=lambda k: self.haversine(k[0], k[1], target[0], target[1])) 
+                    path.append(target)
                     
             self.paths.append(path)
         
@@ -335,7 +333,7 @@ class StateMachineNode(Node):
                     self.spiral_msg.data = [target[0], target[1], self.paths[self.curr_target][-2][0], self.paths[self.curr_target][-2][1], 0.0, 10.0]
                     self.spiral_publisher.publish(self.spiral_msg)
                 
-                # Increment current target
+                # Skip spiral if gnss
                 else:
                     self.curr_target += 1
                     
@@ -375,7 +373,7 @@ class StateMachineNode(Node):
         target = self.paths[self.curr_target][self.curr_waypoint]
         target = min(self.points.keys(), key=lambda k: self.haversine(k[0], k[1], target[0], target[1])) 
         
-        # If within 20m of aruco/object (assuming aruco/object points are at least 40m apart)
+        # If within 20m of aruco/object
         if self.haversine(self.loc[0], self.loc[1], target[0], target[1]) < 20 and self.points[target] != "gnss":
             # Stop nav node
             if self.nav_node != None:
