@@ -11,12 +11,12 @@ import math
 
 MODIFIER_X = (175/100) #TODO: TUNE THIS. Convert counts to mm [there are 126.4 mm in 100 counts of x_movement]
 MODIFIER_Y = (135.6/100) #TODO: TUNE THIS. Convert counts to mm [there are 135.6 mm in 100 counts of y_movement]
-Y_SPEED_AUTO = .2
+X_SPEED_AUTO = .2
 Y_SPEED_AUTO = .2
 OFFSET_Y = 215 #We start -200 mm offset from center
 OFFSET_X = 74
 WRIST_SPEED_VALUE = .5
-GRIPPER_SPEED_VALUE = .5
+GRIPPER_SPEED_VALUE = 3.5
 IN_OUT_MOVE = 40 /1.5
 CLOSE_ENOUGH = 1
 
@@ -131,7 +131,7 @@ class ArmLogic(Node):
     #Put publishers in timer to limit rate of publishing
     def timer_callback(self):
         #self.get_logger().info("Hit left: " + str(self.hit_left) + " Hit right: " + str(self.hit_right))
-        if(self.hit_right or self.hit_left):
+        if((self.hit_right or self.hit_left) and self.D_PAD[4] != 1):
             self.arm_publisher_side_to_side.publish(self.msg_side_to_side_zero)
         else:
             self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
@@ -160,11 +160,11 @@ class ArmLogic(Node):
 
     def set_wrist_speeds(self, up, down, left, right, x, y) -> Float32MultiArray:
         if(x==1):
-            self.modifier = 3
+            self.modifier = .5
         elif(y==1):
-            self.modifier = .3
+            self.modifier = .05
         else:
-            self.modifier = 1
+            self.modifier = .15
         #self.get_logger().info('I heard: "%s"' % self.modifier)
         if up == 1:
             self.msg_wrist_right.data = WRIST_SPEED_VALUE*self.modifier
@@ -175,12 +175,12 @@ class ArmLogic(Node):
             self.msg_wrist_left.data = -WRIST_SPEED_VALUE*self.modifier
             self.going_down = 10
         elif right == 1:
-            self.msg_wrist_right.data = (WRIST_SPEED_VALUE)*self.modifier
-            self.msg_wrist_left.data = -(WRIST_SPEED_VALUE)*self.modifier
+            self.msg_wrist_right.data = (WRIST_SPEED_VALUE)*self.modifier*1.2
+            self.msg_wrist_left.data = -(WRIST_SPEED_VALUE)*self.modifier*0.8
             self.going_down = 0
         elif left == 1:
-            self.msg_wrist_right.data = -(WRIST_SPEED_VALUE)*self.modifier
-            self.msg_wrist_left.data = (WRIST_SPEED_VALUE)*self.modifier
+            self.msg_wrist_right.data = -(WRIST_SPEED_VALUE)*self.modifier*0.8
+            self.msg_wrist_left.data = (WRIST_SPEED_VALUE)*self.modifier*1.2
             self.going_down = 0
         else:
             # if(self.going_down>0):
@@ -251,12 +251,11 @@ class ArmLogic(Node):
                 modifier = .2
             else:
                 modifier = .4
-
             #Expecting (left y joystick)
             self.msg_up_and_down.data = motion[0]*modifier
 
             #Expecting (right y joystick)
-            self.msg_forwards_and_backwards.data = -motion[1]  
+            self.msg_forwards_and_backwards.data = motion[1]  
 
             self.msg_side_to_side.data = linear_rail_speed*modifier
 
@@ -280,18 +279,18 @@ class ArmLogic(Node):
             if(self.counter_x*MODIFIER_X < abs(OFFSET_X)):
                 self.counter_x +=1
                 if(OFFSET_X < 0):
-                    self.msg_side_to_side.data = 1.0
+                    self.msg_side_to_side.data = X_SPEED_AUTO
                 else:
-                    self.msg_side_to_side.data = -1.0
+                    self.msg_side_to_side.data = -X_SPEED_AUTO
             else:
                 self.msg_side_to_side.data = 0.0
 
             if(self.counter_y*MODIFIER_Y < abs(OFFSET_Y)):
                 self.counter_y +=1
                 if(OFFSET_Y < 0):
-                    self.msg_up_and_down.data = 1.0
+                    self.msg_up_and_down.data = Y_SPEED_AUTO
                 else:
-                    self.msg_up_and_down.data = -1.0
+                    self.msg_up_and_down.data = Y_SPEED_AUTO
             else:
                 self.msg_up_and_down.data = 0.0
             
@@ -348,8 +347,8 @@ class ArmLogic(Node):
     def autonomous_movement(self):
 
 
-        self.get_logger().info("Key Positions: " + str(self.key_position))
-        self.get_logger().info("CENTERED: " + str(self.centered))
+        # self.get_logger().info("Key Positions: " + str(self.key_position))
+        # self.get_logger().info("CENTERED: " + str(self.centered))
         
         if 2*self.key_counter + 1 >= len(self.key_position):
             #TODO: set end condition
@@ -397,7 +396,7 @@ class ArmLogic(Node):
                 self.msg_forwards_and_backwards.data = 1.0
             elif(self.counter_in_out >= IN_OUT_MOVE and self.counter_in_out < 2 * IN_OUT_MOVE):
                 self.msg_forwards_and_backwards.data = -1.0
-            elif(self.counter_in_out > 2*IN_OUT_MOVE):
+            elif(self.counter_in_out > 2*IN_OUT_MOVE):  
                 self.counter_in_out = 0.0
                 self.msg_forwards_and_backwards.data = 0.0
                 self.msg_up_and_down.data = 0.0
