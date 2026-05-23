@@ -102,6 +102,10 @@ class PathPlannerNode(Node):
 
             path.append(point)
 
+        # Replace generated start and goal points with initial start and goal points
+        path[0] = start
+        path[-1] = goal
+
         # Package data
         response.path = path
         response.message = ""
