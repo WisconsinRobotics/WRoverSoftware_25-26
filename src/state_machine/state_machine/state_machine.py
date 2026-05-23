@@ -230,8 +230,8 @@ class StateMachine(Node):
             self.curr_target = 0
             self.curr_waypoint = 1
             
-            # TODO: Launch the nav node
-            self.nav_node = subprocess.Popen(["ros2", "run", "nav", "nav"])
+            # Launch the nav node
+            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
             
             # Export paths and set state to nav
             self.export_paths_to_csv()
@@ -330,8 +330,8 @@ class StateMachine(Node):
                 
             # Aruco
             if self.points[target] == "aruco1" or self.points[target] == "aruco2":
-                # TODO: Start aruco nav node
-                self.aruco_nav_node = subprocess.Popen(["ros2", "run", "nav", "aruco"])
+                # Start aruco nav node
+                self.aruco_nav_node = subprocess.Popen(["ros2", "run", "navigation", "detector"])
                 
                 # Change state to aruco nav
                 self.get_logger().info("Approaching aruco point, switching to aruco navigation")
@@ -341,8 +341,8 @@ class StateMachine(Node):
             
             # Mallet
             if self.points[target] == "mallet":
-                # TODO: Start object nav node
-                self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "mallet"])
+                # Start object nav node
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='mallet'"])
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching mallet point, switching to object navigation")
@@ -352,8 +352,8 @@ class StateMachine(Node):
             
             # Hammer
             if self.points[target] == "hammer":
-                # TODO: Start object nav node
-                self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "hammer"])
+                # Start object nav node
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='hammer'"])
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching hammer point, switching to object navigation")
@@ -363,8 +363,8 @@ class StateMachine(Node):
             
             # Bottle
             if self.points[target] == "bottle":
-                # TODO: Start object nav node
-                self.object_nav_node = subprocess.Popen(["ros2", "run", "nav", "object", "bottle"])
+                # Start object nav node
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='bottle'"])
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching bottle point, switching to object navigation")
@@ -505,8 +505,8 @@ class StateMachine(Node):
                 # Increment target
                 self.curr_target += 1
                 
-                # TODO: Start nav node
-                self.nav_node = subprocess.Popen(["ros2", "run", "nav", "nav"])
+                # Start nav node
+                self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
                 
                 # Change state to nav
                 self.get_logger().info("Continuing normal navigation")
@@ -560,8 +560,8 @@ class StateMachine(Node):
                 self.xbox_controller.send_signal(signal.SIGINT)
                 self.xbox_controller = None
                 
-            # TODO: Start nav node
-            self.nav_node = subprocess.Popen(["ros2", "run", "nav", "nav"])
+            # Start nav node
+            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
             
             # Change state to nav
             self.get_logger().info("Continuing normal navigation")
@@ -589,7 +589,7 @@ class StateMachine(Node):
 
         self.get_logger().info(f"Spiral search paths received, exported to {path_filepath}")
         
-    # TODO: check if this is correct
+    # Calculate the distance between 2 gnss coordinates
     def haversine(self, lat1, lon1, lat2, lon2):
         R = 6371000.0
 
