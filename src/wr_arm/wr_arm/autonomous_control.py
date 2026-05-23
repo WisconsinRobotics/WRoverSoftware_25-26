@@ -9,8 +9,10 @@ from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Bool
 import math
 
-MODIFIER_X = (175/100) #Convert counts to mm [there are 126.4 mm in 100 counts of x_movement]
-MODIFIER_Y = (135.6/100) #Convert counts to mm [there are 135.6 mm in 100 counts of y_movement]
+MODIFIER_X = (175/100) #TODO: TUNE THIS. Convert counts to mm [there are 126.4 mm in 100 counts of x_movement]
+MODIFIER_Y = (135.6/100) #TODO: TUNE THIS. Convert counts to mm [there are 135.6 mm in 100 counts of y_movement]
+Y_SPEED_AUTO = .2
+Y_SPEED_AUTO = .2
 OFFSET_Y = 215 #We start -200 mm offset from center
 OFFSET_X = 74
 WRIST_SPEED_VALUE = .5
@@ -238,14 +240,22 @@ class ArmLogic(Node):
                 self.moving_right = False
             
             #self.get_logger().info("Moving left: " + str(self.moving_left) + " Moving right: " + str(self.moving_right))
+            
+            #Publishing
+            if(self.D_PAD[4]==1): #x-button held
+                modifier = 1
+            elif(self.D_PAD[5]==1): #y-button held
+                modifier = .2
+            else:
+                modifier = .4
+
             #Expecting (left y joystick)
-            self.msg_up_and_down.data = motion[0]
+            self.msg_up_and_down.data = motion[0]*modifier
 
             #Expecting (right y joystick)
             self.msg_forwards_and_backwards.data = -motion[1]  
 
-            #Publishing
-            self.msg_side_to_side.data = linear_rail_speed
+            self.msg_side_to_side.data = linear_rail_speed*modifier
 
     def listener_callback_buttons(self, msg):
         buttons = msg.data
@@ -358,9 +368,9 @@ class ArmLogic(Node):
             if(self.counter_x*MODIFIER_X < abs(x) and self.x_done == False): #TODO, scale this properly
                 self.counter_x +=1
                 if(x < 0):
-                    self.msg_side_to_side.data = 1.0
+                    self.msg_side_to_side.data = X_SPEED_AUTO
                 else:
-                    self.msg_side_to_side.data = -1.0
+                    self.msg_side_to_side.data = -X_SPEED_AUTO
             else:
                 self.msg_side_to_side.data = 0.0
                 #if(self.D_PAD[6] == 1 ): #Prevent  saying x is done until we hold the bumper 
@@ -369,9 +379,9 @@ class ArmLogic(Node):
             if(self.counter_y*MODIFIER_Y < abs(y) and self.y_done == False): #TODO, scale this properly
                 self.counter_y +=1
                 if(y < 0):
-                    self.msg_up_and_down.data = 1.0
+                    self.msg_up_and_down.data = Y_SPEED_AUTO
                 else:
-                    self.msg_up_and_down.data = -1.0
+                    self.msg_up_and_down.data = -Y_SPEED_AUTO
             else:
                 self.msg_up_and_down.data = 0.0
                 #if(self.D_PAD[6] == 1): #Prevent  saying x is done until we hold the bumper 

@@ -60,15 +60,15 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_side_to_side(self, msg):
         can_msg_rpm = String()
-        rpm = msg.data * self.max_rpm * (10/6) #10,000 rpm
-        can_msg_rpm.data = self.vesc_ids["side_to_side"][0] + " CAN_PACKET_SET_RPM " + str(rpm) + " float"
+        rpm = msg.data
+        can_msg_rpm.data = self.vesc_ids["side_to_side"][0] + " CAN_PACKET_SET_DUTY " + str(rpm) + " float"
         self.publisher_.publish(can_msg_rpm)
         #self.get_logger().info('Publishing RPM FL: "%s"' % can_msg_rpm)
 
     def arm_listener_up_and_down(self, msg):
         can_msg_rpm = String()
-        rpm = msg.data * self.max_rpm* (10/6) #10,000 rpm
-        can_msg_rpm.data = self.vesc_ids["up_and_down"][0] + " CAN_PACKET_SET_RPM " + str(rpm) + " float"
+        rpm = msg.data
+        can_msg_rpm.data = self.vesc_ids["up_and_down"][0] + " CAN_PACKET_SET_DUTY " + str(rpm) + " float"
         self.publisher_.publish(can_msg_rpm)
         #self.get_logger().info('Publishing RPM FL: "%s"' % can_msg_rpm)
 
@@ -83,11 +83,11 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_differential_left(self, msg):
         can_msg_angle = String()
-        speed_amount = msg.data * self.max_rpm 
+        speed_amount = msg.data 
         if(speed_amount == 0.0):
             can_msg_angle.data = self.vesc_ids["differential_left"][0] + " CAN_PACKET_SET_CURRENT_HANDBRAKE_REL " + str(BREAK_REL) +" float"
         else:
-            can_msg_angle.data = self.vesc_ids["differential_left"][0] + " CAN_PACKET_SET_RPM " + str(speed_amount) +" float"
+            can_msg_angle.data = self.vesc_ids["differential_left"][0] + " CAN_PACKET_SET_DUTY " + str(speed_amount) +" float"
         
         #74 is id; CAN_PACKET_SET_POS is command; turn_amount is angle to turn to divide by 4; float is value to convert to
         self.publisher_.publish(can_msg_angle)
@@ -96,11 +96,11 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_differential_right(self, msg):
         can_msg_angle = String()
-        speed_amount = msg.data * self.max_rpm 
+        speed_amount = msg.data 
         if(speed_amount == 0.0):
             can_msg_angle.data = self.vesc_ids["differential_right"][0] + " CAN_PACKET_SET_CURRENT_HANDBRAKE_REL " + str(BREAK_REL) +" float"
         else:
-            can_msg_angle.data = self.vesc_ids["differential_right"][0] + " CAN_PACKET_SET_RPM " + str(speed_amount) +" float"
+            can_msg_angle.data = self.vesc_ids["differential_right"][0] + " CAN_PACKET_SET_DUTY " + str(speed_amount) +" float"
         
         #74 is id; CAN_PACKET_SET_POS is command; turn_amount is angle to turn to divide by 4; float is value to convert to
         self.publisher_.publish(can_msg_angle)
