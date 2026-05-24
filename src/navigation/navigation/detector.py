@@ -214,7 +214,7 @@ class CameraHandler(Node):
                 # Keep a 2 degree deadband, maintain neutral resolution
                 pass
 
-            if abs(error < 20.0):
+            if abs(error) < 20.0:
                 linear_x = min(distance / 2.0, 1.5)
             else:
                 linear_x = 0.0
