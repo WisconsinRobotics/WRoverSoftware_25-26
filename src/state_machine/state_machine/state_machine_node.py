@@ -20,6 +20,15 @@ from ament_index_python.packages import get_package_share_directory
 import json
 from enum import StrEnum, auto
 from pathlib import Path
+from typing import Tuple
+
+# 20 Hz
+TIMER_CALLBACK_INTERVAL = 0.05
+
+# DANCE OFF constants
+STUCK_FRAMES_THRESHOLD = int(1/TIMER_CALLBACK_INTERVAL) * 7200          # 2 minutes threshold
+STUCK_DISTANCE_THRESHOLD = 0.2                                          # 0.2 meters
+DANCE_OFF_FRAMES_THRESHOLD = int(1/TIMER_CALLBACK_INTERVAL) * 900       # 15 seconds
 
 class ROVER_STATE(StrEnum):
     PLANNING = auto(),
@@ -75,7 +84,10 @@ class StateMachineNode(Node):
         
         # Create waypoint publisher
         self.waypoint_publisher = self.create_publisher(Float64MultiArray, 'waypoint', 10)
-        
+
+        # Create a direct swerve publisher (for DANCE_OFF)
+        self.swerve_publisher = self.create_publisher(Float32MultiArray, '/swerve', 10)
+
         # Create led publisher
         self.led_publisher = self.create_publisher(Float32MultiArray, 'led', 1)
         
@@ -99,7 +111,7 @@ class StateMachineNode(Node):
         self.paths = []                                      # Each target has a path (list of lists)
         self.curr_target = 0                                 # Current target index
         self.curr_waypoint = 0                               # Current waypoint index
-        self.interval = 0.05                                 # Timer callback interval (20 Hz)
+        self.interval = TIMER_CALLBACK_INTERVAL              # Timer callback interval (20 Hz)
         self.counter = 0                                     # Control led flashing frequency
         
         # Default points file is points.txt in /resource
@@ -170,7 +182,15 @@ class StateMachineNode(Node):
         # Set state to planning
         self.get_logger().info("Waiting for path planning result")
         self.state = ROVER_STATE.PLANNING
-        
+
+        # Stuck detection trackers
+        self.last_rover_position = None
+        self.stuck_frames = 0
+
+        # DANCE_OFF fix trackers
+        self.last_state = None
+        self.dance_off_frames = 0
+
         # Timer callback at 20 Hz
         self.timer = self.create_timer(self.interval, self.timer_callback)
         
@@ -243,6 +263,15 @@ class StateMachineNode(Node):
             self.get_logger().info("Autonomous operation stopped, switching to manual mode")
             self.state = ROVER_STATE.MANUAL
         
+        self.dance_off_tracking()
+        # If we are in navigation and got stuck for long time, transition to DANCE_OFF state
+        if self.stuck_frames >= STUCK_FRAMES_THRESHOLD and self.state in [ROVER_STATE.NAV, ROVER_STATE.ARUCO_NAV, ROVER_STATE.OBJECT_NAV]:
+            self.last_state = self.state
+            self.state = ROVER_STATE.DANCE_OFF
+            self.stuck_frames = 0
+            self.last_rover_position = self.loc
+            self.dance_off_frames = 0
+
         match self.state:
             case ROVER_STATE.PLANNING:
                 self.planning()
@@ -580,6 +609,26 @@ class StateMachineNode(Node):
             self.led_publisher.publish(self.led_msg)
     
     def dance_off(self):
+        # If we were in dance off more than threshold, return back to state prior to dance off
+        if self.dance_off_frames >= DANCE_OFF_FRAMES_THRESHOLD:
+            self.state = self.last_state
+
+            self.last_state = None
+            self.stuck_frames = 0
+            self.last_rover_position = self.loc
+            self.dance_off_frames = 0
+            return
+        
+        # Send command to swerve backwards in the direction of the last rover position before getting stuck
+        msg = Float32MultiArray()
+        bearing = self.bearing_between_points(self.loc, self.last_rover_position)
+        if bearing > 0:
+            msg.data = [-0.5, -1.0, -0.5, -1.0]
+        else:
+            msg.data = [-1.0, -0.5, -1.0, -0.5]
+        self.swerve_publisher.publish(msg)
+
+        self.dance_off_frames += 1
         return
     
     def manual(self):
@@ -640,6 +689,35 @@ class StateMachineNode(Node):
             self.get_logger().info("Skipped current target, continuing normal navigation to next target")
             self.state = ROVER_STATE.NAV
 
+
+    def dance_off_tracking(self):
+        # If in dance off, skip directly to dance off handler
+        if self.state == ROVER_STATE.DANCE_OFF:
+            return
+        
+        # If not in dance off, reset dance off fix trackers
+        self.dance_off_frames = 0
+        self.last_state = None
+
+        if not self.last_rover_position:
+            self.last_rover_position = self.loc
+            self.stuck_frames = 0
+            return
+        
+        # If we are not in navigation, don't track stuck detection
+        if self.state not in [ROVER_STATE.NAV, ROVER_STATE.ARUCO_NAV, ROVER_STATE.OBJECT_NAV]:
+            self.stuck_frames = 0
+            self.last_rover_position = self.loc
+            return
+        
+        # Track for how long rover hasn't changed its position
+        last_lat, last_lon = self.last_rover_position
+        current_lat, current_lon = self.loc
+        if self.haversine(last_lat, last_lon, current_lat, current_lon) < STUCK_DISTANCE_THRESHOLD:
+            self.stuck_frames += 1
+        else:
+            self.stuck_frames = 0
+            self.last_rover_position = self.loc
         
         
     def export_paths_to_csv(self):
@@ -678,6 +756,26 @@ class StateMachineNode(Node):
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         return R * c
+    
+    def bearing_between_points(self, current: Tuple[float], target: Tuple[float]) -> float:
+        """
+        Returns bearing angle in radians from current -> target
+        current, target: (lat, lon)
+        """
+        lat1 = math.radians(current[0])
+        lon1 = math.radians(current[1])
+
+        lat2 = math.radians(target[0])
+        lon2 = math.radians(target[1])
+
+        dlon = lon2 - lon1
+
+        y = math.sin(dlon) * math.cos(lat2)
+        x = (
+            math.cos(lat1) * math.sin(lat2)
+            - math.sin(lat1) * math.cos(lat2) * math.cos(dlon)
+        )
+        return math.atan2(y, x)
         
 def main(args=None):
     rclpy.init(args=args)
