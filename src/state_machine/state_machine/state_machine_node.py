@@ -35,6 +35,7 @@ class ROVER_COMMAND(StrEnum):
     EMPTY = "",
     STOP = "stop",
     CONTINUE = "continue",
+    SKIP = "skip"
 
 class TARGET_LABEL(StrEnum):
     ARUCO1 = "aruco1",
@@ -618,7 +619,27 @@ class StateMachineNode(Node):
             # Change state to nav
             self.get_logger().info("Continuing normal navigation")
             self.state = ROVER_STATE.NAV
-        
+
+        # If skip
+        if self.state_machine_controlelr ==  ROVER_COMMAND.SKIP:
+            self.state_machine_controller = ROVER_COMMAND.EMPTY
+
+            # Stop Xbox controller node
+            if self.xbox_controller != None:
+                self.xbox_controller.send_signal(signal.SIGINT)
+                self.xbox_controller = None
+
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+
+            # Start nav node
+            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
+            
+            # Change state to nav
+            self.get_logger().info("Skipped current target, continuing normal navigation to next target")
+            self.state = ROVER_STATE.NAV
+
         
         
     def export_paths_to_csv(self):
