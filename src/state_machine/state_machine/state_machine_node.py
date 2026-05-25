@@ -1,11 +1,16 @@
+# === Import Packages ===
 import os
 import csv
 import math
+import json
 import rclpy
 import signal
 import subprocess
+from pathlib import Path
+from typing import Tuple
 from rclpy.node import Node
 from std_msgs.msg import Bool
+from enum import StrEnum, auto
 from std_msgs.msg import String
 from geographic_msgs.msg import GeoPath
 from geographic_msgs.msg import GeoPose
@@ -17,18 +22,17 @@ from wr_interfaces.srv import MultiPathPlan
 from geographic_msgs.msg import GeoPoseStamped
 from ament_index_python.packages import get_package_share_directory
 
-import json
-from enum import StrEnum, auto
-from pathlib import Path
-from typing import Tuple
 
-# 20 Hz
+
+# === Global Variables ===
+
+# 20 Hz timer callback
 TIMER_CALLBACK_INTERVAL = 0.05
 
-# DANCE OFF constants
-STUCK_FRAMES_THRESHOLD = int(1/TIMER_CALLBACK_INTERVAL) * 7200          # 2 minutes threshold
-STUCK_DISTANCE_THRESHOLD = 0.2                                          # 0.2 meters
-DANCE_OFF_FRAMES_THRESHOLD = int(1/TIMER_CALLBACK_INTERVAL) * 900       # 15 seconds
+# TODO: tune Dance off constants
+STUCK_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 15      # 15 secs trigger threshold
+STUCK_DISTANCE_THRESHOLD = 1                                        # 1 meter trigger threshold
+DANCE_OFF_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 15  # 15 seconds dance off time
 
 class ROVER_STATE(StrEnum):
     PLANNING = auto(),
@@ -55,15 +59,12 @@ class TARGET_LABEL(StrEnum):
     GNSS = "gnss"
 
 
+
 class StateMachineNode(Node):
+    # === Initialization ===
     def __init__(self):
-        # Initialization
         super().__init__('state_machine')
         self.get_logger().info("Starting Autonomous Mission")
-        
-        # TODO: Start swerve nodes
-        # self.swerve_control = subprocess.Popen(["ros2", "run", "wr_swerve_control", "swerve_control"])
-        # self.swerve_motor = subprocess.Popen(["ros2", "run", "wr_swerve_motor", "swerve_motor"])
         
         # Create publisher and subscriber for spiral path generation node
         self.spiral_publisher = self.create_publisher(Float64MultiArray, 'spiral_request', 10)
@@ -195,7 +196,9 @@ class StateMachineNode(Node):
         self.timer = self.create_timer(self.interval, self.timer_callback)
         
         
-        
+
+    # === Callback Functions ===
+
     # Callback function for path
     def path_callback(self, future):
         result = future.result()
@@ -254,8 +257,9 @@ class StateMachineNode(Node):
             
         self.loc = [(self.rover1_lat + self.rover2_lat) / 2.0, (self.rover1_lon + self.rover2_lon) / 2.0]
 
+
     
-    # Main loop
+    # === Main Loop ===
     def timer_callback(self):
         # If stop, Change state to manual
         if self.state_machine_controller == ROVER_COMMAND.STOP:
@@ -263,14 +267,28 @@ class StateMachineNode(Node):
             self.get_logger().info("Autonomous operation stopped, switching to manual mode")
             self.state = ROVER_STATE.MANUAL
         
+        # Track dance off
         self.dance_off_tracking()
-        # If we are in navigation and got stuck for long time, transition to DANCE_OFF state
+
+        # If we are in navigation and got stuck for a long time, transition to dance off state
         if self.stuck_frames >= STUCK_FRAMES_THRESHOLD and self.state in [ROVER_STATE.NAV, ROVER_STATE.ARUCO_NAV, ROVER_STATE.OBJECT_NAV]:
+            # Stop nav node
+            if self.state == ROVER_STATE.NAV:
+                self.stop_node(self.nav_node)
+
+            if self.state == ROVER_STATE.ARUCO_NAV:
+                self.stop_node(self.aruco_nav_node)
+
+            if self.state == ROVER_STATE.OBJECT_NAV:
+                self.stop_node(self.object_nav_node)
+
+            # Set the dance off constants
             self.last_state = self.state
             self.state = ROVER_STATE.DANCE_OFF
             self.stuck_frames = 0
             self.last_rover_position = self.loc
             self.dance_off_frames = 0
+            self.get_logger().info("Rover stuck, starting dance off mode")
 
         match self.state:
             case ROVER_STATE.PLANNING:
@@ -297,6 +315,10 @@ class StateMachineNode(Node):
             case ROVER_STATE.MANUAL:
                 self.manual() 
     
+
+
+    # === States ===
+
     # Waiting for path planning to generate path
     def planning(self):
         if len(self.paths) != 0:
@@ -390,8 +412,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop nav node
-            self.nav_node.send_signal(signal.SIGINT)
-            self.nav_node = None
+            self.stop_node(self.nav_node)
             
             # Change state to flashing
             self.get_logger().info("Gnss point reached, switching to flashing mode")
@@ -407,12 +428,11 @@ class StateMachineNode(Node):
         if self.haversine(self.loc[0], self.loc[1], target[0], target[1]) < 20 and self.points[target] != "gnss":
             # Stop nav node
             if self.nav_node != None:
-                self.nav_node.send_signal(signal.SIGINT)
-                self.nav_node = None
+                self.stop_node(self.nav_node)
                 
             # Aruco
             if self.points[target] == TARGET_LABEL.ARUCO1 or self.points[target] == TARGET_LABEL.ARUCO2:
-                # TODO: Start aruco nav node
+                # Start aruco nav node
                 self.aruco_nav_node = subprocess.Popen(["ros2", "run", "navigation", "detector"])
                 
                 # Change state to aruco nav
@@ -423,7 +443,7 @@ class StateMachineNode(Node):
             
             # Mallet
             if self.points[target] == TARGET_LABEL.MALLET:
-                # TODO: Start object nav node
+                # Start object nav node
                 self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='mallet'"])
                 
                 # Change state to object nav
@@ -434,7 +454,7 @@ class StateMachineNode(Node):
             
             # Hammer
             if self.points[target] == TARGET_LABEL.HAMMER:
-                # TODO: Start object nav node
+                # Start object nav node
                 self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='hammer'"])
                 
                 # Change state to object nav
@@ -445,7 +465,7 @@ class StateMachineNode(Node):
             
             # Bottle
             if self.points[target] == TARGET_LABEL.BOTTLE:
-                # TODO: Start object nav node
+                # Start object nav node
                 self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='bottle'"])
                 
                 # Change state to object nav
@@ -472,8 +492,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop aruco nav node
-            self.aruco_nav_node.send_signal(signal.SIGINT)
-            self.aruco_nav_node = None
+            self.stop_node(self.aruco_nav_node)
             
             # Change state to nav
             self.get_logger().info("Traversed entire search spiral but no aruco tag found, switching to normal navigation")
@@ -490,8 +509,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop aruco nav node
-            self.aruco_nav_node.send_signal(signal.SIGINT)
-            self.aruco_nav_node = None
+            self.stop_node(self.aruco_nav_node)
             
             # Change state to flashing
             self.get_logger().info("Aruco tag reached, switching to flashing mode")
@@ -517,8 +535,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop object nav node
-            self.object_nav_node.send_signal(signal.SIGINT)
-            self.object_nav_node = None
+            self.stop_node(self.object_nav_node)
             
             # Change state to nav
             self.get_logger().info("Traversed entire search spiral but no object found, switching to normal navigation")
@@ -535,8 +552,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop object nav node
-            self.object_nav_node.send_signal(signal.SIGINT)
-            self.object_nav_node = None
+            self.stop_node(self.object_nav_node)
             
             # Change state to flashing
             self.get_logger().info("Object reached, switching to flashing mode")
@@ -557,16 +573,13 @@ class StateMachineNode(Node):
     def flashing(self):
         # Stop any nav node
         if self.nav_node != None:
-            self.nav_node.send_signal(signal.SIGINT)
-            self.nav_node = None
+            self.stop_node(self.nav_node)
             
         if self.aruco_nav_node != None:
-            self.aruco_nav_node.send_signal(signal.SIGINT)
-            self.aruco_nav_node = None
+            self.stop_node(self.aruco_nav_node)
             
         if self.object_nav_node != None:
-            self.object_nav_node.send_signal(signal.SIGINT)
-            self.object_nav_node = None
+            self.stop_node(self.object_nav_node)
             
         # If continue
         if self.state_machine_controller == ROVER_COMMAND.CONTINUE:
@@ -611,15 +624,22 @@ class StateMachineNode(Node):
     def dance_off(self):
         # If we were in dance off more than threshold, return back to state prior to dance off
         if self.dance_off_frames >= DANCE_OFF_FRAMES_THRESHOLD:
-            self.state = self.last_state
-
+            # Start nav node
+            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
+            
+            # Change state to nav
+            self.get_logger().info("Exited dance off, continuing normal navigation")
+            self.state = ROVER_STATE.NAV
+            
+            # Reset dance off variables
             self.last_state = None
             self.stuck_frames = 0
             self.last_rover_position = self.loc
             self.dance_off_frames = 0
+
             return
         
-        # Send command to swerve backwards in the direction of the last rover position before getting stuck
+        # TODO: Send command to swerve backwards in the direction of the last rover position before getting stuck
         msg = Float32MultiArray()
         bearing = self.bearing_between_points(self.loc, self.last_rover_position)
         if bearing > 0:
@@ -627,9 +647,7 @@ class StateMachineNode(Node):
         else:
             msg.data = [-1.0, -0.5, -1.0, -0.5]
         self.swerve_publisher.publish(msg)
-
         self.dance_off_frames += 1
-        return
     
     def manual(self):
         # Set led to blue
@@ -638,16 +656,13 @@ class StateMachineNode(Node):
         
         # Stop any nav node
         if self.nav_node != None:
-            self.nav_node.send_signal(signal.SIGINT)
-            self.nav_node = None
+            self.stop_node(self.nav_node)
             
         if self.aruco_nav_node != None:
-            self.aruco_nav_node.send_signal(signal.SIGINT)
-            self.aruco_nav_node = None
+            self.stop_node(self.aruco_nav_node)
             
         if self.object_nav_node != None:
-            self.object_nav_node.send_signal(signal.SIGINT)
-            self.object_nav_node = None
+            self.stop_node(self.object_nav_node)
         
         # Start Xbox controller node
         if self.xbox_controller == None:
@@ -659,8 +674,7 @@ class StateMachineNode(Node):
             
             # Stop Xbox controller node
             if self.xbox_controller != None:
-                self.xbox_controller.send_signal(signal.SIGINT)
-                self.xbox_controller = None
+                self.stop_node(self.xbox_controller)
                 
             # Start nav node
             self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
@@ -675,8 +689,7 @@ class StateMachineNode(Node):
 
             # Stop Xbox controller node
             if self.xbox_controller != None:
-                self.xbox_controller.send_signal(signal.SIGINT)
-                self.xbox_controller = None
+                self.stop_node(self.xbox_controller)
 
             # Increment current target and set current waypoint to 0
             self.curr_target += 1
@@ -690,6 +703,10 @@ class StateMachineNode(Node):
             self.state = ROVER_STATE.NAV
 
 
+
+    # === Helper Functions ===
+
+    # TODO: sus
     def dance_off_tracking(self):
         # If in dance off, skip directly to dance off handler
         if self.state == ROVER_STATE.DANCE_OFF:
@@ -718,8 +735,17 @@ class StateMachineNode(Node):
         else:
             self.stuck_frames = 0
             self.last_rover_position = self.loc
+
+    # Helper function to stop swerve and stop nodes
+    def stop_node(self, node):
+        msg = Float32MultiArray()
+        msg.data = [0.0, 0.0, -1.0, -1.0]
+        self.swerve_publisher.publish(msg)
+
+        node.send_signal(signal.SIGINT)
+        node = None
         
-        
+    # Export the entire path to a csv file
     def export_paths_to_csv(self):
         # Define file path to write to
         path_filepath = os.path.expanduser('~/path.csv')
@@ -757,11 +783,8 @@ class StateMachineNode(Node):
 
         return R * c
     
+    # Calculate bearing angle in radians from current to target
     def bearing_between_points(self, current: Tuple[float], target: Tuple[float]) -> float:
-        """
-        Returns bearing angle in radians from current -> target
-        current, target: (lat, lon)
-        """
         lat1 = math.radians(current[0])
         lon1 = math.radians(current[1])
 
@@ -775,8 +798,12 @@ class StateMachineNode(Node):
             math.cos(lat1) * math.sin(lat2)
             - math.sin(lat1) * math.cos(lat2) * math.cos(dlon)
         )
+
         return math.atan2(y, x)
         
+
+
+# === Main ===
 def main(args=None):
     rclpy.init(args=args)
     
