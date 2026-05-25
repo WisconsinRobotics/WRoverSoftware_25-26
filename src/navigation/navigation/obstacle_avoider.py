@@ -1,4 +1,5 @@
 import depthai as dai
+
 import cv2
 import numpy as np
 import time
@@ -6,7 +7,6 @@ import math
 import zmq
 import base64
 from collections import deque
-#100m 25 images
 
 import rclpy
 from rclpy.node import Node
@@ -15,61 +15,9 @@ from std_msgs.msg import Float64MultiArray
 from ublox_ubx_msgs.msg import UBXNavPVT
 from std_msgs.msg import Float32
 
-class SwervePublisher(Node):
-    def __init__(self):
-        super().__init__("swerve_publisher")
-        self.pub = self.create_publisher(Float32MultiArray, "swerve", 10)
-
-        self.lat = 0
-        self.lon = 0
-
-        self.origin_lat = None
-        self.origin_lon = None
-
-        self.heading = None
-
-        self.curr_waypoint = (None , None)
-
-        self.create_subscription(UBXNavPVT, '/rover1/ubx_nav_pvt', self.gps_callback, 10)
-        self.heading_sub = self.create_subscription(Float32, '/heading', self.heading_cb, 10)
-        self.waypoint_sub = self.create_subscription(Float64MultiArray, '/waypoint', self.waypoint_cb, 10)
-
-    def send(self, swrv):
-        msg = Float32MultiArray()
-        msg.data = swrv
-        self.pub.publish(msg)
-
-    def gps_callback(self, msg):
-        current_lat = msg.lat * 1e-7
-        current_lon = msg.lon * 1e-7
-        
-        if self.origin_lat is None:
-            # First fix
-            self.origin_lat = current_lat
-            self.origin_lon = current_lon
-            self.lat = current_lat
-            self.lon = current_lon
-        else:
-            # Smooth out minor RTK jitter (Alpha = 0.6 means trust new reading 60%, old reading 40%)
-            alpha = 0.25 
-            self.lat = (alpha * current_lat) + ((1.0 - alpha) * self.lat)
-            self.lon = (alpha * current_lon) + ((1.0 - alpha) * self.lon)
-    
-    def waypoint_cb(self, msg):
-        self.curr_waypoint = (msg.data[0], msg.data[1]) # lat, lon
-
-    # def current_pos_cb(self, msg):
-    #     self.curr_pos = (msg.lat * 1e-7, msg.lon * 1e-7) # lat, lon
-
-    def heading_cb(self, msg):
-        self.heading = msg.data
-    
-    
-
-
 class SectorDepthClassifier():
     def __init__(self):
-        self.debug   = False
+        self.debug   = True
         self.onRover = False
 
         # ── ZMQ video stream ───────────────────────────────────────────────
@@ -78,18 +26,20 @@ class SectorDepthClassifier():
         self.socket.setsockopt(zmq.CONFLATE, 1)
         self.socket.bind("tcp://*:5555")
         print("Video streamer ready on port 5555")
+        
+        SCALE = 2.0
 
         # ── Camera intrinsics ──────────────────────────────────────────────
-        self.X_PIXEL_OFFSET = np.float32(643.2372)
-        self.Y_PIXEL_OFFSET = np.float32(367.1311)
-        self.FOCAL_LENGTH = np.float32(568.15)
-        self.W = 1280
-        self.H = 720
+        self.X_PIXEL_OFFSET = np.float32(643.2372 / SCALE)
+        self.Y_PIXEL_OFFSET = np.float32(367.1311 / SCALE)
+        self.FOCAL_LENGTH   = np.float32(568.15 / SCALE)
+        self.W = int(1280 / SCALE)
+        self.H = int(720 / SCALE)
 
         # ── Obstacle avoidance params ──────────────────────────────────────
         self.DEPTH_THRESH = np.float32(4.5)   # metres — beyond this = ignore
         self.MAX_FORWARD  = 1.0
-        self.kP           = 0.02
+        self.kP           = 0.015 # Bump up angular speed scale factor
 
         # ── VFH sector setup ───────────────────────────────────────────────
         self.DEG_PER_SECT = 4.0
@@ -99,56 +49,69 @@ class SectorDepthClassifier():
         # ── VFH histogram state ────────────────────────────────────────────
         self.sector_state    = np.zeros(self.NUM_SECTORS, dtype=int)
         self.hist_persistent = np.zeros(self.NUM_SECTORS)
-        self.T_HIGH          = 38
-        self.T_LOW           = 26
-        self.MIN_VALLEY_SECTS = 2
-        self.SMAX             = 6
+        self.T_HIGH          = 12
+        self.T_LOW           = 8
+        self.MIN_VALLEY_SECTS = 1
+        self.SMAX             = 4
 
         # ── Steering smoothing ─────────────────────────────────────────────
         self.previous_best_theta = None
-        self.EWA_ALPHA           = 0.27
+        self.EWA_ALPHA           = 0.85
 
         # ── Recovery state ─────────────────────────────────────────────────
         self.recovery_frame_count = 0
 
-        # ── RANSAC ground plane cache ──────────────────────────────────────
-        self.cached_n        = None
-        self.cached_d        = None
-        self.ransac_counter  = 0
-        self.RANSAC_INTERVAL = 3
+        # GPS antenna offset from rover center, in robot body frame (meters)
+        # Positive = forward of center, positive left_m = left of center
+        self.GPS_FWD_M  =  0.05
+        self.GPS_LEFT_M =  0.4518  
+
+        # Camera position offset from rover center, in robot body frame (meters)
+        self.CAM_FWD_M  =  0.2794  
+        self.CAM_LEFT_M =  0.00  
 
         self.lat = 0
         self.lon = 0
         self.inflated = None
-        self.origin_lat = 1
-        self.origin_lon = 2
+        self.origin_lat = None
+        self.origin_lon = None
 
         self.R = 6378137.0
 
         self.prev_rx = 0.0
         self.prev_ry = 0.0
 
-        self.ground_thresh = -0.25 
+        self.ground_thresh = -0.40 # Maybe -0.3 for going over small obstacles? TUNE : 0.55 away from ground - 0.15 for 3/4 of a wheel
 
-        self.map_res = 0.05
+        self.map_res = 0.1
         
-        self.MAP_SIZE = 180   
+        self.MAP_SIZE = 90  
         self.MAP_HALF = self.MAP_SIZE // 2 
         self.map = np.zeros((self.MAP_SIZE, self.MAP_SIZE), dtype=np.float32)
-        self.elevation_map = np.full((self.MAP_SIZE, self.MAP_SIZE), -np.inf, dtype=np.float32)
+        self.elevation_map = np.full((self.MAP_SIZE, self.MAP_SIZE), self.ground_thresh, dtype=np.float32)
         self.map_center_rx = 0.0
         self.map_center_ry = 0.0
 
         self.heading = None
         self.waypoint = (None, None)
 
-        ROBOT_RADIUS_M = 0.55
-        r = int(ROBOT_RADIUS_M / self.map_res)
+        self.ROBOT_RADIUS_M = 0.5
+        r = int(self.ROBOT_RADIUS_M / self.map_res)
         kernel_size = 2 * r + 1
         self.dilation_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
 
         self.is_aligning = False
         self.debug_removed_slopes = None
+
+
+        self.rows = (self.Y_PIXEL_OFFSET - np.arange(self.H, dtype=np.float32)) / self.FOCAL_LENGTH
+        self.cols = (np.arange(self.W, dtype=np.float32) - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH
+
+        self.frame_times = deque(maxlen=30)
+
+        _r = int(self.ROBOT_RADIUS_M / self.map_res)
+        _yy, _xx = np.ogrid[0:self.MAP_SIZE, 0:self.MAP_SIZE]
+        self.footprint_mask = (_xx - self.MAP_HALF)**2 + (_yy - self.MAP_HALF)**2 <= _r**2
     
     def _build_elev_bg(self):
         CELL_PX = 4
@@ -246,129 +209,50 @@ class SectorDepthClassifier():
         # Angle in compass degrees (0=N, clockwise), matching visualize_map's convention
         self._sector_angle_deg = (np.degrees(np.arctan2(dx_m, dy_m)) + 360) % 360
 
-    def angular_dist(self, s1, s2, max_val):
-        """Calculates shortest distance between two sectors in a circular array."""
-        diff = abs(s1 - s2) % max_val
-        return min(diff, max_val - diff)
-    
-
-    def remove_upslopes(self, box_size=3, smooth_size=5, slope_thresh_deg=40.0):
-        """
-        Slope-based obstacle removal pass. 
-        Gentle slopes (< 40°) are traversable ramps -> removed from obstacle map.
-        Steep slopes  (> 40°) are walls             -> kept in obstacle map.
-        """
-        valid_mask = self.elevation_map > -np.inf
-        elev_input = np.where(valid_mask, self.elevation_map, 0.0).astype(np.float32)
-        smoothed = cv2.blur(elev_input, (smooth_size, smooth_size))
-        elev_for_max = np.where(valid_mask, smoothed, -1e9).astype(np.float32)
-        elev_for_min = np.where(valid_mask, smoothed,  1e9).astype(np.float32)
-        kernel = np.ones((box_size, box_size), dtype=np.uint8)
-        local_max = cv2.dilate(elev_for_max, kernel)
-        local_min = cv2.erode(elev_for_min, kernel)
-        dz = local_max - local_min
-        dx = (box_size - 1) * self.map_res
-        slope_angle = np.degrees(np.arctan(dz / dx)) 
-        remove_mask = (slope_angle < slope_thresh_deg) & valid_mask
-        self.map[remove_mask] = 0.0
-
-        self.debug_removed_slopes = remove_mask
-
-
-    def map_to_histogram(self, compass_angle):
-        yaw   = math.radians(90.0 - compass_angle)
-        cos_y = math.cos(yaw)
-        sin_y = math.sin(yaw)
-
-        hist = np.zeros(self.NUM_SECTORS)
-
-        self.remove_upslopes(box_size=3, smooth_size=3, slope_thresh_deg=40.0)
-
-        # Cells with fewer than BUSH_THRESH hits 
-        # zero them out before inflating.
-        MAX_CELL_WEIGHT = (self.map_res * self.FOCAL_LENGTH) ** 2  # 793 
-        OBJ_DENSITY  = 0.5          # ignores anything thats less than 50% solid
-        BUSH_THRESH     = MAX_CELL_WEIGHT * OBJ_DENSITY
-        filtered_map = np.where(self.map >= BUSH_THRESH, self.map, 0.0).astype(np.float32)
-        self.inflated = cv2.dilate(filtered_map, self.dilation_kernel)
-        inflated = self.inflated
-
-        cell_i, cell_j = np.where(inflated > 0)
-        if len(cell_i) == 0:
-            return hist
-
-        # Robot-centric offsets in metres (ENU)
-        d_east  = (cell_j - self.MAP_HALF).astype(np.float64) * self.map_res
-        d_north = (self.MAP_HALF - cell_i).astype(np.float64) * self.map_res
-
-        # Rotate ENU robot frame  (forward = robot heading)
-        robot_fwd  =  d_east * cos_y + d_north * sin_y
-        robot_left = -d_east * sin_y + d_north * cos_y
-
-        # m = c² · (a − b·d)
-        #   c  = certainty value (hit count stored in map cell)
-        #   d  = Euclidean distance from robot to cell (metres)
-        #   a  = 1.0  (weight at d = 0)
-        #   b  = a / d_max  → weight decays linearly to ~0 at sensor horizon
-        dist_m = np.sqrt(d_east**2 + d_north**2)
-        dist_m = np.clip(dist_m, 0.01, self.DEPTH_THRESH)
-
-        a = 1.0
-        b = a / self.DEPTH_THRESH
-
-        certainty = np.clip(inflated[cell_i, cell_j] / MAX_CELL_WEIGHT, 0.0, 1.0)  #normalized to [0,1]
-        magnitude = (certainty ** 2) * (a - b * dist_m)
-        magnitude = np.clip(magnitude, 0.0, None)   # never negative
-
-        angle_deg  = np.degrees(np.arctan2(robot_left, robot_fwd)) % 360.0
-        
-        # Safely bin into sectors
-        sector_idx = (angle_deg / self.DEG_PER_SECT).astype(int) % self.NUM_SECTORS
-
-        np.add.at(hist, sector_idx, magnitude)
-
-        return hist
-
     # ──────────────────────────────────────────────────────────────────────────
     # Main callback
     # ──────────────────────────────────────────────────────────────────────────
     def cb(self, depth_full, compass_angle):
-        #compass_angle = self.heading
-        if self.origin_lat is None:
+       # compass_angle = self.heading
+        if compass_angle is None or self.origin_lat is None:
             return [0.0, 0.0, -1.0, -1.0]
-        start_time = time.time()
-        H, W = depth_full.shape
+        
+        self.frame_count = getattr(self, "frame_count", 0) + 1
+        if self.frame_count < 20:
+            return [0.0, 0.0, -1.0, -1.0]
 
-        # Invalid pixels NaN
-        invalid_mask = (depth_full == 0) | np.isnan(depth_full)
-        depth_full[invalid_mask] = np.nan
+        start_time = time.perf_counter()
 
-        #  Ground remova
-        # ground_mask = self.get_ground_mask(depth_full)
-        # if ground_mask is None:
-            # fallback row-angle heuristic
-        rows = (self.Y_PIXEL_OFFSET - np.arange(H, dtype=np.float32)) / self.FOCAL_LENGTH
-        ground_mask = np.nan_to_num(depth_full) * rows[:, None] < self.ground_thresh
+        if depth_full.shape != (self.H, self.W):
+            depth_full = cv2.resize(depth_full, (self.W, self.H))
+        # Update map position based on GPS
+        self._shift_local_map()
 
-        obstacle_mask = (
-            ~ground_mask         &
-            ~np.isnan(depth_full) &
-            (depth_full > 0.001)   &
-            (depth_full < self.DEPTH_THRESH)
-        )
+        # Process point cloud and update occupancy map for objects
+        ground_mask, obstacle_mask = self._process_depth_to_map(depth_full, compass_angle)
+        
+        # Generate VFH Histogram and find safe valleys
+        hist_smooth, valleys = self._find_valleys(compass_angle)
+        
+        # Calculate best steering sector and commands
+        swerve_cmd, steering_context = self._calculate_steering(valleys, compass_angle)
+        # ── Visualization ──────────────────────────────────────────────
+        t0 = time.perf_counter()
+        if self.debug:
+            self._render_visualization(depth_full, ground_mask, compass_angle, hist_smooth, steering_context)
+        print("viz time = ", (time.perf_counter() - t0) * 1000)
+        elapsed = time.perf_counter() - start_time
+        self.frame_times.append(elapsed)
+        avg_time = sum(self.frame_times) / len(self.frame_times)
+        print(f"Current Frame: {elapsed * 1000:.1f} ms | 30-Frame Avg: {avg_time * 1000:.1f} ms")
 
-        free_mask = (
-            ~obstacle_mask         &
-            ~np.isnan(depth_full)  &
-            (depth_full > 0.001)   &
-            (depth_full < self.DEPTH_THRESH)
-        )
+        return swerve_cmd
 
-# memory for vfh ---------------------------------------------------------
-
+    def _shift_local_map(self):
+        # RTK Jitter can potentially vibrate back and forth, smearing obstacles and obstructing future stuff
         ry = math.radians(self.lat - self.origin_lat) * self.R
         rx = math.radians(self.lon - self.origin_lon) * self.R * math.cos(math.radians(self.origin_lat))
-        
+
         dx = rx - self.map_center_rx
         dy = ry - self.map_center_ry
 
@@ -377,118 +261,213 @@ class SectorDepthClassifier():
 
         if shiftx != 0 or shifty != 0:
             new_map = np.zeros_like(self.map)
+            new_elev = np.full_like(self.elevation_map, self.ground_thresh)
             
             # Slice shifting logic prevents wrapping obstacles to the other side
+            # Can be problematic if we lose RTK fix, cuz its like rover teleported.
             if abs(shiftx) < self.MAP_SIZE and abs(shifty) < self.MAP_SIZE:
-                if shiftx > 0:    
-                    src_x, dst_x = slice(shiftx, self.MAP_SIZE), slice(0, self.MAP_SIZE - shiftx)
-                elif shiftx < 0:  
-                    src_x, dst_x = slice(0, self.MAP_SIZE + shiftx), slice(-shiftx, self.MAP_SIZE)
-                else:             
-                    src_x, dst_x = slice(None), slice(None)
-
-
-                if shifty > 0:    
-                    src_y, dst_y = slice(0, self.MAP_SIZE - shifty), slice(shifty, self.MAP_SIZE)
-                elif shifty < 0:  
-                    src_y, dst_y = slice(-shifty, self.MAP_SIZE), slice(0, self.MAP_SIZE + shifty)
-                else:             
-                    src_y, dst_y = slice(None), slice(None)
+                
+                src_x = slice(shiftx, self.MAP_SIZE) if shiftx > 0 else slice(0, self.MAP_SIZE + shiftx) if shiftx < 0 else slice(None)
+                dst_x = slice(0, self.MAP_SIZE - shiftx) if shiftx > 0 else slice(-shiftx, self.MAP_SIZE) if shiftx < 0 else slice(None)
+                src_y = slice(0, self.MAP_SIZE - shifty) if shifty > 0 else slice(-shifty, self.MAP_SIZE) if shifty < 0 else slice(None)
+                dst_y = slice(shifty, self.MAP_SIZE) if shifty > 0 else slice(0, self.MAP_SIZE + shifty) if shifty < 0 else slice (None)
 
                 new_map[dst_y, dst_x] = self.map[src_y, src_x]
+                new_elev[dst_y, dst_x] = self.elevation_map[src_y, src_x]
             
             self.map = new_map
-            
+            self.elevation_map = new_elev
             self.map_center_rx += shiftx * self.map_res
             self.map_center_ry += shifty * self.map_res
 
+    def _process_depth_to_map(self, depth_full, compass_angle):
+        
+        # Invalid pixels NaN
+        invalid_mask = (depth_full == 0) | np.isnan(depth_full)
+        depth_full[invalid_mask] = np.nan
+
+        #  Ground removal
+        with np.errstate(invalid='ignore'):
+            Z = depth_full
+            Y = depth_full * self.rows[:, None]
+            
+            # Step size for difference checking. Using 2 or 3 pixels instead of 1 
+            # helps smooth out tiny sub-pixel stereo noise so flat ground doesn't trigger false slopes.
+            STEP = 2 
+            
+            dZ = np.zeros_like(Z)
+            dY = np.zeros_like(Y)
+            
+            #diff between z at step and z at i + step
+            dZ[:-STEP, :] = Z[:-STEP, :] - Z[STEP:, :]
+            dY[:-STEP, :] = Y[:-STEP, :] - Y[STEP:, :]
+        
+            slope_deg = np.degrees(np.arctan2(np.abs(dY), np.abs(dZ)))
+            
+            ground_slope_mask = slope_deg < 30.0
+
+            # ground_mask = (depth_full * self.rows[:, None]) < self.ground_thresh
+            abs_ground_mask = (Y < self.ground_thresh)
+
+            ground_mask = abs_ground_mask | ground_slope_mask
+            # valid_depth implicitly excludes NaNs because NaN > 0.001 is False
+            valid_depth = (depth_full > 0.001) & (depth_full < self.DEPTH_THRESH)
+
+        obstacle_mask = valid_depth & ~ground_mask
+        free_mask = valid_depth & ground_mask # Wipe pixels we prove are empty
+        
         heading_rad = math.radians(90.0 - compass_angle)
-        # Rotate vectors into world coordinates
         cos_h = math.cos(heading_rad)
         sin_h = math.sin(heading_rad)
-        cols = (np.arange(W, dtype=np.float32) - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH
-        
-        # Process Obstacles
+
+        eff_cam_fwd  = self.CAM_FWD_M  - self.GPS_FWD_M    #  0.229 m
+        eff_cam_left = self.CAM_LEFT_M - self.GPS_LEFT_M    # -0.4518 m (May need changes based on GPS loc)
+
+        cam_east  =  eff_cam_fwd * cos_h - eff_cam_left * sin_h
+        cam_north =  eff_cam_fwd * sin_h + eff_cam_left * cos_h
+
+#----------------------------------------------------------------------------------
+
+        # # Project Obstacles
+        # y_obs, x_obs = np.nonzero(obstacle_mask)
+        # if len(x_obs) > 0:
+        #     fwd_valid = depth_full[obstacle_mask]
+        #     left_valid = -fwd_valid * self.cols[x_obs]
+            
+        #     d_east = fwd_valid * cos_h - left_valid * sin_h
+        #     d_north = fwd_valid * sin_h + left_valid * cos_h
+
+        #     # Map coordinates to grid (Rover is at 45, 45)
+        #     cell_x_obs = ((d_east  + cam_east)  / self.map_res).astype(int) + self.MAP_HALF
+        #     cell_y_obs = ((-d_north - cam_north) / self.map_res).astype(int) + self.MAP_HALF
+          
+        #     # Filter coordinates that fall outside the map
+        #     valid_cells = (cell_x_obs >= 0) & (cell_x_obs < self.MAP_SIZE) & (cell_y_obs >= 0) & (cell_y_obs < self.MAP_SIZE)
+
+        #     if valid_cells.any():
+        #         pixel_weights = fwd_valid[valid_cells] ** 2               # Z² weighting to cancel out distance difference in hits
+        #         flat_obs_idx = cell_y_obs[valid_cells] * self.MAP_SIZE + cell_x_obs[valid_cells]
+        #         updates = np.bincount(flat_obs_idx, weights=pixel_weights, minlength=self.MAP_SIZE * self.MAP_SIZE)
+        #         self.map += updates.reshape((self.MAP_SIZE, self.MAP_SIZE))
+
+        #         row_angles = (self.Y_PIXEL_OFFSET - y_obs[valid_cells].astype(np.float32)) / self.FOCAL_LENGTH
+        #         cam_y = fwd_valid[valid_cells] * row_angles   # height in camera frame, upward = positive
+        #         cam_y = np.clip(cam_y, self.ground_thresh, 1.0)
+        #         # Store max height per cell
+        #         np.maximum.at(self.elevation_map, (cell_y_obs[valid_cells], cell_x_obs[valid_cells]), cam_y)
+        # # free cells stay 0 
+        # # Clear proven free-space directly, rather than wiping the whole cone here
+        # y_free, x_free = np.nonzero(free_mask)
+        # if len(x_free) > 0:
+        #     fwd_free = depth_full[free_mask]
+        #     left_free = -fwd_free * self.cols[x_free]
+        #     d_east_f = fwd_free * cos_h - left_free * sin_h
+        #     d_north_f = fwd_free * sin_h + left_free * cos_h
+
+        #     cell_x_f = ((d_east_f + cam_east) / self.map_res).astype(int) + self.MAP_HALF
+        #     cell_y_f = ((-d_north_f - cam_north / self.map_res)).astype(int) + self.MAP_HALF
+
+        #     valid_f = (cell_x_f >= 0) & (cell_x_f < self.MAP_SIZE) & (cell_y_f >= 0) & (cell_y_f < self.MAP_SIZE)
+
+        #     if valid_f.any():
+        #         # Empty space decremented smoothly, so noise is not a concern, but strong obstacles will decay as we drive over them
+        #         flat_free_idx = cell_y_f[valid_f] * self.MAP_SIZE + cell_x_f[valid_f]
+        #         free_weights = fwd_free[valid_f] ** 2
+        #         free_updates = np.bincount(flat_free_idx, weights=free_weights, minlength=self.MAP_SIZE * self.MAP_SIZE)
+
+        #         # Reduce confidence of mapped obstacles when we see clear ground
+        #         self.map -= (free_updates.reshape((self.MAP_SIZE, self.MAP_SIZE)) * 0.75)
+            
+        # MAX_CELL_WEIGHT = ((self.map_res * self.FOCAL_LENGTH)) ** 2
+        # self.map = np.clip(self.map * 0.997, 0.0, MAX_CELL_WEIGHT) # Slow decay so ghost noise dissappears over time
+        # self.map[self.footprint_mask] = 0.0
+        # self.elevation_map[self.footprint_mask] = self.ground_thresh
+
+         # CALCULATE OBSTACLE UPDATES
         y_obs, x_obs = np.nonzero(obstacle_mask)
         if len(x_obs) > 0:
             fwd_valid = depth_full[obstacle_mask]
-            left_valid = -fwd_valid * cols[x_obs]
+            left_valid = -fwd_valid * self.cols[x_obs]
             
             d_east = fwd_valid * cos_h - left_valid * sin_h
             d_north = fwd_valid * sin_h + left_valid * cos_h
 
-            # Map coordinates to grid (Rover is at 45, 45)
-            cell_x_obs = (d_east / self.map_res).astype(int) + self.MAP_HALF
-            cell_y_obs = (-d_north / self.map_res).astype(int) + self.MAP_HALF
+            cell_x_obs = ((d_east  + cam_east)  / self.map_res).astype(int) + self.MAP_HALF
+            cell_y_obs = ((-d_north - cam_north) / self.map_res).astype(int) + self.MAP_HALF
           
-            # Filter coordinates that fall outside the 90x90 array
             valid_cells = (cell_x_obs >= 0) & (cell_x_obs < self.MAP_SIZE) & (cell_y_obs >= 0) & (cell_y_obs < self.MAP_SIZE)
-            cell_x_obs = cell_x_obs[valid_cells]
-            cell_y_obs = cell_y_obs[valid_cells]
-            y_obs      = y_obs[valid_cells]
-            fwd_valid  = fwd_valid[valid_cells] 
             
+            obs_pixel_weights = fwd_valid[valid_cells] ** 2               
+            flat_obs_idx = cell_y_obs[valid_cells] * self.MAP_SIZE + cell_x_obs[valid_cells]
+            
+            # Generate the 2D array of obstacle additions
+            obs_updates = np.bincount(flat_obs_idx, weights=obs_pixel_weights, minlength=self.MAP_SIZE * self.MAP_SIZE)
+            obs_updates_2d = obs_updates.reshape((self.MAP_SIZE, self.MAP_SIZE))
+            
+            # Elevation mapping
+            row_angles = (self.Y_PIXEL_OFFSET - y_obs[valid_cells].astype(np.float32)) / self.FOCAL_LENGTH
+            cam_y = fwd_valid[valid_cells] * row_angles   
+            np.maximum.at(self.elevation_map, (cell_y_obs[valid_cells], cell_x_obs[valid_cells]), cam_y)
         else:
-            cell_x_obs = np.array([], dtype=int)
-            cell_y_obs = np.array([], dtype=int)
+            obs_updates_2d = np.zeros((self.MAP_SIZE, self.MAP_SIZE), dtype=np.float32)
+
+
+        #free space updates
+        # Create a coordinate grid in meters relative to the map center
+        y_idx, x_idx = np.ogrid[0:self.MAP_SIZE, 0:self.MAP_SIZE]
+        y_m = (self.MAP_HALF - y_idx) * self.map_res
+        x_m = (x_idx - self.MAP_HALF) * self.map_res
         
-        # Process Free Space
-        y_free, x_free = np.nonzero(free_mask)
-        if len(x_free) > 0:
-            fwd_free  = depth_full[free_mask]
-            left_free = -fwd_free * cols[x_free]
-
-            d_east_free  = fwd_free * cos_h - left_free * sin_h
-            d_north_free = fwd_free * sin_h + left_free * cos_h
-
-            cell_x_free = (d_east_free / self.map_res).astype(int) + self.MAP_HALF
-            cell_y_free = (-d_north_free / self.map_res).astype(int) + self.MAP_HALF
-
-            valid_free = (
-                (cell_x_free >= 0) & (cell_x_free < self.MAP_SIZE) &
-                (cell_y_free >= 0) & (cell_y_free < self.MAP_SIZE)
-            )
-            cell_x_free = cell_x_free[valid_free]
-            cell_y_free = cell_y_free[valid_free]
-        else:
-            cell_x_free = np.array([], dtype=int)
-            cell_y_free = np.array([], dtype=int)
-
-        # Collect all cells being touched this frame
-        touched_y = np.concatenate([cell_y_obs, cell_y_free])
-        touched_x = np.concatenate([cell_x_obs, cell_x_free])
+        # Shift coordinates to be relative to the CAMERA's position
+        dx = x_m - cam_east
+        dy = y_m - cam_north
+        dist = np.hypot(dx, dy)
         
-        # zero them all first wipes old value before this frame writes
-        if len(touched_x) > 0:
-            self.map[touched_y, touched_x] = 0.0
-            self.elevation_map[touched_y, touched_x] = self.ground_thresh
+        # Calculate angle of each cell relative to the camera optical axis
+        angle_deg = np.degrees(np.arctan2(dx, dy))
+        diff_deg = (angle_deg - compass_angle + 180) % 360 - 180
         
-
+        # inside max depth and inside FOV
+        SAFE_FOV_DEG = self.FOV_DEG * 0.80  # 80% to prevent edge noise from doing shit
+        clear_mask = (dist <= self.DEPTH_THRESH) & (np.abs(diff_deg) <= (SAFE_FOV_DEG / 2.0))
         
-        # Now accumulate obstacle hits into the clean cells
-        if len(cell_x_obs) > 0:
-            # Passing 1.0 means every pixel hit adds +1 to that cell's counter
-            pixel_weights = fwd_valid ** 2               # Z² weighting to cancel out distance difference in hits
-            np.add.at(self.map, (cell_y_obs, cell_x_obs), pixel_weights)
+        MAX_CELL_WEIGHT = (self.map_res * self.FOCAL_LENGTH) ** 2
+        DECAY_AMOUNT = MAX_CELL_WEIGHT * 0.05  # Slow decay (5% of max weight per frame)
+        # decay needs to happen ONLY to counter act noise there should be no decay that can clear obstacles.
+        # most of our map clearing needs to happen through movement
+        
+        free_updates_2d = np.where(clear_mask, DECAY_AMOUNT, 0.0).astype(np.float32)
 
-            row_angles = (self.Y_PIXEL_OFFSET - y_obs.astype(np.float32)) / self.FOCAL_LENGTH
-            cam_y = fwd_valid * row_angles   # height in camera frame, upward = positive
+        # Obstacles win ties If a cell has an obstacle hit THIS frame, DO NOT decay it.
+        free_updates_2d[obs_updates_2d > 0] = 0.0
 
-            # Store max height per cell
-            np.maximum.at(self.elevation_map, (cell_y_obs, cell_x_obs), cam_y)
-        # free cells stay 0 
+        # Apply the updates
+        self.map += obs_updates_2d
+        self.map -= free_updates_2d
 
-        # the map is generated and also shifts depending on where we moved
-        # generate histogram based on the map instead of doing via image now
+        # Prevent infinity and negative confidence
+        MAP_CEILING = MAX_CELL_WEIGHT * 3.0  
+        np.clip(self.map, 0.0, MAP_CEILING, out=self.map)
+
+        # Elevation reset: ONLY reset height if the cell has been eroded to 0 confidence
+        cleared_mask = self.map <= 0.01
+        self.elevation_map[cleared_mask] = float(self.ground_thresh)
+
+        # APPLY FOOTPRINT
+        self.map[self.footprint_mask]           = 0.0
+        self.elevation_map[self.footprint_mask] = float(self.ground_thresh)
+        self.elevation_map[self.map < 0.05] = self.ground_thresh
+        return ground_mask, obstacle_mask
+
+    def _find_valleys(self, compass_angle):
         raw_hist = self.map_to_histogram(compass_angle=compass_angle)
-
-
-        window = np.array([1.0, 2.0, 3.0, 2.0, 1.0])
+        window = np.array([1.0, 1.25, 1.75, 1.25, 1.0])
         window /= window.sum()
         
         pad_size = len(window) // 2
         padded_hist = np.pad(raw_hist, pad_size, mode='wrap')
         hist_smooth = np.convolve(padded_hist, window, mode='valid')
+        # raw_hist *= 0
 
         # Hysteresis thresholding
         for i in range(self.NUM_SECTORS):
@@ -521,23 +500,29 @@ class SectorDepthClassifier():
         # Edge case: The entire 360 space is open
         if in_valley and v_start == 0 and np.sum(self.sector_state) == 0:
             valleys = [(0, self.NUM_SECTORS - 1)]
+        
+        return hist_smooth, valleys
 
+    def _calculate_steering(self, valleys, compass_angle):
+        #TARGET_NORTH = (MOCK_LAT + 0.000449, MOCK_LON)
+
+        # 50m due East
+        #TARGET_EAST  = (MOCK_LAT, MOCK_LON + 0.000537)
+
+        # 50m due South  
+        #TARGET_SOUTH = (MOCK_LAT - 0.000449, MOCK_LON)
+
+        # 50m due West
+        TARGET_WEST  = (MOCK_LAT, MOCK_LON - 0.000537)
         #Target bearing
-        target_gps        = (43.0724831900561, -89.41245993537561) 
+        target_gps        = self.waypoint 
         rover_gps         = (self.lat, self.lon)
+        # Target bearing is already a global compass angle (0=N, 90=E)
         bearing_to_target = self.compute_bearing(rover_gps, target_gps)
+        target_sector     = int(bearing_to_target / self.DEG_PER_SECT) % self.NUM_SECTORS
         
-        # Calculate target vector in ENU, then rotate to robot frame
-        yaw_rad = math.radians(90.0 - compass_angle)
-        tx = math.cos(math.radians(90.0 - bearing_to_target))
-        ty = math.sin(math.radians(90.0 - bearing_to_target))
-        
-        r_fwd  = tx * math.cos(yaw_rad) + ty * math.sin(yaw_rad)
-        r_left = -tx * math.sin(yaw_rad) + ty * math.cos(yaw_rad)
-        
-        # Target angle mapping perfectly matches the histogram (0 = Front)
-        target_angle_deg = np.degrees(math.atan2(r_left, r_fwd)) % 360.0
-        target_sector    = int(target_angle_deg / self.DEG_PER_SECT) % self.NUM_SECTORS
+        # Rover heading as a sector
+        robot_heading_sector = int(compass_angle / self.DEG_PER_SECT) % self.NUM_SECTORS
 
         # Cost-based Valley Selection
         best_steering_sector = None
@@ -545,196 +530,241 @@ class SectorDepthClassifier():
 
         for v_start, v_end in valleys:
             size = v_end - v_start + 1
-            candidates = []
+            margin = self.SMAX // 2
+            candidates = [v_start + margin, v_end - margin, target_sector] if size > self.SMAX else [(v_start + v_end) // 2]
             
-            if size > self.SMAX:
-                margin = self.SMAX // 2
-                candidates.extend([v_start + margin, v_end - margin])
-                if (target_sector - v_start) % self.NUM_SECTORS <= size:
-                    candidates.append(target_sector)
-            else:
-                candidates.append((v_start + v_end) // 2)
-
             for c in candidates:
                 c_norm = c % self.NUM_SECTORS
+
+                if c == target_sector and (target_sector - v_start) % self.NUM_SECTORS > size:
+                    continue
+
                 cost = 5.0 * self.angular_dist(c_norm, target_sector, self.NUM_SECTORS) + \
-                       1.0 * self.angular_dist(c_norm, 0, self.NUM_SECTORS)
+                       1.0 * self.angular_dist(c_norm, robot_heading_sector, self.NUM_SECTORS)
                        
                 if cost < best_cost:
-                    best_cost = cost
-                    best_steering_sector = c_norm
+                    best_cost, best_steering_sector = cost, c_norm
 
-
-        is_recovery = False
-
-        if best_steering_sector is None:
-            # ENTIRE 360 map is blocked. We are truly stuck.
-            is_recovery = True
-            self.recovery_frame_count += 1
-            error_deg = 45.0 # Force a spin to scan
-            
-        else:
-            self.recovery_frame_count = 0
-            # Convert chosen sector back to an angle in [-180, 180] for steering
-            best_angle_deg = best_steering_sector * self.DEG_PER_SECT
-            if best_angle_deg > 180.0:
-                best_angle_deg -= 360.0
-                
-            best_theta = math.radians(best_angle_deg)
-
-            if self.previous_best_theta is None:
-                smoothed_theta = best_theta
-            else:
-                # Find the shortest angular difference (handles the -180/180 wrap-around)
-                diff = (best_theta - self.previous_best_theta + math.pi) % (2 * math.pi) - math.pi
-                smoothed_theta = self.previous_best_theta + (self.EWA_ALPHA * diff)
-                
-                # Re-normalize to [-pi, pi]
-                smoothed_theta = (smoothed_theta + math.pi) % (2 * math.pi) - math.pi
-                
-            self.previous_best_theta = smoothed_theta
-            
-            error_deg = math.degrees(smoothed_theta)
-
-        if self.is_aligning:
-            # If we are currently turning, keep turning until we are highly accurate 
-            if abs(error_deg) <= 3.0:
-                self.is_aligning = False
-        else:
-            # If we are driving, allow some slop. Only stop to fix it if we drift past 8°
-            if abs(error_deg) > 8.0:
-                self.is_aligning = True
-
-        if self.is_aligning:
-            forward_speed = 0.0
-            turn_speed = max(min(abs(error_deg) * self.kP, 1.0), 0.2)
-        else:
-            # Pure Forward Drive
-            forward_speed = self.MAX_FORWARD
-            turn_speed = -1.0
-
-        #print(f"Aligning: {self.is_aligning} | error: {error_deg:.1f}°  fwd: {forward_speed:.2f}  turn: {turn_speed:.2f}")
-
-
-        # ── Visualization ──────────────────────────────────────────────
-        if self.debug:
-            depth_vis = cv2.normalize(
-                np.nan_to_num(depth_full), None, 0, 255, cv2.NORM_MINMAX
-            ).astype(np.uint8)
-            depth_vis = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
-
-            # ground — blue
-            depth_vis[ground_mask] = [255, 80, 0]
-            prev_s = int((-np.degrees(np.arctan((0 - self.X_PIXEL_OFFSET) / self.FOCAL_LENGTH)) % 360) / self.DEG_PER_SECT) % self.NUM_SECTORS
-            # Draw sector borders cleanly without looping over every pixel
-            half_sectors = int((self.FOV_DEG / 2) / self.DEG_PER_SECT)
-            for s_offset in range(-half_sectors, half_sectors + 1):
-                s = (-s_offset) % self.NUM_SECTORS
-                
-                # Project the sector boundary angle into a pixel column
-                x_col = int(math.tan(math.radians((s_offset - 0.5) * self.DEG_PER_SECT)) * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET)
-                
-                if 0 <= x_col < W:
-                    color = (0, 0, 200) if self.sector_state[s] == 1 else (0, 200, 0)
-                    cv2.line(depth_vis, (x_col, 0), (x_col, H - 1), color, 1)
-            # steering line — purple
-            if not is_recovery and abs(smoothed_theta) < math.radians(self.FOV_DEG / 2):
-                chosen_pixel = int(math.tan(-smoothed_theta) * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET)
-                chosen_pixel = max(0, min(W - 1, chosen_pixel))
-                cv2.line(depth_vis, (chosen_pixel, 0), (chosen_pixel, H - 1), (203, 192, 255), 3)
-
-            # target bearing line — yellow
-            target_angle_rad_viz = math.radians(target_angle_deg)
-            if target_angle_rad_viz > math.pi: 
-                target_angle_rad_viz -= 2 * math.pi
-            
-            if abs(target_angle_rad_viz) < math.radians(self.FOV_DEG / 2):
-                target_pixel = int(math.tan(-target_angle_rad_viz) * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET)
-                target_pixel = max(0, min(W - 1, target_pixel))
-                cv2.line(depth_vis, (target_pixel, 0), (target_pixel, H - 1), (0, 255, 255), 2)
-
-            if is_recovery:
-                cv2.putText(depth_vis, f"RECOVER",
-                            (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
-
-
-            # magnitude print
-            #print("hist:", " ".join(f"[{s:02d}]{'X' if self.sector_state[s] else 'O'}{hist_smooth[s]:.2f}"for s in range(self.NUM_SECTORS)))
-            # ── In-view histogram bar chart ───────────────────────────────────
-            BAR_MAX_H = 80
-            BAR_BASE  = H - 4
-            scale     = BAR_MAX_H / max(hist_smooth.max(), self.T_HIGH * 1.5, 0.001)
-
-            cv2.rectangle(depth_vis, (0, H - BAR_MAX_H - 10), (W, H), (15, 15, 15), -1)
-
-            t_high_y = BAR_BASE - int(self.T_HIGH * scale)
-            t_low_y  = BAR_BASE - int(self.T_LOW  * scale)
-            cv2.line(depth_vis, (0, t_high_y), (W, t_high_y), (0, 50, 220), 1)
-            cv2.line(depth_vis, (0, t_low_y),  (W, t_low_y),  (0, 200, 255), 1)
-            cv2.putText(depth_vis, f"T_H={self.T_HIGH:.2f}", (4, t_high_y - 3),
-                        cv2.FONT_HERSHEY_PLAIN, 0.8, (0, 50, 220), 1)
-            cv2.putText(depth_vis, f"T_L={self.T_LOW:.2f}",  (4, t_low_y  - 3),
-                        cv2.FONT_HERSHEY_PLAIN, 0.8, (0, 200, 255), 1)
-
-            half_sectors = int((self.FOV_DEG / 2) / self.DEG_PER_SECT)
-            for s_offset in range(-half_sectors, half_sectors + 1):
-                s = (-s_offset) % self.NUM_SECTORS  # <--- CHANGED to -s_offset
-
-                # Project sector edges into pixel columns using the same math as the camera
-                x_left  = int(math.tan(math.radians((s_offset - 0.5) * self.DEG_PER_SECT))
-                            * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET)
-                # ... rest of the code remains exactly the same ...
-                x_right = int(math.tan(math.radians((s_offset + 0.5) * self.DEG_PER_SECT))
-                            * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET)
-                x_left  = max(0, x_left)
-                x_right = min(W - 1, x_right)
-
-                bar_h = int(hist_smooth[s] * scale)
-
-                # Three zones based on raw value — not sector_state which lags due to hysteresis
-                if hist_smooth[s] > self.T_HIGH:
-                    color = (0, 50, 220)    # red   — would be blocked
-                elif hist_smooth[s] > self.T_LOW:
-                    color = (0, 165, 255)   # orange — hysteresis zone
-                else:
-                    color = (30, 180, 60)   # green  — open
-
-                cv2.rectangle(depth_vis,
-                            (x_left + 1, BAR_BASE - bar_h),
-                            (x_right - 1, BAR_BASE),
-                            color, -1)
-
-                if hist_smooth[s] > self.T_LOW * 0.3:
-                    cv2.putText(depth_vis, f"{hist_smooth[s]:.2f}",
-                                (x_left + 2, BAR_BASE - bar_h - 3),
-                                cv2.FONT_HERSHEY_PLAIN, 0.65, (200, 200, 200), 1)
-            if not self.onRover:
-                cv2.imshow("VFH Obstacle Avoidance", depth_vis)
-                self.visualize_map(compass_angle)
-                #self.visualize_elevation_map()
-                cv2.waitKey(1) 
-            else:
-                try:
-                    ret, buffer = cv2.imencode(
-                        '.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30]
-                    )
-                    if ret:
-                        self.socket.send(base64.b64encode(buffer.tobytes()))
-                except Exception:
-                    pass
-        
-        elapsed = time.time() - start_time
-        print("time ===================", elapsed)
+        # Potentially going into recovery states?
+        is_recovery = best_steering_sector is None
+        smoothed_theta_cw = 0.0
 
         if is_recovery:
-            # Blind spin  to gather map data
-            return [0.0, 0.0, 0.7, -1.0]
-
-        # Positive error_deg means the target is to the LEFT.
-        if error_deg > 0:
-            return [forward_speed, 0.0, turn_speed, -1.0]  # Turn Left
+            self.recovery_frame_count += 1
+            error_deg = 45.0 # Force a spin to scan
         else:
-            return [forward_speed, 0.0, -1.0, turn_speed]  # Turn Right
+            self.recovery_frame_count = 0
+            
+            # Global angle of chosen sector
+            best_angle_deg = best_steering_sector * self.DEG_PER_SECT
+            
+            # Difference from current heading (Clockwise diff: Positive = Target is to the Right)
+            diff_deg = (best_angle_deg - compass_angle + 180) % 360 - 180
+            best_theta_cw = math.radians(diff_deg)
+
+            if self.previous_best_theta is None:
+                smoothed_theta_cw = best_theta_cw
+            else:
+                diff = (best_theta_cw - self.previous_best_theta + math.pi) % (2 * math.pi) - math.pi
+                smoothed_theta_cw = self.previous_best_theta + (self.EWA_ALPHA * diff)
+                smoothed_theta_cw = (smoothed_theta_cw + math.pi) % (2 * math.pi) - math.pi
+                
+            self.previous_best_theta = smoothed_theta_cw
+            
+            # Your wheel code expects positive error_deg to turn LEFT, so we flip the sign here
+            error_deg = math.degrees(-smoothed_theta_cw)
+
+        # Remove is_aligning lock on the swerve drive
+        # VFH proportional speeds again
+        speed_factor = max(0.2, 1.0 - (abs(error_deg) / 45.0))
+        forward_speed = self.MAX_FORWARD * speed_factor if not is_recovery else 0.0 # Only have recover state i.e no best sector found
+        #kp = 0.015
+        turn_speed = max(min(abs(error_deg) * self.kP, 2.0), 0.15) - 1.0 if abs(error_deg) > 2.0 else 0.0 # 2 degree deadband
+
+        if error_deg > 0: turn_speed = turn_speed
+        else: turn_speed = -turn_speed
+        # if self.is_aligning:
+        #     # If we are currently turning, keep turning until we are highly accurate 
+        #     if abs(error_deg) <= 6.0: self.is_aligning = False
+        # elif abs(error_deg) > 11.0:
+        #     # If we are driving, allow some slop. Only stop to fix it if we drift past 8°
+        #     self.is_aligning = True
+
+        # if self.is_aligning:
+        #     forward_speed, turn_speed = 0.0, max(min(abs(error_deg) * self.kP, 1.8), 0.42) - 1.0
+        # else:
+        #     # Pure Forward Drive
+        #     forward_speed, turn_speed = self.MAX_FORWARD * 0.8, -1.0
+
+        steering_context = {
+            "is_recovery": is_recovery,
+            "error_deg": error_deg,
+            "smoothed_theta_cw": smoothed_theta_cw,
+            "bearing_to_target": bearing_to_target
+        }
+
+        cmd = [0.0, 0.0, 0.7, -1.0] if is_recovery else (
+            [forward_speed, 0.0, turn_speed, -1.0] if error_deg > 0 else
+            [forward_speed, 0.0, -1.0, turn_speed]
+        )
+
+        print(f"Aligning: {self.is_aligning} | error: {error_deg:.1f}°")
+
+        return cmd, steering_context
+        
+
+
+    def _render_visualization(self, depth_full, ground_mask, compass_angle, hist_smooth, ctx):
+        H, W = depth_full.shape
+        depth_vis = cv2.normalize(np.nan_to_num(depth_full), None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        depth_vis = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
+        # ground — blue
+        depth_vis[ground_mask] = [255, 80, 0]
+
+        # Draw sector borders cleanly without looping over every pixel
+        half_sectors = int((self.FOV_DEG / 2) / self.DEG_PER_SECT)
+        max_rad = math.radians(self.FOV_DEG / 2.0) - 0.05 # Cap the angles so they stick to the edge of the screen instead of vanishing
+
+        # Draw Bounds
+        for s_offset in range(-half_sectors, half_sectors + 1):
+            s = int((compass_angle + s_offset * self.DEG_PER_SECT) / self.DEG_PER_SECT) % self.NUM_SECTORS
+            # Project the sector boundary angle into a pixel column
+            x_col = int(math.tan(math.radians((s_offset - 0.5) * self.DEG_PER_SECT)) * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET)
+            if 0 <= x_col < W:
+                color = (0, 0, 200) if self.sector_state[s] == 1 else (0, 200, 0)
+                cv2.line(depth_vis, (x_col, 0), (x_col, H - 1), color, 1)
+        
+        # steering line — purple
+        if not ctx["is_recovery"]:
+            viz_theta_cw = max(-max_rad, min(max_rad, ctx["smoothed_theta_cw"]))
+            chosen_pixel = int(math.tan(viz_theta_cw) * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET)
+            chosen_pixel = max(0, min(W - 1, chosen_pixel))
+            cv2.line(depth_vis, (chosen_pixel, 0), (chosen_pixel, H - 1), (203, 192, 255), 3)
+
+        # target bearing line — yellow
+        target_diff_deg = (ctx["bearing_to_target"] - compass_angle + 180) % 360 - 180
+        viz_target_cw = max(-max_rad, min(max_rad, math.radians(target_diff_deg)))
+        target_pixel = int(math.tan(viz_target_cw) * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET)
+        target_pixel = max(0, min(W - 1, target_pixel))
+        cv2.line(depth_vis, (target_pixel, 0), (target_pixel, H - 1), (0, 255, 255), 2)
+        
+        if ctx["is_recovery"]:
+            cv2.putText(depth_vis, f"RECOVER", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
+
+        # magnitude print
+        #print("hist:", " ".join(f"[{s:02d}]{'X' if self.sector_state[s] else 'O'}{hist_smooth[s]:.2f}"for s in range(self.NUM_SECTORS)))
+        # ── In-view histogram bar chart ───────────────────────────────────
+        BAR_MAX_H, BAR_BASE = 80, H - 4
+        scale = BAR_MAX_H / max(hist_smooth.max(), self.T_HIGH * 1.5, 0.001)
+        cv2.rectangle(depth_vis, (0, H - BAR_MAX_H - 10), (W, H), (15, 15, 15), -1)
+
+        t_high_y = BAR_BASE - int(self.T_HIGH * scale)
+        t_low_y  = BAR_BASE - int(self.T_LOW  * scale)
+        cv2.line(depth_vis, (0, t_high_y), (W, t_high_y), (0, 50, 220), 1)
+        cv2.line(depth_vis, (0, t_low_y),  (W, t_low_y),  (0, 200, 255), 1)
+        cv2.putText(depth_vis, f"T_H={self.T_HIGH:.2f}", (4, t_high_y - 3),
+                    cv2.FONT_HERSHEY_PLAIN, 0.8, (0, 50, 220), 1)
+        cv2.putText(depth_vis, f"T_L={self.T_LOW:.2f}",  (4, t_low_y  - 3),
+                    cv2.FONT_HERSHEY_PLAIN, 0.8, (0, 200, 255), 1)
+
+        for s_offset in range(-half_sectors, half_sectors + 1):
+            s = int((compass_angle + s_offset * self.DEG_PER_SECT) / self.DEG_PER_SECT) % self.NUM_SECTORS
+            # Project sector edges into pixel columns using the same math as the camera
+            x_left  = max(0, int(math.tan(math.radians((s_offset - 0.5) * self.DEG_PER_SECT)) * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET))
+            x_right = min(W-1, int(math.tan(math.radians((s_offset + 0.5) * self.DEG_PER_SECT)) * self.FOCAL_LENGTH + self.X_PIXEL_OFFSET))
+
+            bar_h = int(hist_smooth[s] * scale)
+            # Color is red, orange and green respectively
+            color = (0, 50, 220) if hist_smooth[s] >  self.T_HIGH else (0, 165, 255) if hist_smooth[s] > self.T_LOW else (30, 180, 60)
+            cv2.rectangle(depth_vis, (x_left + 1, BAR_BASE - bar_h), (x_right - 1, BAR_BASE), color, -1)
+
+            if hist_smooth[s] > self.T_LOW * 0.3:
+                cv2.putText(depth_vis, f"{hist_smooth[s]:.2f}",
+                            (x_left + 2, BAR_BASE - bar_h - 3),
+                            cv2.FONT_HERSHEY_PLAIN, 0.65, (200, 200, 200), 1)
+        if not self.onRover:
+            cv2.imshow("VFH Obstacle Avoidance", depth_vis)
+            self.visualize_map(compass_angle)
+            #self.visualize_elevation_map()
+            cv2.waitKey(1) 
+        else:
+            try:
+                ret, buffer = cv2.imencode(
+                    '.jpg', depth_vis, [int(cv2.IMWRITE_JPEG_QUALITY), 30]
+                )
+                if ret:
+                    self.socket.send(base64.b64encode(buffer.tobytes()))
+            except Exception:
+                pass
+
+    def angular_dist(self, s1, s2, max_val):
+        """Calculates shortest distance between two sectors in a circular array."""
+        diff = abs(s1 - s2) % max_val
+        return min(diff, max_val - diff)
+    
+
+    def remove_upslopes(self, box_size=3, smooth_size=3, slope_thresh_deg=40.0):
+        """
+        Slope-based obstacle removal pass. 
+        Gentle slopes (< 40°) are traversable ramps -> removed from obstacle map.
+        Steep slopes  (> 40°) are walls             -> kept in obstacle map.
+        """
+        valid_mask = self.elevation_map > -np.inf
+        elev_input = np.where(valid_mask, self.elevation_map, self.ground_thresh).astype(np.float32)
+        smoothed = cv2.blur(elev_input, (smooth_size, smooth_size))
+        elev_for_max = np.where(valid_mask, smoothed, -1e9).astype(np.float32)
+        elev_for_min = np.where(valid_mask, smoothed,  1e9).astype(np.float32)
+        kernel = np.ones((box_size, box_size), dtype=np.uint8)
+        local_max = cv2.dilate(elev_for_max, kernel)
+        local_min = cv2.erode(elev_for_min, kernel)
+        dz = local_max - local_min
+        dx = (box_size - 1) * self.map_res
+        tan_thresh = math.tan(math.radians(slope_thresh_deg))
+        remove_mask = (dz < dx * tan_thresh) & valid_mask
+
+        self.map[remove_mask] = 0.0
+
+        self.debug_removed_slopes = remove_mask
+
+
+    def map_to_histogram(self, compass_angle):
+        hist = np.zeros(self.NUM_SECTORS)
+
+        self.remove_upslopes(box_size=3, smooth_size=3, slope_thresh_deg=40.0)
+
+        MAX_CELL_WEIGHT = (self.map_res * self.FOCAL_LENGTH) ** 2  
+        OBJ_DENSITY     = 0.5          
+        BUSH_THRESH     = MAX_CELL_WEIGHT * OBJ_DENSITY
+        
+        filtered_map = np.where(self.map >= BUSH_THRESH, self.map, 0.0).astype(np.float32)
+        self.inflated = cv2.dilate(filtered_map, self.dilation_kernel)
+        self.inflated[self.footprint_mask] = 0.0
+        inflated = self.inflated
+
+        cell_i, cell_j = np.where(inflated > 0)
+        if len(cell_i) == 0:
+            return hist
+
+        # Global offsets in metres
+        d_east  = (cell_j - self.MAP_HALF).astype(np.float32) * self.map_res
+        d_north = (self.MAP_HALF - cell_i).astype(np.float32) * self.map_res
+
+        dist_m = np.clip(np.hypot(d_east, d_north), 0.01, self.DEPTH_THRESH)
+
+        a = 1.0
+        b = a / self.DEPTH_THRESH
+
+        certainty = np.clip(inflated[cell_i, cell_j] / MAX_CELL_WEIGHT, 0.0, 1.0)
+        magnitude = (certainty ** 2) * (a - b * dist_m)
+        magnitude = np.clip(magnitude, 0.0, None)
+
+        # Global compass angle (0=N, 90=E, Clockwise)
+        angle_deg  = (np.degrees(np.arctan2(d_east, d_north)) + 360) % 360.0
+        sector_idx = (angle_deg / self.DEG_PER_SECT).astype(int) % self.NUM_SECTORS
+
+        hist = np.bincount(sector_idx, weights=magnitude, minlength=self.NUM_SECTORS)
+
+        return hist
 
     @staticmethod
     def compute_bearing(p1, p2):
@@ -782,17 +812,16 @@ class SectorDepthClassifier():
         cell_img[obs_mask, 1] = g_ch[obs_mask]
         cell_img[obs_mask, 2] = r_ch[obs_mask]
 
-        if hasattr(self, 'debug_removed_slopes'):
-            # Paint removed gentle slopes bright Magenta (BGR format)   
-            cell_img[self.debug_removed_slopes] = (255, 0, 255)
+        # if hasattr(self, 'debug_removed_slopes'):
+        #     # Paint removed gentle slopes bright Magenta (BGR format)   
+        #     cell_img[self.debug_removed_slopes] = (255, 0, 255)
 
         scaled = cv2.resize(cell_img, (SZ, SZ), interpolation=cv2.INTER_NEAREST)
         canvas[PAD:PAD+SZ, PAD:PAD+SZ] = scaled
 
         # ── Sector overlay — VECTORIZED, replaces 90x fillPoly + line loops ──
         # Rotate precomputed angle grid so 0° aligns with current compass heading
-        rotated_angle = (self._sector_angle_deg - compass_angle + 360) % 360
-        sector_idx    = (rotated_angle / self.DEG_PER_SECT).astype(int) % self.NUM_SECTORS
+        sector_idx    = (self._sector_angle_deg / self.DEG_PER_SECT).astype(int) % self.NUM_SECTORS
         in_range      = self._sector_dist_m <= self.DEPTH_THRESH
         blocked       = self.sector_state[sector_idx].astype(bool)
 
@@ -903,77 +932,3 @@ class SectorDepthClassifier():
                     cv2.FONT_HERSHEY_PLAIN, 0.65, (200, 200, 200), 1)
 
         cv2.imshow("Elevation Map", canvas)
-
-def quaternion_to_yaw(rv_x, rv_y, rv_z, rv_w):
-    siny_cosp = 2 * (rv_w * rv_z + rv_x * rv_y)
-    cosy_cosp = 1 - 2 * (rv_y * rv_y + rv_z * rv_z)
-    return (math.degrees(math.atan2(siny_cosp, cosy_cosp)) + 360) % 360
-
-
-
-with dai.Pipeline() as pipeline:
-    monoLeft  = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
-    monoRight = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
-    stereo    = pipeline.create(dai.node.StereoDepth)
-
-    stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.ROBOTICS)
-    stereo.setDepthAlign(dai.CameraBoardSocket.CAM_B)
-    stereo.setOutputSize(1280, 720)
-
-    config = stereo.initialConfig
-    config.postProcessing.median                   = dai.MedianFilter.KERNEL_5x5
-    config.postProcessing.thresholdFilter.maxRange = 7500
-    config.setConfidenceThreshold(0)
-    #config.setSubpixel(True)
-    config.setExtendedDisparity(False)
-    config.setLeftRightCheck(True)
-
-    # device = pipeline.getDefaultDevice()
-    # cali_data = device.readCalibration()
-    # intrinsics = cali_data.getCameraIntrinsics(dai.CameraBoardSocket.CAM_B, 1280, 720)
-    # print(intrinsics)
-
-    monoLeftOut  = monoLeft.requestOutput((1280, 720))
-    monoRightOut = monoRight.requestOutput((1280, 720))
-    monoLeftOut.link(stereo.left)
-    monoRightOut.link(stereo.right)
-
-    stereoOut = stereo.depth.createOutputQueue(maxSize=1, blocking=False)
-
-    imu = pipeline.create(dai.node.IMU)
-    imu.enableIMUSensor(dai.IMUSensor.ARVR_STABILIZED_ROTATION_VECTOR, 100)
-    imu.setBatchReportThreshold(1)
-    imu.setMaxBatchReports(10)
-    imuQueue = imu.out.createOutputQueue(maxSize=1, blocking=False)
-
-    obj         = SectorDepthClassifier()
-    rclpy.init()
-    swerve_node = SwervePublisher()
-
-    pipeline.start()
-    current_heading = 0.0
-
-    while pipeline.isRunning():
-        rclpy.spin_once(swerve_node, timeout_sec=0.0)
-
-        # obj.lat        = swerve_node.lat
-        # obj.lon        = swerve_node.lon
-        # obj.origin_lat = swerve_node.origin_lat
-        # obj.origin_lon = swerve_node.origin_lon
-        # obj.waypoint = swerve_node.curr_waypoint
-        # obj.heading = swerve_node.heading
-
-        imuData = imuQueue.tryGet()
-        if imuData:
-            rv              = imuData.packets[-1].rotationVector
-            current_heading = (-quaternion_to_yaw(rv.i, rv.j, rv.k, rv.real)) % 360
-
-        stereoFrame = stereoOut.get()
-
-        depth      = stereoFrame.getCvFrame().astype(np.float32) / 1000.0
-        swerve_cmd = obj.cb(depth, current_heading)
-        swerve_node.send(swerve_cmd)
-
-    pipeline.stop()
-
-cv2.destroyAllWindows()
