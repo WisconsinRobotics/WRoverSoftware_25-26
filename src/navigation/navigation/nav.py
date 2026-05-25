@@ -50,7 +50,7 @@ class ObjectDetection(Node):
         self.config = self.stereo.initialConfig
         self.config.postProcessing.median                   = dai.MedianFilter.KERNEL_7x7
         self.config.postProcessing.thresholdFilter.maxRange = 7500
-        self.config.setConfidenceThreshold(0)
+        self.config.setConfidenceThreshold(50)
         #config.setSubpixel(True)
         self.config.setExtendedDisparity(False)
         self.config.setLeftRightCheck(True)
@@ -100,7 +100,7 @@ class ObjectDetection(Node):
      
 
     def control(self):
-        if self.heading is None:
+        if self.heading is None or self.curr_waypoint is (None, None):
             return
 
         stereoFrame = self.stereoOut.tryGet()
