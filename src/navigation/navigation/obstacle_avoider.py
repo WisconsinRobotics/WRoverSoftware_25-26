@@ -213,7 +213,7 @@ class SectorDepthClassifier():
     # Main callback
     # ──────────────────────────────────────────────────────────────────────────
     def cb(self, depth_full, compass_angle):
-       # compass_angle = self.heading
+        compass_angle = self.heading
         if compass_angle is None or self.origin_lat is None:
             return [0.0, 0.0, -1.0, -1.0]
         
@@ -475,8 +475,7 @@ class SectorDepthClassifier():
                 self.sector_state[i] = 1   # blocked
             elif hist_smooth[i] < self.T_LOW:
                 self.sector_state[i] = 0   # open
-
-        print("HIST_MAX:", hist_smooth.max(), "HIST_MEAN_NONZERO:", hist_smooth[hist_smooth > 0].mean())
+                
         # Valley detection
         valleys   = []
         in_valley = False
@@ -504,17 +503,6 @@ class SectorDepthClassifier():
         return hist_smooth, valleys
 
     def _calculate_steering(self, valleys, compass_angle):
-        #TARGET_NORTH = (MOCK_LAT + 0.000449, MOCK_LON)
-
-        # 50m due East
-        #TARGET_EAST  = (MOCK_LAT, MOCK_LON + 0.000537)
-
-        # 50m due South  
-        #TARGET_SOUTH = (MOCK_LAT - 0.000449, MOCK_LON)
-
-        # 50m due West
-        TARGET_WEST  = (MOCK_LAT, MOCK_LON - 0.000537)
-        #Target bearing
         target_gps        = self.waypoint 
         rover_gps         = (self.lat, self.lon)
         # Target bearing is already a global compass angle (0=N, 90=E)
