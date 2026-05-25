@@ -639,14 +639,11 @@ class StateMachineNode(Node):
 
             return
         
-        # TODO: Send command to swerve backwards in the direction of the last rover position before getting stuck
+        # Go straight back
         msg = Float32MultiArray()
-        bearing = self.bearing_between_points(self.loc, self.last_rover_position)
-        if bearing > 0:
-            msg.data = [-0.5, -1.0, -0.5, -1.0]
-        else:
-            msg.data = [-1.0, -0.5, -1.0, -0.5]
+        msg.data = [-1.0, -1.0, -1.0, -1.0]
         self.swerve_publisher.publish(msg)
+
         self.dance_off_frames += 1
     
     def manual(self):
@@ -706,7 +703,7 @@ class StateMachineNode(Node):
 
     # === Helper Functions ===
 
-    # TODO: sus
+    # Function to track dance off
     def dance_off_tracking(self):
         # If in dance off, skip directly to dance off handler
         if self.state == ROVER_STATE.DANCE_OFF:
