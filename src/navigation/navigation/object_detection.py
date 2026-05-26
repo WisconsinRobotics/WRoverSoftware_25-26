@@ -90,7 +90,7 @@ class ObjectDetection(Node):
         self.config = self.stereo.initialConfig
         self.config.postProcessing.median                   = dai.MedianFilter.KERNEL_5x5
         self.config.postProcessing.thresholdFilter.maxRange = 7500
-        self.config.setConfidenceThreshold(0)
+        self.config.setConfidenceThreshold(50)
         #config.setSubpixel(True)
         self.config.setExtendedDisparity(False)
         self.config.setLeftRightCheck(True)
@@ -327,6 +327,8 @@ class ObjectDetection(Node):
             self.obstacle_avoider.origin_lon = self.origin_lon
             self.obstacle_avoider.waypoint = self.curr_waypoint
             self.obstacle_avoider.heading = self.heading
+            if stereoFrame is None:
+                return
             self.depth      = stereoFrame.getCvFrame().astype(np.float32) / 1000.0
             swerve_cmd = Float32MultiArray()
             swerve_cmd.data = self.obstacle_avoider.cb(self.depth, self.heading)
