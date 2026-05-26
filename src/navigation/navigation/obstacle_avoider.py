@@ -1,5 +1,3 @@
-import depthai as dai
-
 import cv2
 import numpy as np
 import time
@@ -8,12 +6,6 @@ import zmq
 import base64
 from collections import deque
 
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray
-from std_msgs.msg import Float64MultiArray
-from ublox_ubx_msgs.msg import UBXNavPVT
-from std_msgs.msg import Float32
 
 class SectorDepthClassifier():
     def __init__(self):
@@ -245,7 +237,7 @@ class SectorDepthClassifier():
         self._shift_local_map()
 
         # Process point cloud and update occupancy map for objects
-        ground_mask, obstacle_mask = self._process_depth_to_map(depth_full, compass_angle)
+        ground_mask, bush_mask = self._process_depth_to_map(depth_full, compass_angle)
         
         # Generate VFH Histogram and find safe valleys
         hist_smooth, valleys = self._find_valleys(compass_angle)
@@ -255,7 +247,7 @@ class SectorDepthClassifier():
         # ── Visualization ──────────────────────────────────────────────
         t0 = time.perf_counter()
         if self.debug:
-            self._render_visualization(depth_full, ground_mask, compass_angle, hist_smooth, steering_context)
+            self._render_visualization(depth_full, ground_mask, compass_angle, hist_smooth, steering_context, bush_mask)
         print("viz time = ", (time.perf_counter() - t0) * 1000)
         elapsed = time.perf_counter() - start_time
         self.frame_times.append(elapsed)
@@ -307,20 +299,21 @@ class SectorDepthClassifier():
             Z = depth_full
             Y = depth_full * self.rows[:, None]
             
-            # Step size for difference checking. Using 2 or 3 pixels instead of 1 
-            # helps smooth out tiny sub-pixel stereo noise so flat ground doesn't trigger false slopes.
-            STEP = 2 
-            
-            dZ = np.zeros_like(Z)
-            dY = np.zeros_like(Y)
-            
-            #diff between z at step and z at i + step
-            dZ[:-STEP, :] = Z[:-STEP, :] - Z[STEP:, :]
-            dY[:-STEP, :] = Y[:-STEP, :] - Y[STEP:, :]
-        
+            # Create a 2D vertical kernel (7 rows, 1 column)
+            # We divide by 3 to average the 3 active pixels on each side
+            kernel = np.array([[-1], [-1], [-1], [0], [1], [1], [1]], dtype=np.float32) / 3.0
+
+            # Apply the filter. cv2.CV_32F ensures the output is 32-bit float to handle negatives
+            dZ = cv2.filter2D(Z.astype(np.float32), cv2.CV_32F, kernel)
+            dY = cv2.filter2D(Y.astype(np.float32), cv2.CV_32F, kernel)
+
+            # Compute slope
             slope_deg = np.degrees(np.arctan2(np.abs(dY), np.abs(dZ)))
-            
-            ground_slope_mask = slope_deg < 30.0
+
+            # OpenCV automatically pads the edges, so slope_deg is the exact same shape as Z and Y.
+            # No complicated slicing needed for your masks.
+            slope_check_mask = (Z > 0.5) & (Z < 4.5)
+            ground_slope_mask = (slope_deg < 30.0) & slope_check_mask
 
             # ground_mask = (depth_full * self.rows[:, None]) < self.ground_thresh
             abs_ground_mask = (Y < self.ground_thresh)
@@ -330,15 +323,9 @@ class SectorDepthClassifier():
             valid_depth = (depth_full > 0.001) & (depth_full < self.DEPTH_THRESH)
         
         bush_mask = self._vegetation_mask(self.rgb_frame)
-
-        if self.rgb_frame is not None:
-            bush_mask = self._vegetation_mask(self.rgb_frame)
-            obstacle_mask = valid_depth & ~ground_mask & ~bush_mask
-            free_mask = valid_depth & (ground_mask | bush_mask)
-        else:
-            obstacle_mask = valid_depth & ~ground_mask
-            free_mask = valid_depth & ground_mask
-        
+        obstacle_mask = valid_depth & ~ground_mask & ~bush_mask
+        free_mask = valid_depth & (ground_mask | bush_mask)
+    
         heading_rad = math.radians(90.0 - compass_angle)
         cos_h = math.cos(heading_rad)
         sin_h = math.sin(heading_rad)
@@ -480,7 +467,7 @@ class SectorDepthClassifier():
         self.map[self.footprint_mask]           = 0.0
         self.elevation_map[self.footprint_mask] = float(self.ground_thresh)
         self.elevation_map[self.map < 0.05] = self.ground_thresh
-        return ground_mask, obstacle_mask
+        return ground_mask, bush_mask
 
     def _find_valleys(self, compass_angle):
         raw_hist = self.map_to_histogram(compass_angle=compass_angle)
@@ -625,12 +612,13 @@ class SectorDepthClassifier():
         
 
 
-    def _render_visualization(self, depth_full, ground_mask, compass_angle, hist_smooth, ctx):
+    def _render_visualization(self, depth_full, ground_mask, compass_angle, hist_smooth, ctx, bush_mask):
         H, W = depth_full.shape
         depth_vis = cv2.normalize(np.nan_to_num(depth_full), None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
         depth_vis = cv2.cvtColor(depth_vis, cv2.COLOR_GRAY2BGR)
         # ground — blue
         depth_vis[ground_mask] = [255, 80, 0]
+        depth_vis[bush_mask] = [30,255,30]
 
         # Draw sector borders cleanly without looping over every pixel
         half_sectors = int((self.FOV_DEG / 2) / self.DEG_PER_SECT)
