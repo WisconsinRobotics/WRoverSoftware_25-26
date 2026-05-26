@@ -112,7 +112,23 @@ class SectorDepthClassifier():
         _r = int(self.ROBOT_RADIUS_M / self.map_res)
         _yy, _xx = np.ogrid[0:self.MAP_SIZE, 0:self.MAP_SIZE]
         self.footprint_mask = (_xx - self.MAP_HALF)**2 + (_yy - self.MAP_HALF)**2 <= _r**2
+
+        self.rgb_frame = None
+        self.EXGR_THRESHOLD = -0.13
     
+    def _vegetation_mask(self, bgr_frame: np.ndarray) -> np.ndarray:
+        f = bgr_frame.astype(np.float32)
+        B, G, R = f[:,:,0], f[:,:,1], f[:,:,2]
+
+        total = R + G + B + 1e-6
+        r, g, b = R / total, G / total, B / total
+
+        ExG  = 2.0 * g - r - b
+        ExR  = 1.4 * r - g
+        ExGR = ExG - ExR
+
+        return ExGR > self.EXGR_THRESHOLD
+
     def _build_elev_bg(self):
         CELL_PX = 4
         PAD     = 24
@@ -214,7 +230,7 @@ class SectorDepthClassifier():
     # ──────────────────────────────────────────────────────────────────────────
     def cb(self, depth_full, compass_angle):
         compass_angle = self.heading
-        if compass_angle is None or self.origin_lat is None:
+        if compass_angle is None or self.origin_lat is None or depth_full is None:
             return [0.0, 0.0, -1.0, -1.0]
         
         self.frame_count = getattr(self, "frame_count", 0) + 1
@@ -312,9 +328,16 @@ class SectorDepthClassifier():
             ground_mask = abs_ground_mask | ground_slope_mask
             # valid_depth implicitly excludes NaNs because NaN > 0.001 is False
             valid_depth = (depth_full > 0.001) & (depth_full < self.DEPTH_THRESH)
+        
+        bush_mask = self._vegetation_mask(self.rgb_frame)
 
-        obstacle_mask = valid_depth & ~ground_mask
-        free_mask = valid_depth & ground_mask # Wipe pixels we prove are empty
+        if self.rgb_frame is not None:
+            bush_mask = self._vegetation_mask(self.rgb_frame)
+            obstacle_mask = valid_depth & ~ground_mask & ~bush_mask
+            free_mask = valid_depth & (ground_mask | bush_mask)
+        else:
+            obstacle_mask = valid_depth & ~ground_mask
+            free_mask = valid_depth & ground_mask
         
         heading_rad = math.radians(90.0 - compass_angle)
         cos_h = math.cos(heading_rad)
@@ -432,7 +455,7 @@ class SectorDepthClassifier():
         clear_mask = (dist <= self.DEPTH_THRESH) & (np.abs(diff_deg) <= (SAFE_FOV_DEG / 2.0))
         
         MAX_CELL_WEIGHT = (self.map_res * self.FOCAL_LENGTH) ** 2
-        DECAY_AMOUNT = MAX_CELL_WEIGHT * 0.05  # Slow decay (5% of max weight per frame)
+        DECAY_AMOUNT = MAX_CELL_WEIGHT * 0.07  # Slow decay (5% of max weight per frame)
         # decay needs to happen ONLY to counter act noise there should be no decay that can clear obstacles.
         # most of our map clearing needs to happen through movement
         
@@ -718,7 +741,7 @@ class SectorDepthClassifier():
     def map_to_histogram(self, compass_angle):
         hist = np.zeros(self.NUM_SECTORS)
 
-        self.remove_upslopes(box_size=3, smooth_size=3, slope_thresh_deg=40.0)
+        #self.remove_upslopes(box_size=3, smooth_size=3, slope_thresh_deg=40.0)
 
         MAX_CELL_WEIGHT = (self.map_res * self.FOCAL_LENGTH) ** 2  
         OBJ_DENSITY     = 0.5          

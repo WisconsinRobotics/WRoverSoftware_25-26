@@ -12,10 +12,10 @@ from ublox_ubx_msgs.msg import UBXNavPVT
 
 
 
-class ObjectDetection(Node):
+class Nav(Node):
     def __init__(self):
         # Initialize node
-        super().__init__('object_detection')
+        super().__init__('navigation')
         
         self.K = np.array([[568.15, 0.0, 643.2372],
                            [0.0, 568.15, 367.1311],
@@ -38,7 +38,6 @@ class ObjectDetection(Node):
         self.pipeline = dai.Pipeline()
         
         # obstacle avoidance pipeline shit
-
         self.monoLeft  = self.pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
         self.monoRight = self.pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_C)
         self.stereo    = self.pipeline.create(dai.node.StereoDepth)
@@ -48,7 +47,7 @@ class ObjectDetection(Node):
         self.stereo.setOutputSize(1280, 720)
 
         self.config = self.stereo.initialConfig
-        self.config.postProcessing.median                   = dai.MedianFilter.KERNEL_7x7
+        self.config.postProcessing.median                   = dai.MedianFilter.KERNEL_5x5
         self.config.postProcessing.thresholdFilter.maxRange = 7500
         self.config.setConfidenceThreshold(50)
         #config.setSubpixel(True)
@@ -68,6 +67,15 @@ class ObjectDetection(Node):
         self.stereoOut = self.stereo.depth.createOutputQueue(maxSize=1, blocking=False)
 
         self.obstacle_avoider = SectorDepthClassifier()
+
+        self.colorCam = self.pipeline.create(dai.node.ColorCamera)
+        self.colorCam.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+        self.colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+        self.colorCam.setInterleaved(False)
+        self.colorCam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+        self.colorCam.setPreviewSize(640, 360)
+ 
+        self.colorOut = self.colorCam.preview.createOutputQueue(maxSize=1, blocking=False)
         
         # Start pipeline
         self.pipeline.start()
@@ -100,8 +108,12 @@ class ObjectDetection(Node):
      
 
     def control(self):
-        if self.heading is None or self.curr_waypoint is (None, None):
+        if self.heading is None or self.curr_waypoint  (None, None):
             return
+        
+        colorFrame = self.colorOut.tryGet()
+        if colorFrame is not None:
+            self.obstacle_avoider.rgb_frame = colorFrame.getCvFrame()  
 
         stereoFrame = self.stereoOut.tryGet()
         self.obstacle_avoider.lat        = self.lat
@@ -110,6 +122,8 @@ class ObjectDetection(Node):
         self.obstacle_avoider.origin_lon = self.origin_lon
         self.obstacle_avoider.waypoint = self.curr_waypoint
         self.obstacle_avoider.heading = self.heading
+        if stereoFrame is None:
+            return
         self.depth      = stereoFrame.getCvFrame().astype(np.float32) / 1000.0
         swerve_cmd = Float32MultiArray()
         swerve_cmd.data = self.obstacle_avoider.cb(self.depth, self.heading)
@@ -119,7 +133,7 @@ class ObjectDetection(Node):
 def main(args=None):
     rclpy.init(args=args)
     
-    publisher = ObjectDetection()
+    publisher = Nav()
     
     rclpy.spin(publisher)
     
