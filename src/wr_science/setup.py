@@ -26,6 +26,7 @@ setup(
             'get_data = wr_science.get_data:main',
             'science_control = wr_science.science_control:main',
             'send_to_can = wr_science.send_to_can:main',
+            'science_photographer = wr_science_photography.science_photographer:main',
         ],
     },
 )
