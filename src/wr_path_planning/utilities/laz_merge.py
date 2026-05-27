@@ -1,33 +1,42 @@
 import sys
 import json
-import numpy as np
 import pdal
+
 
 def main(argv=None):
     n = len(argv)
-    if n < 3:
-        raise Exception("Usage: <laz1> <laz2> ... <lazN> <output>")
-
-    input_files = argv[1:(n - 1)]
+    if n < 5:
+        raise Exception("Usage: python3 merge.py voxel_size <laz1> <laz2> ... <lazN> <output>")
+    
+    voxel_size = float(argv[1])
+    input_files = argv[2:n - 1]
     output_file = argv[n - 1]
 
-    pipeline = [
-        *input_files,
-        {
-            "type": "filters.merge"
-        },
-        {
-            "type": "writers.las",
-            "filename": output_file,
-            "compression": "laszip"
-        }
-    ]
+    pipeline_dict = {
+        "pipeline": [
+            *input_files,
+            {
+                "type": "filters.merge"
+            },
+            {
+                "type": "filters.voxeldownsize",
+                "cell": voxel_size,
+                "mode": "center"
+            },
+            {
+                "type": "writers.las",
+                "filename": output_file,
+                "compression": "laszip"
+            }
+        ]
+    }
 
-    pipeline_json = json.dumps(pipeline)
-    operator = pdal.Pipeline(pipeline_json)
-    operator.execute()
+    pipeline_json = json.dumps(pipeline_dict)
+    pipeline = pdal.Pipeline(pipeline_json)
+    pipeline.execute_streaming()
+
+    print(f"Merged {len(input_files)} file(s) into {output_file}")
 
 
 if __name__ == "__main__":
-    argv = sys.argv
-    main(argv)
+    main(sys.argv)

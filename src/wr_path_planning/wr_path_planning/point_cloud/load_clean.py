@@ -4,7 +4,7 @@ import numpy as np
 from typing import List, Tuple
 
 
-def load_and_clean_lidar(path: str, voxel_size=0.35, min_points_per_cell=2, logger=None, skip=10) -> List[Tuple[float]]:
+def load_and_clean_lidar(path: str, voxel_size=0.15, min_points_per_cell=2, logger=None, skip=10) -> List[Tuple[float]]:
     """Loands and cleans lidar data
 
     Args:

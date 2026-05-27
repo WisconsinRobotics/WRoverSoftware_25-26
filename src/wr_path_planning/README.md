@@ -31,8 +31,9 @@ ros2 launch path_planner_launch.py lidar_path:=<path/to/lidar/file> epsg:=<epsg>
 To use this server in ros2 nodes, refer to `wr_workspace/src/wr_path_planning/wr_path_planning/example_client_node.py` for an example.
 If you have laz files from USGS website to merge, you can use script at `utilities` folder by running the following command
 ```bash
-python3 laz_merge.py <laz1> <laz2> ... <lazN> <output>
+python3 laz_merge.py <voxel_size> <laz1> <laz2> ... <lazN> <output>
 ```
+It is recommended to set `voxel_size` to 0.15-0.3 meters for huge collection of laz datasets.
 
 # Contributors
 
