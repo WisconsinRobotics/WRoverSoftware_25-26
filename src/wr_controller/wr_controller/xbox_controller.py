@@ -8,7 +8,7 @@ from std_msgs.msg import Int16MultiArray
 # NOTE: This might cause problems if called multiple times
 pygame.init()
 
-CONTROLLER = 0 # Choose controller for the arm TODO 
+CONTROLLER = 1 # Choose controller for the arm TODO 
 
 class XboxPublisher(Node):
 
