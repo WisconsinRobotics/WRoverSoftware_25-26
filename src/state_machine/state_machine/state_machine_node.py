@@ -252,10 +252,11 @@ class StateMachineNode(Node):
     # Calculate the current location using the average of the two coordinates
     def calculate_pos(self):
         # Check if we've received at least one message from both antennas
-        if None in [self.rover1_lat, self.rover1_lon, self.rover2_lat, self.rover2_lon]:
-            return
+        # if None in [self.rover1_lat, self.rover1_lon, self.rover2_lat, self.rover2_lon]:
+        #    return
             
-        self.loc = [(self.rover1_lat + self.rover2_lat) / 2.0, (self.rover1_lon + self.rover2_lon) / 2.0]
+        # self.loc = [(self.rover1_lat + self.rover2_lat) / 2.0, (self.rover1_lon + self.rover2_lon) / 2.0]
+        self.loc = [self.rover1_lat, self.rover1_lon]
 
 
     
