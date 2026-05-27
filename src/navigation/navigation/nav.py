@@ -44,11 +44,11 @@ class Nav(Node):
 
         self.stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.ROBOTICS)
         self.stereo.setDepthAlign(dai.CameraBoardSocket.CAM_B)
-        self.stereo.setOutputSize(1280, 720)
+        self.stereo.setOutputSize(640, 360)
 
         self.config = self.stereo.initialConfig
         self.config.postProcessing.median                   = dai.MedianFilter.KERNEL_5x5
-        self.config.postProcessing.thresholdFilter.maxRange = 7500
+        self.config.postProcessing.thresholdFilter.maxRange = 4600
         self.config.setConfidenceThreshold(50)
         #config.setSubpixel(True)
         self.config.setExtendedDisparity(False)
@@ -59,8 +59,8 @@ class Nav(Node):
         # intrinsics = cali_data.getCameraIntrinsics(dai.CameraBoardSocket.CAM_B, 1280, 720)
         # print(intrinsics)
 
-        self.monoLeftOut  = self.monoLeft.requestOutput((1280, 720))
-        self.monoRightOut = self.monoRight.requestOutput((1280, 720))
+        self.monoLeftOut  = self.monoLeft.requestOutput((640, 360))
+        self.monoRightOut = self.monoRight.requestOutput((640, 360))
         self.monoLeftOut.link(self.stereo.left)
         self.monoRightOut.link(self.stereo.right)
 

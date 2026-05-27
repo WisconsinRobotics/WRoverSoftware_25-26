@@ -19,14 +19,14 @@ class SectorDepthClassifier():
         self.socket.bind("tcp://*:5555")
         print("Video streamer ready on port 5555")
         
-        SCALE = 2.0
+        SCALE = 1.0
 
         # ── Camera intrinsics ──────────────────────────────────────────────
         self.X_PIXEL_OFFSET = np.float32(643.2372 / SCALE)
         self.Y_PIXEL_OFFSET = np.float32(367.1311 / SCALE)
         self.FOCAL_LENGTH   = np.float32(568.15 / SCALE)
-        self.W = int(1280 / SCALE)
-        self.H = int(720 / SCALE)
+        self.W = int(640 / SCALE)
+        self.H = int(360 / SCALE)
 
         # ── Obstacle avoidance params ──────────────────────────────────────
         self.DEPTH_THRESH = np.float32(4.5)   # metres — beyond this = ignore
@@ -115,11 +115,13 @@ class SectorDepthClassifier():
         total = R + G + B + 1e-6
         r, g, b = R / total, G / total, B / total
 
-        ExG  = 2.0 * g - r - b
-        ExR  = 1.4 * r - g
-        ExGR = ExG - ExR
+        sky = (2.0 * b - r - g)
+        sky_mask = sky > 0.04
 
-        return ExGR > self.EXGR_THRESHOLD
+        exgn = (2.0 * g - r - b)
+        bush_mask = exgn > 0.04
+
+        return bush_mask & ~sky_mask
 
     def _build_elev_bg(self):
         CELL_PX = 4
