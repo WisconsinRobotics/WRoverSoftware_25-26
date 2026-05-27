@@ -101,6 +101,7 @@ class ArmLogic(Node):
 
         #Expecting (left trigger, rigt trigger)
         linear_rail_speed = self.get_linear_rail_speed(motion[3], motion[2])
+        #self.get_logger().info('Linear Rail Speed: "%s"' % linear_rail_speed)
 
         #Publishing
         self.msg_caroussel.data = linear_rail_speed
