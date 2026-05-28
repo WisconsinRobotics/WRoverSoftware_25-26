@@ -250,11 +250,9 @@ class SectorDepthClassifier():
         t0 = time.perf_counter()
         if self.debug:
             self._render_visualization(depth_full, ground_mask, compass_angle, hist_smooth, steering_context, bush_mask)
-        print("viz time = ", (time.perf_counter() - t0) * 1000)
         elapsed = time.perf_counter() - start_time
         self.frame_times.append(elapsed)
         avg_time = sum(self.frame_times) / len(self.frame_times)
-        print(f"Current Frame: {elapsed * 1000:.1f} ms | 30-Frame Avg: {avg_time * 1000:.1f} ms")
 
         return swerve_cmd
 
@@ -608,7 +606,6 @@ class SectorDepthClassifier():
             [forward_speed, 0.0, -1.0, turn_speed]
         )
 
-        print(f"Aligning: {self.is_aligning} | error: {error_deg:.1f}°")
 
         return cmd, steering_context
         
