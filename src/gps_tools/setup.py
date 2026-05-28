@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'local_grapher = gps_tools.local_grapher:main',
             'heading = gps_tools.heading:main',
+            'single_heading = gps_tools.single_heading:main',
         ],
     },
 )
