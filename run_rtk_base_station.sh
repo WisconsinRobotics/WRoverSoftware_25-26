@@ -4,11 +4,11 @@ PORT="/dev/ttyACM0"
 BAUD="115200"
 
 # Change these on game day based on what the judges give us and what we measure
-POLE_LAT="38.221704"
-POLE_LON="-110.421456"
-POLE_ALT="1309.99"        # Altitude in meters
-DISTANCE="0"         # Measured distance in meters
-BEARING="0"         # Measured compass bearing (e.g. 135 is SE) - just use mobile phone
+POLE_LAT="$1"
+POLE_LON="$2"
+POLE_ALT="$3"         # Altitude in meters
+DISTANCE="$4"         # Measured distance in meters
+BEARING="$5"          # Measured compass bearing (e.g. 135 is SE) - just use mobile phone
 # ---------------------
 
 echo "Calculating local offset from competition pole..."
