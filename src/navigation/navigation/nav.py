@@ -108,7 +108,7 @@ class Nav(Node):
      
 
     def control(self):
-        if self.heading is None or self.curr_waypoint  (None, None):
+        if self.heading is None or self.curr_waypoint == (None, None):
             return
         
         colorFrame = self.colorOut.tryGet()

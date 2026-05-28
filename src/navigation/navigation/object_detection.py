@@ -52,7 +52,7 @@ class ObjectDetection(Node):
 
         # Find the model path
         model_name = self.get_parameter('model').value
-        model_path = os.path.join(get_package_share_directory('object_detection'), 'resource', f'{model_name}.blob')
+        model_path = os.path.join(get_package_share_directory('navigation'), 'resource', f'{model_name}.blob')
         
         # Create pipeline
         self.pipeline = dai.Pipeline()

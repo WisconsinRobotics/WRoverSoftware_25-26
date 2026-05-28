@@ -10,7 +10,7 @@ from collections import deque
 class SectorDepthClassifier():
     def __init__(self):
         self.debug   = True
-        self.onRover = False
+        self.onRover = True
 
         # ── ZMQ video stream ───────────────────────────────────────────────
         self.context = zmq.Context()
