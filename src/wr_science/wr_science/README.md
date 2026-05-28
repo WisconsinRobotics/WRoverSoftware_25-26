@@ -24,6 +24,9 @@ This node runs on the **Base Station Laptop** (must have a display for OpenCV).
 
 ## 🚀 2. Running the Node
 By default, the node looks for a camera streaming at `192.168.1.192` on port `5555`.
+The raspberry pi's have the following ip and port configurations:
+1) wrpi1 : broadcast_ip:="192.168.1.169" port:=4444
+2) wrpi2 : broadcast_ip:="192.168.1.192" port:=5555
 
 ### Standard Start (Default Camera)
 ```bash
@@ -33,7 +36,7 @@ ros2 run wr_science science_photographer
 ### Advanced Start (Specific Camera / IP)
 If you need to connect to a different camera (e.g., the mast camera on the other Pi `192.168.1.169`), use ROS parameters:
 ```bash
-ros2 run wr_science science_photographer --ros-args -p broadcast_ip:="192.168.1.169" -p port:=5555
+ros2 run wr_science science_photographer --ros-args -p broadcast_ip:="192.168.1.169" -p port:=4444
 ```
 
 ---
@@ -75,6 +78,7 @@ For every capture, **two** files are generated using a UNIX timestamp:
 ## ⚠️ Mission Day Checklists & Sanity Checks
 *   **Blank/Grey Screen?** Check your IPs. Are you connected to the rover network? Is the Pi at `.169` or `.192`?
 *   **Rover Jittering during Panorama?** You have a "Teleop Fight". Make sure the operator driving the rover lets go of the joystick and that the joystick script isn't spamming "STOP" commands while the camera script is trying to send "TURN" commands.
+* Remember, all functionality except the high res image needs Joseph's launch stuff to be running. The HDR needs all of his launch processes to be stopped.
 
 ## 6. Capturing a HDR Image of the sampling site
 """
