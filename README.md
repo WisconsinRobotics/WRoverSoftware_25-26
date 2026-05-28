@@ -31,18 +31,18 @@ from ublox_ubx_msgs.msg import UBXNavPVT
 
 To configure rtk on the base station:
 ```bash
-run_rtk_base_station.sh POLE_LAT POLE_LON POLE_ALT DISTANCE BEARING
+./run_rtk_base_station.sh POLE_LAT POLE_LON POLE_ALT DISTANCE BEARING
 ```
 Example:
 ```bash
-run_rtk_base_station.sh 38.221704 -110.421456 1309.99 0 0
+./run_rtk_base_station.sh 38.221704 -110.421456 1309.99 0 0
 ```
 
 To run the path planning, spiral planning, and base station controller:
 ```bash
-run_state_machine_base_station.sh LIDAR_PATH
+./run_state_machine_base_station.sh LIDAR_PATH
 ```
 Example:
 ```bash
-run_state_machine_base_station.sh ~/motel.laz
+./run_state_machine_base_station.sh ~/motel.laz
 ```
