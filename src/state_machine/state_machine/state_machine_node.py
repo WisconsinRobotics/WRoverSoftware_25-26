@@ -345,7 +345,7 @@ class StateMachineNode(Node):
         # Iterated through all the targets
         if self.curr_target == len(self.paths):
             # Launch the nav node
-            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
+            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"], preexec_fn=os.setsid)
             
             # Export paths and set state to nav
             self.export_paths_to_csv()
@@ -437,7 +437,7 @@ class StateMachineNode(Node):
             # Aruco
             if self.points[target] == TARGET_LABEL.ARUCO1 or self.points[target] == TARGET_LABEL.ARUCO2:
                 # Start aruco nav node
-                self.aruco_nav_node = subprocess.Popen(["ros2", "run", "navigation", "detector"])
+                self.aruco_nav_node = subprocess.Popen(["ros2", "run", "navigation", "detector"], preexec_fn=os.setsid)
                 
                 # Change state to aruco nav
                 self.get_logger().info("Approaching aruco point, switching to aruco navigation")
@@ -448,7 +448,7 @@ class StateMachineNode(Node):
             # Mallet
             if self.points[target] == TARGET_LABEL.MALLET:
                 # Start object nav node
-                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='mallet'"])
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='mallet'"], preexec_fn=os.setsid)
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching mallet point, switching to object navigation")
@@ -459,7 +459,7 @@ class StateMachineNode(Node):
             # Hammer
             if self.points[target] == TARGET_LABEL.HAMMER:
                 # Start object nav node
-                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='hammer'"])
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='hammer'"], preexec_fn=os.setsid)
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching hammer point, switching to object navigation")
@@ -470,7 +470,7 @@ class StateMachineNode(Node):
             # Bottle
             if self.points[target] == TARGET_LABEL.BOTTLE:
                 # Start object nav node
-                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='bottle'"])
+                self.object_nav_node = subprocess.Popen(["ros2", "run", "navigation", "object_detection", "--ros-args -p model:='bottle'"], preexec_fn=os.setsid)
                 
                 # Change state to object nav
                 self.get_logger().info("Approaching bottle point, switching to object navigation")
@@ -589,7 +589,7 @@ class StateMachineNode(Node):
                 self.led_publisher.publish(self.led_msg)
                 
                 # Start nav node
-                self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
+                self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"], preexec_fn=os.setsid)
                 
                 # Change state to nav
                 self.get_logger().info("Continuing normal navigation")
@@ -620,7 +620,7 @@ class StateMachineNode(Node):
         # If we were in dance off more than threshold, return back to state prior to dance off
         if self.dance_off_frames >= DANCE_OFF_FRAMES_THRESHOLD:
             # Start nav node
-            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
+            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"], preexec_fn=os.setsid)
             
             # Change state to nav
             self.get_logger().info("Exited dance off, continuing normal navigation")
@@ -656,7 +656,7 @@ class StateMachineNode(Node):
             self.state_machine_controller = ROVER_COMMAND.EMPTY
                 
             # Start nav node
-            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
+            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"], preexec_fn=os.setsid)
             
             # Change state to nav
             self.get_logger().info("Continuing normal navigation")
@@ -667,7 +667,7 @@ class StateMachineNode(Node):
             self.state_machine_controller = ROVER_COMMAND.EMPTY
 
             # Start nav node
-            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
+            self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"], preexec_fn=os.setsid)
             
             # Change state to nav
             self.get_logger().info("Skipped current target, continuing normal navigation to next target")
@@ -723,15 +723,11 @@ class StateMachineNode(Node):
     def stop_node(self, node_name):
         # Kill the node if it exists and set it to none
         node = getattr(self, node_name)
+
         if node is not None:
-            try:
-                node.send_signal(signal.SIGINT)
-                node.wait(timeout=2.0) 
-            except subprocess.TimeoutExpired:
-                node.kill()
-                node.wait()
-            finally:
-                setattr(self, node_name, None)
+            os.killpg(os.getpgid(node.pid), signal.SIGKILL)
+            node.wait()
+            setattr(self, node_name, None)
 
             # Stop the drive
             msg = Float32MultiArray()
