@@ -727,14 +727,14 @@ class StateMachineNode(Node):
         # Kill the node if it exists and set it to none
         node = getattr(self, node_name)
         if node is not None:
-            node.kill()
+            node.send_signal(signal.SIGINT)
             node.wait()
             setattr(self, node_name, None)
 
-        # Stop the drive
-        msg = Float32MultiArray()
-        msg.data = [0.0, 0.0, -1.0, -1.0]
-        self.swerve_publisher.publish(msg)
+            # Stop the drive
+            msg = Float32MultiArray()
+            msg.data = [0.0, 0.0, -1.0, -1.0]
+            self.swerve_publisher.publish(msg)
         
     # Export the entire path to a csv file
     def export_paths_to_csv(self):
