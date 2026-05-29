@@ -96,7 +96,6 @@ class StateMachineNode(Node):
         self.state_publisher = self.create_publisher(String, 'state_machine_state', 10)
         
         # Initialize global variables
-        self.xbox_controller = None                          # Xbox controller node
         self.nav_node = None                                 # Normal navigation node
         self.aruco_nav_node = None                           # Navigation with aruco node
         self.object_nav_node = None                          # Navigation with object node
@@ -659,16 +658,9 @@ class StateMachineNode(Node):
         self.stop_node("aruco_nav_node")
         self.stop_node("object_nav_node")
         
-        # Start Xbox controller node
-        if self.xbox_controller == None:
-            self.xbox_controller = subprocess.Popen(["ros2", "run", "wr_xbox_controller", "drive_controller"])
-        
         # If continue
         if self.state_machine_controller == ROVER_COMMAND.CONTINUE:
             self.state_machine_controller = ROVER_COMMAND.EMPTY
-            
-            # Stop Xbox controller node
-            self.stop_node("xbox_controller")
                 
             # Start nav node
             self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
@@ -680,9 +672,6 @@ class StateMachineNode(Node):
         # If skip
         if self.state_machine_controller == ROVER_COMMAND.SKIP:
             self.state_machine_controller = ROVER_COMMAND.EMPTY
-
-            # Stop Xbox controller node
-            self.stop_node("xbox_controller")
 
             # Increment current target and set current waypoint to 0
             self.curr_target += 1
@@ -739,6 +728,7 @@ class StateMachineNode(Node):
         node = getattr(self, node_name)
         if node is not None:
             node.kill()
+            node.wait()
             setattr(self, node_name, None)
 
         # Stop the drive
