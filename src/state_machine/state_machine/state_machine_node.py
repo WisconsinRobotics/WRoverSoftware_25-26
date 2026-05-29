@@ -3,15 +3,14 @@ import os
 import csv
 import math
 import json
-import time
 import rclpy
 import signal
 import subprocess
+from enum import Enum
 from pathlib import Path
 from typing import Tuple
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from enum import Enum
 from std_msgs.msg import String
 from geographic_msgs.msg import GeoPath
 from geographic_msgs.msg import GeoPose
@@ -30,33 +29,33 @@ from ament_index_python.packages import get_package_share_directory
 # 20 Hz timer callback
 TIMER_CALLBACK_INTERVAL = 0.05
 
-# TODO: tune Dance off constants
-STUCK_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 15      # 15 secs trigger threshold
+# Dance off constants
+STUCK_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 30      # 30 secs trigger threshold
 STUCK_DISTANCE_THRESHOLD = 1                                        # 1 meter trigger threshold
-DANCE_OFF_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 15  # 15 seconds dance off time
+DANCE_OFF_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 7   # 7 seconds dance off time
 
 class ROVER_STATE(str, Enum):
-    PLANNING = "PLANNING",
-    MANUAL = "MANUAL",
-    SPIRAL_PLANNING = "SPIRAL_PLANNING",
-    NAV = "NAV",
-    ARUCO_NAV = "ARUCO_NAV",
-    OBJECT_NAV = "OBJECT_NAV",
-    FLASHING = "FLASHING",
+    PLANNING = "PLANNING"
+    MANUAL = "MANUAL"
+    SPIRAL_PLANNING = "SPIRAL_PLANNING"
+    NAV = "NAV"
+    ARUCO_NAV = "ARUCO_NAV"
+    OBJECT_NAV = "OBJECT_NAV"
+    FLASHING = "FLASHING"
     DANCE_OFF = "DANCE_OFF"
 
 class ROVER_COMMAND(str, Enum):
-    EMPTY = "",
-    STOP = "stop",
-    CONTINUE = "continue",
+    EMPTY = ""
+    STOP = "stop"
+    CONTINUE = "continue"
     SKIP = "skip"
 
 class TARGET_LABEL(str, Enum):
-    ARUCO1 = "aruco1",
-    ARUCO2 = "aruco2",
-    BOTTLE = "bottle",
-    MALLET = "mallet",
-    HAMMER = "hammer",
+    ARUCO1 = "aruco1"
+    ARUCO2 = "aruco2"
+    BOTTLE = "bottle"
+    MALLET = "mallet"
+    HAMMER = "hammer"
     GNSS = "gnss"
 
 
@@ -76,7 +75,7 @@ class StateMachineNode(Node):
         self.rover2_subscriber = self.create_subscription(UBXNavPVT, 'rover2/ubx_nav_pvt', self.rover2_callback, 10)
         
         # Create subscriber to state machine controller
-        self.state_machine_controller_subscriber = self.create_subscription(String, '/state_machine_controller', self.state_machine_controller_callback, 10)
+        self.state_machine_controller_subscriber = self.create_subscription(String, 'state_machine_controller', self.state_machine_controller_callback, 10)
         
         # Create subscriber for aruco/object reached
         self.reached_signal = self.create_subscription(Bool, "reached_signal", self.reached_signal_callback, 10)
@@ -88,10 +87,13 @@ class StateMachineNode(Node):
         self.waypoint_publisher = self.create_publisher(Float64MultiArray, 'waypoint', 10)
 
         # Create a direct swerve publisher (for DANCE_OFF)
-        self.swerve_publisher = self.create_publisher(Float32MultiArray, '/swerve', 10)
+        self.swerve_publisher = self.create_publisher(Float32MultiArray, 'swerve', 10)
 
         # Create led publisher
         self.led_publisher = self.create_publisher(Float32MultiArray, 'led', 1)
+
+        # Create state machine state publisher
+        self.state_publisher = self.create_publisher(String, 'state_machine_state', 10)
         
         # Initialize global variables
         self.xbox_controller = None                          # Xbox controller node
@@ -113,8 +115,8 @@ class StateMachineNode(Node):
         self.paths = []                                      # Each target has a path (list of lists)
         self.curr_target = 0                                 # Current target index
         self.curr_waypoint = 0                               # Current waypoint index
-        self.interval = TIMER_CALLBACK_INTERVAL              # Timer callback interval (20 Hz)
-        self.counter = 0                                     # Control led flashing frequency
+        self.interval = TIMER_CALLBACK_INTERVAL              # Timer callback interval
+        self.counter = 0                                     # Control waypoint message and led flashing frequency
         
         # Default points file is points.txt in /resource
         default_points_filepath = os.path.join(get_package_share_directory('state_machine'), 'resource', 'points.txt')
@@ -159,16 +161,13 @@ class StateMachineNode(Node):
         # Path planning request
         req = MultiPathPlan.Request()
         
-        # Starting point
+        # Get starting point
         req.start = GeoPoint()
-        # TODO
         while self.loc is None:
             self.get_logger().info("Waiting for gnss")
             rclpy.spin_once(self, timeout_sec=1)
         req.start.latitude = self.loc[0]
         req.start.longitude = self.loc[1]
-        # req.start.latitude = 38.371533
-        # req.start.longitude = -110.704540
         
         # Target points
         targets = []
@@ -196,7 +195,7 @@ class StateMachineNode(Node):
         self.last_state = None
         self.dance_off_frames = 0
 
-        # Timer callback at 20 Hz
+        # Timer callback
         self.timer = self.create_timer(self.interval, self.timer_callback)
         
         
@@ -255,6 +254,7 @@ class StateMachineNode(Node):
         
     # Calculate the current location using the average of the two coordinates
     def calculate_pos(self):
+        # TODO
         # Check if we've received at least one message from both antennas
         # if None in [self.rover1_lat, self.rover1_lon, self.rover2_lat, self.rover2_lon]:
         #    return
@@ -266,6 +266,9 @@ class StateMachineNode(Node):
     
     # === Main Loop ===
     def timer_callback(self):
+        # Increment counter
+        self.counter += 1
+
         # If stop, Change state to manual
         if self.state_machine_controller == ROVER_COMMAND.STOP:
             self.state_machine_controller = ROVER_COMMAND.EMPTY
@@ -277,15 +280,10 @@ class StateMachineNode(Node):
 
         # If we are in navigation and got stuck for a long time, transition to dance off state
         if self.stuck_frames >= STUCK_FRAMES_THRESHOLD and self.state in [ROVER_STATE.NAV, ROVER_STATE.ARUCO_NAV, ROVER_STATE.OBJECT_NAV]:
-            # Stop nav node
-            if self.state == ROVER_STATE.NAV:
-                self.stop_node(self.nav_node)
-
-            if self.state == ROVER_STATE.ARUCO_NAV:
-                self.stop_node(self.aruco_nav_node)
-
-            if self.state == ROVER_STATE.OBJECT_NAV:
-                self.stop_node(self.object_nav_node)
+            # Stop any nav node
+            self.stop_node("nav_node")
+            self.stop_node("aruco_nav_node")
+            self.stop_node("object_nav_node")
 
             # Set the dance off constants
             self.last_state = self.state
@@ -298,6 +296,14 @@ class StateMachineNode(Node):
         # Publish waypoint
         if self.waypoint_msg.data != None:
             self.waypoint_publisher.publish(self.waypoint_msg)
+
+            if self.counter % int(1 / self.interval) == 0:
+                self.get_logger().info(f"Navigating to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
+
+        # Publish state
+        msg = String()
+        msg.data = self.state
+        self.state_publisher.publish(msg)
 
         match self.state:
             case ROVER_STATE.PLANNING:
@@ -351,10 +357,9 @@ class StateMachineNode(Node):
             self.get_logger().info("Starting normal navigation")
             self.state = ROVER_STATE.NAV
             
-            # Publish the first waypoint
+            # Update to the first waypoint
             self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.waypoint_publisher.publish(self.waypoint_msg)
-            self.get_logger().info(f"Published waypoint [{self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]}]")
+            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
             
             # Increment current waypoint (assuming each path has at least 3 total points)
             self.curr_waypoint += 1
@@ -421,7 +426,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop nav node
-            self.stop_node(self.nav_node)
+            self.stop_node("nav_node")
             
             # Change state to flashing
             self.get_logger().info("Gnss point reached, switching to flashing mode")
@@ -436,8 +441,7 @@ class StateMachineNode(Node):
         # If within 20m of aruco/object
         if self.haversine(self.loc[0], self.loc[1], target[0], target[1]) < 20 and self.points[target] != "gnss":
             # Stop nav node
-            if self.nav_node != None:
-                self.stop_node(self.nav_node)
+            self.stop_node("nav_node")
                 
             # Aruco
             if self.points[target] == TARGET_LABEL.ARUCO1 or self.points[target] == TARGET_LABEL.ARUCO2:
@@ -488,10 +492,9 @@ class StateMachineNode(Node):
             # Increment current waypoint
             self.curr_waypoint += 1
             
-            # Publish the next waypoint
+            # Update to the next waypoint
             self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.waypoint_publisher.publish(self.waypoint_msg)
-            self.get_logger().info(f"Published waypoint [{self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]}]")
+            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
      
     def aruco_nav(self):
         # If reached end of path but no aruco found
@@ -501,7 +504,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop aruco nav node
-            self.stop_node(self.aruco_nav_node)
+            self.stop_node("aruco_nav_node")
             
             # Change state to nav
             self.get_logger().info("Traversed entire search spiral but no aruco tag found, switching to normal navigation")
@@ -518,7 +521,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop aruco nav node
-            self.stop_node(self.aruco_nav_node)
+            self.stop_node("aruco_nav_node")
             
             # Change state to flashing
             self.get_logger().info("Aruco tag reached, switching to flashing mode")
@@ -531,10 +534,9 @@ class StateMachineNode(Node):
             # Increment current waypoint
             self.curr_waypoint += 1
             
-            # Publish the next waypoint
+            # Update to the next waypoint
             self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.waypoint_publisher.publish(self.waypoint_msg)
-            self.get_logger().info(f"Published waypoint [{self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]}]")
+            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
     
     def object_nav(self):
         # If reached end of path but no object found
@@ -544,7 +546,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop object nav node
-            self.stop_node(self.object_nav_node)
+            self.stop_node("object_nav_node")
             
             # Change state to nav
             self.get_logger().info("Traversed entire search spiral but no object found, switching to normal navigation")
@@ -561,7 +563,7 @@ class StateMachineNode(Node):
             self.curr_waypoint = 0
             
             # Stop object nav node
-            self.stop_node(self.object_nav_node)
+            self.stop_node("object_nav_node")
             
             # Change state to flashing
             self.get_logger().info("Object reached, switching to flashing mode")
@@ -574,21 +576,15 @@ class StateMachineNode(Node):
             # Increment current waypoint
             self.curr_waypoint += 1
             
-            # Publish the next waypoint
+            # Update to the next waypoint
             self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.waypoint_publisher.publish(self.waypoint_msg)
-            self.get_logger().info(f"Published waypoint [{self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]}]")
+            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
     
     def flashing(self):
         # Stop any nav node
-        if self.nav_node != None:
-            self.stop_node(self.nav_node)
-            
-        if self.aruco_nav_node != None:
-            self.stop_node(self.aruco_nav_node)
-            
-        if self.object_nav_node != None:
-            self.stop_node(self.object_nav_node)
+        self.stop_node("nav_node")
+        self.stop_node("aruco_nav_node")
+        self.stop_node("object_nav_node")
             
         # If continue
         if self.state_machine_controller == ROVER_COMMAND.CONTINUE:
@@ -608,6 +604,7 @@ class StateMachineNode(Node):
                 
                 # Increment target
                 self.curr_target += 1
+                self.curr_waypoint = 0
                 
                 # Start nav node
                 self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
@@ -615,11 +612,12 @@ class StateMachineNode(Node):
                 # Change state to nav
                 self.get_logger().info("Continuing normal navigation")
                 self.state = ROVER_STATE.NAV
+
+                # Update to the next waypoint
+                self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
+                self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
             
             return
-        
-        # Increment counter
-        self.counter += 1
         
         # Flash green at 2 Hz
         if self.counter % int(0.5 / self.interval) == 0:
@@ -661,14 +659,9 @@ class StateMachineNode(Node):
         self.led_publisher.publish(self.led_msg)
         
         # Stop any nav node
-        if self.nav_node != None:
-            self.stop_node(self.nav_node)
-            
-        if self.aruco_nav_node != None:
-            self.stop_node(self.aruco_nav_node)
-            
-        if self.object_nav_node != None:
-            self.stop_node(self.object_nav_node)
+        self.stop_node("nav_node")
+        self.stop_node("aruco_nav_node")
+        self.stop_node("object_nav_node")
         
         # Start Xbox controller node
         if self.xbox_controller == None:
@@ -679,8 +672,7 @@ class StateMachineNode(Node):
             self.state_machine_controller = ROVER_COMMAND.EMPTY
             
             # Stop Xbox controller node
-            if self.xbox_controller != None:
-                self.stop_node(self.xbox_controller)
+            self.stop_node("xbox_controller")
                 
             # Start nav node
             self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
@@ -690,12 +682,11 @@ class StateMachineNode(Node):
             self.state = ROVER_STATE.NAV
 
         # If skip
-        if self.state_machine_controlelr ==  ROVER_COMMAND.SKIP:
+        if self.state_machine_controller == ROVER_COMMAND.SKIP:
             self.state_machine_controller = ROVER_COMMAND.EMPTY
 
             # Stop Xbox controller node
-            if self.xbox_controller != None:
-                self.stop_node(self.xbox_controller)
+            self.stop_node("xbox_controller")
 
             # Increment current target and set current waypoint to 0
             self.curr_target += 1
@@ -707,6 +698,10 @@ class StateMachineNode(Node):
             # Change state to nav
             self.get_logger().info("Skipped current target, continuing normal navigation to next target")
             self.state = ROVER_STATE.NAV
+
+            # Update to the next waypoint
+            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
+            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
 
 
 
@@ -743,13 +738,17 @@ class StateMachineNode(Node):
             self.last_rover_position = self.loc
 
     # Helper function to stop swerve and stop nodes
-    def stop_node(self, node):
+    def stop_node(self, node_name):
+        # Kill the node and set it to none
+        node = getattr(self, node_name)
+        if node is not None:
+            node.kill()
+            setattr(self, node_name, None)
+
+        # Stop the drive
         msg = Float32MultiArray()
         msg.data = [0.0, 0.0, -1.0, -1.0]
         self.swerve_publisher.publish(msg)
-
-        node.send_signal(signal.SIGINT)
-        node = None
         
     # Export the entire path to a csv file
     def export_paths_to_csv(self):
