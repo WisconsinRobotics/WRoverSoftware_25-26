@@ -115,8 +115,9 @@ class StateMachineNode(Node):
         self.paths = []                                      # Each target has a path (list of lists)
         self.curr_target = 0                                 # Current target index
         self.curr_waypoint = 0                               # Current waypoint index
+        self.last_waypoint = None                            # Last waypoint that was printed
         self.interval = TIMER_CALLBACK_INTERVAL              # Timer callback interval
-        self.counter = 0                                     # Control waypoint message and led flashing frequency
+        self.counter = 0                                     # Control led flashing frequency
         
         # Default points file is points.txt in /resource
         default_points_filepath = os.path.join(get_package_share_directory('state_machine'), 'resource', 'points.txt')
@@ -266,9 +267,6 @@ class StateMachineNode(Node):
     
     # === Main Loop ===
     def timer_callback(self):
-        # Increment counter
-        self.counter += 1
-
         # If stop, Change state to manual
         if self.state_machine_controller == ROVER_COMMAND.STOP:
             self.state_machine_controller = ROVER_COMMAND.EMPTY
@@ -294,11 +292,13 @@ class StateMachineNode(Node):
             self.get_logger().info("Rover stuck, starting dance off mode")
 
         # Publish waypoint
-        if self.waypoint_msg.data != None:
+        if len(self.waypoint_msg.data) == 2:
             self.waypoint_publisher.publish(self.waypoint_msg)
 
-            if self.counter % int(1 / self.interval) == 0:
+            # Print the waypoint if it changed
+            if [self.waypoint_msg.data[0], self.waypoint_msg.data[1]] != self.last_waypoint:
                 self.get_logger().info(f"Navigating to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
+                self.last_waypoint = [self.waypoint_msg.data[0], self.waypoint_msg.data[1]]
 
         # Publish state
         msg = String()
@@ -619,6 +619,9 @@ class StateMachineNode(Node):
             
             return
         
+        # Increment counter
+        self.counter += 1
+        
         # Flash green at 2 Hz
         if self.counter % int(0.5 / self.interval) == 0:
             if self.led_msg.data != [0.0, 255.0, 0.0]:
@@ -739,7 +742,7 @@ class StateMachineNode(Node):
 
     # Helper function to stop swerve and stop nodes
     def stop_node(self, node_name):
-        # Kill the node and set it to none
+        # Kill the node if it exists and set it to none
         node = getattr(self, node_name)
         if node is not None:
             node.kill()
