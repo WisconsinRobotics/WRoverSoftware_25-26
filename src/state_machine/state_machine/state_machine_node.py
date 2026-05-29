@@ -344,10 +344,6 @@ class StateMachineNode(Node):
     def spiral_planning(self):
         # Iterated through all the targets
         if self.curr_target == len(self.paths):
-            # Set current target back to 0 and set current waypoint to 1
-            self.curr_target = 0
-            self.curr_waypoint = 1
-            
             # Launch the nav node
             self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
             
@@ -355,10 +351,13 @@ class StateMachineNode(Node):
             self.export_paths_to_csv()
             self.get_logger().info("Starting normal navigation")
             self.state = ROVER_STATE.NAV
+
+            # Set current target back to 0 and set current waypoint to 1
+            self.curr_target = 0
+            self.curr_waypoint = 1
             
             # Update to the first waypoint
-            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
+            self.update_waypoint()
             
             return
             
@@ -417,10 +416,6 @@ class StateMachineNode(Node):
     def nav(self):
         # If reached end of path (this would only happen if reached gnss target since added spiral path)
         if self.curr_waypoint == len(self.paths[self.curr_target]):
-            # Increment current target and set current waypoint to 0
-            self.curr_target += 1
-            self.curr_waypoint = 0
-            
             # Stop nav node
             self.stop_node("nav_node")
             
@@ -489,32 +484,30 @@ class StateMachineNode(Node):
             self.curr_waypoint += 1
             
             # Update to the next waypoint
-            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
+            self.update_waypoint()
      
     def aruco_nav(self):
         # If reached end of path but no aruco found
         if self.curr_waypoint == len(self.paths[self.curr_target]) and self.reached_signal == False:
-            # Increment current target and set current waypoint to 0
-            self.curr_target += 1
-            self.curr_waypoint = 0
-            
             # Stop aruco nav node
             self.stop_node("aruco_nav_node")
             
             # Change state to nav
             self.get_logger().info("Traversed entire search spiral but no aruco tag found, switching to normal navigation")
             self.state = ROVER_STATE.NAV
+
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+
+            # Update to the next waypoint
+            self.update_waypoint()
             
             return
             
         # If reached aruco
         if self.reached_signal:
             self.reached_signal = False
-            
-            # Increment current target and set current waypoint to 0
-            self.curr_target += 1
-            self.curr_waypoint = 0
             
             # Stop aruco nav node
             self.stop_node("aruco_nav_node")
@@ -531,33 +524,31 @@ class StateMachineNode(Node):
             self.curr_waypoint += 1
             
             # Update to the next waypoint
-            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
+            self.update_waypoint()
     
     def object_nav(self):
         # If reached end of path but no object found
-        if self.curr_waypoint == len(self.paths[self.curr_target]) and self.reached_signal == False:
-            # Increment current target and set current waypoint to 0
-            self.curr_target += 1
-            self.curr_waypoint = 0
-            
+        if self.curr_waypoint == len(self.paths[self.curr_target]) and self.reached_signal == False:      
             # Stop object nav node
             self.stop_node("object_nav_node")
             
             # Change state to nav
             self.get_logger().info("Traversed entire search spiral but no object found, switching to normal navigation")
             self.state = ROVER_STATE.NAV
+
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+
+            # Update to the next waypoint
+            self.update_waypoint()
             
             return
             
         # If reached object
         if self.reached_signal:
             self.reached_signal = False
-            
-            # Increment current target and set current waypoint to 0
-            self.curr_target += 1
-            self.curr_waypoint = 0
-            
+
             # Stop object nav node
             self.stop_node("object_nav_node")
             
@@ -573,9 +564,8 @@ class StateMachineNode(Node):
             self.curr_waypoint += 1
             
             # Update to the next waypoint
-            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
-    
+            self.update_waypoint()
+
     def flashing(self):
         # Stop any nav node
         self.stop_node("nav_node")
@@ -605,9 +595,12 @@ class StateMachineNode(Node):
                 self.get_logger().info("Continuing normal navigation")
                 self.state = ROVER_STATE.NAV
 
+                # Increment current target and set current waypoint to 0
+                self.curr_target += 1
+                self.curr_waypoint = 0
+
                 # Update to the next waypoint
-                self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-                self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
+                self.update_waypoint()
             
             return
         
@@ -673,10 +666,6 @@ class StateMachineNode(Node):
         if self.state_machine_controller == ROVER_COMMAND.SKIP:
             self.state_machine_controller = ROVER_COMMAND.EMPTY
 
-            # Increment current target and set current waypoint to 0
-            self.curr_target += 1
-            self.curr_waypoint = 0
-
             # Start nav node
             self.nav_node = subprocess.Popen(["ros2", "run", "navigation", "nav"])
             
@@ -684,13 +673,21 @@ class StateMachineNode(Node):
             self.get_logger().info("Skipped current target, continuing normal navigation to next target")
             self.state = ROVER_STATE.NAV
 
+            # Increment current target and set current waypoint to 0
+            self.curr_target += 1
+            self.curr_waypoint = 0
+
             # Update to the next waypoint
-            self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
-            self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
+            self.update_waypoint()
 
 
 
     # === Helper Functions ===
+
+    # Update waypoint msg
+    def update_waypoint(self):
+        self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
+        self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
 
     # Function to track dance off
     def dance_off_tracking(self):
@@ -727,9 +724,14 @@ class StateMachineNode(Node):
         # Kill the node if it exists and set it to none
         node = getattr(self, node_name)
         if node is not None:
-            node.send_signal(signal.SIGINT)
-            node.wait()
-            setattr(self, node_name, None)
+            try:
+                node.send_signal(signal.SIGINT)
+                node.wait(timeout=2.0) 
+            except subprocess.TimeoutExpired:
+                node.kill()
+                node.wait()
+            finally:
+                setattr(self, node_name, None)
 
             # Stop the drive
             msg = Float32MultiArray()
