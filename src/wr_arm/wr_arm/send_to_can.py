@@ -108,7 +108,7 @@ class ArmControlSubsrciber(Node):
 
     def arm_listener_gripper(self, msg):
         can_msg_rpm = String()
-        rpm = msg.data * .1
+        rpm = msg.data * 1
         can_msg_rpm.data = self.vesc_ids["gripper"][0] + " CAN_PACKET_SET_DUTY " + str(rpm) + " float"
         self.publisher_.publish(can_msg_rpm)
         #self.get_logger().info('Publishing RPM FL: "%s"' % can_msg_rpm)
