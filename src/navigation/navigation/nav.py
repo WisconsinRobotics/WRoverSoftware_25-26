@@ -1,15 +1,11 @@
-import numpy as np
 import math
 
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float64MultiArray
-from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float32
 from ublox_ubx_msgs.msg import UBXNavPVT
-
-
 
 class Nav(Node):
     def __init__(self):
@@ -29,13 +25,9 @@ class Nav(Node):
         self.current_lon = None
         self.heading = None
 
-        self.MAX_FORWARD_SPEED = 1.0
-        self.KP_TURN = 0.02
-
-        # SLEW control scheme
-        self.current_linear_x = 0.0
-        self.current_rot_right = -1.0
-        self.current_rot_left = -1.0
+        # SLOW and steady base speeds
+        self.MAX_FORWARD_SPEED = 0.8 
+        self.KP_TURN = 0.015
 
         self.last_gps_time = self.get_clock().now()
         self.last_heading_time = self.get_clock().now()
@@ -44,9 +36,8 @@ class Nav(Node):
 
         # controls output at 10 hz
         self.timer = self.create_timer(0.1, self.control_loop)
-        self.get_logger().info("GPS Waypoint Navigator initialized...")
+        self.get_logger().info("GPS Waypoint Navigator initialized (Proportional Mode)...")
         
-    
     def waypoint_cb(self, msg):
         self.target_lat, self.target_lon = msg.data[0], msg.data[1] # lat, lon
 
@@ -56,14 +47,12 @@ class Nav(Node):
         current_lon = msg.lon * 1e-7
         
         if self.current_lat is None:
-            # First fix
             self.current_lat = current_lat
             self.current_lon = current_lon
         else:
             alpha = 0.9
             self.current_lat = (alpha * current_lat) + ((1.0 - alpha) * self.current_lat)
             self.current_lon = (alpha * current_lon) + ((1.0 - alpha) * self.current_lon)
-
 
     def heading_cb(self, msg):
         self.last_heading_time = self.get_clock().now()
@@ -103,75 +92,64 @@ class Nav(Node):
         head_age = (now - self.last_heading_time).nanoseconds / 1e9
 
         if gps_age > self.TELEMETRY_TIMEOUT or head_age > self.TELEMETRY_TIMEOUT:
-            self.get_logger().warn(f"Telemetry lost. Last known GPS: {gps_age:.2f} seconds ago, Last known Heading age: {head_age:.2f} seconds ago", throttle_duration_sec=2.0)
+            self.get_logger().warn(f"Telemetry lost. GPS age: {gps_age:.2f}s, Heading age: {head_age:.2f}s", throttle_duration_sec=2.0)
             return False
         
         return True
     
     def control_loop(self):
-        target_linear_x = 0.0
-        target_rot_left = -1.0
-        target_rot_right = -1.0
         if not self.check_telemetry():
-            # If we lose GPS, then our target will be 0, let SLEW smoothly decelerate
-            pass
-        else:
-            # We have normal GPS data, execute funcs
+            # If we lose GPS, stop immediately
+            self.stop_rover()
+            return
 
-            dist_to_target = self.haversine_distance(
-                self.current_lat, self.current_lon, 
-                self.target_lat, self.target_lon
-            )
-            
-            target_bearing = self.calculate_bearing(
-                self.current_lat, self.current_lon,
-                self.target_lat, self.target_lon
-            )
-
-            # Calculate heading error [-180, 180] degrees
-            error = (target_bearing - self.heading + 180) % 360 - 180
-            
-            target_rot_left = -1.0
-            target_rot_right = -1.0
-
-            rotation_effort = min(abs(error) / 45.0, 1.0)
-
-            if error > 4.0:
-                target_rot_right = -1.0 + (rotation_effort * 2.0)
-            elif error < -4.0:
-                target_rot_left = -1.0 + (rotation_effort * 2.0) # 2.0 for scaling - eg 90 degree turn, our rotation will be 1.0, and our rot effort will be -1.0, 1.0 - but this should keep going down
-            else:
-                pass # 4 degree deadband for over/under corrections, should be eh eh
-
-            DECEL_DIST_M = 3.0
-            base_target_speed = min(dist_to_target / DECEL_DIST_M, self.MAX_FORWARD_SPEED)
-
-            alignment_factor = 1.0 - rotation_effort # If max rotation (i.e 1.0), then forward speed is exactly 0, if rotation is 0.0, forward speed is exactly 1.0
-            target_linear_x = base_target_speed * alignment_factor
-
-            self.get_logger().info(f"bearing={target_bearing:.1f} heading={self.heading:.1f} error={error:.1f}")
+        dist_to_target = self.haversine_distance(
+            self.current_lat, self.current_lon, 
+            self.target_lat, self.target_lon
+        )
         
-        # SLEW RATE LIMITER - smooth swerve acceleration and deceleration
+        target_bearing = self.calculate_bearing(
+            self.current_lat, self.current_lon,
+            self.target_lat, self.target_lon
+        )
 
-        dt = 0.1 # Loop runs at 10 Hz so we have 0.1 seconds per tick
-        LIN_ACCEL_RATE = 0.5 # Max units per second to speed up
-        LIN_DECEL_RATE = 6.0 # Max units per second to slowdown - currently dominates over accel
-
-        # Rotational acceleration
-        # range of -1.0 to 1.0, so change is of 2 units.
-        # Having an acceleration rate of 2.0 units/second would mean it would take 1 second to go from neutral to full turn
-        ROT_ACCEL_RATE = 0.8 # Maybe slow it down so it takes 4 seconds to go to full turn?
-
-        slew = lambda curr, target, step_acc, step_dec: min(curr + step_acc, target) if target > curr else max(curr - step_dec, target)
-        self.current_linear_x = slew(self.current_linear_x, target_linear_x, LIN_ACCEL_RATE * dt, LIN_DECEL_RATE * dt)
-        self.current_rot_left = slew(self.current_rot_left, target_rot_left, ROT_ACCEL_RATE * dt, ROT_ACCEL_RATE * dt)
-        self.current_rot_right = slew(self.current_rot_right, target_rot_right, ROT_ACCEL_RATE * dt, ROT_ACCEL_RATE * dt)
+        # Calculate heading error [-180, 180] degrees
+        error = (target_bearing - self.heading + 180) % 360 - 180
         
-        cmd = [float(self.current_linear_x), 0.0, float(self.current_rot_left), float(self.current_rot_right)]
+        # --- PROPORTIONAL CONTROL (No Smoothing) ---
+        
+        # 1. Forward Speed Scales inversely with error (if facing away, go slower. Min 0.2 scale)
+        speed_factor = max(0.2, 1.0 - (abs(error) / 45.0))
+        
+        # Also drop speed if we are close to the target distance-wise
+        DECEL_DIST_M = 3.0
+        dist_factor = min(dist_to_target / DECEL_DIST_M, 1.0)
+        
+        forward_speed = self.MAX_FORWARD_SPEED * speed_factor * dist_factor
+
+        # 2. Turn Speed Scales proportionally with error
+        # Yields a turning effort mapped to your [-1.0, 1.0] expected wheel logic limits
+        turn_speed = max(min(abs(error) * self.KP_TURN, 2.0), 0.15) - 1.0
+        
+        # Base neutrals
+        rot_left = -1.0
+        rot_right = -1.0
+
+        # Apply deadband of 2 degrees
+        if error > 7.0:
+            rot_right = turn_speed
+        elif error < -7.0:
+            rot_left = turn_speed
+
+        cmd = [float(forward_speed), 0.0, float(rot_left), float(rot_right)]
+        
         msg = Float32MultiArray()
         msg.data = cmd
         self.drive_pub.publish(msg)
 
+        self.get_logger().info(
+            f"Err: {error:.1f}deg | Dist: {dist_to_target:.1f}m | Fwd: {forward_speed:.2f} | Turn: {turn_speed:.2f}"
+        )
 
     def stop_rover(self):
         msg = Float32MultiArray()
@@ -192,7 +170,6 @@ def main(args=None):
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
