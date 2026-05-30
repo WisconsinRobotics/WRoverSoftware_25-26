@@ -168,6 +168,7 @@ class Nav(Node):
         cmd = [float(self.current_linear_x), 0.0, float(self.current_rot_left), float(self.current_rot_right)]
         msg = Float32MultiArray()
         msg.data = cmd
+        self.get_logger().info(f"bearing={target_bearing:.1f} heading={self.heading:.1f} error={error:.1f}")
         self.drive_pub.publish(msg)
 
 
