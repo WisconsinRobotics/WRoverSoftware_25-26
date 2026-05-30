@@ -32,7 +32,7 @@ class PathGeneration:
         self.r_max = r_stop # max radius in meters
         self.loop_spacing = 4.0 # distance between the spiral arms
 
-        self.resolution_meters = 0.5 # Distance between GPS waypoints is now half a meter
+        self.resolution_meters = 2.0 # Distance between GPS waypoints is now half a meter
 
         self.geodesic = Geodesic.WGS84
 
@@ -61,7 +61,9 @@ class PathGeneration:
         
         if self.r_start != 0.0:
             theta_min = -2
-            
+        
+        MAX_D_THETA = math.radians(20.0)
+
         while theta_min <= theta_max:
             r = a + b * theta_min # radius of rotation
             current_az = base_azimuth + math.degrees(theta_min) # bearing corrected for elliptoids
@@ -70,7 +72,8 @@ class PathGeneration:
             path_msg.poses.append(pose)
 
             r_safe = max(r, 0.1)
-            d_theta = self.resolution_meters / r_safe
+            calculated_d_theta = self.resolution_meters / r_safe
+            d_theta = min(calculated_d_theta, MAX_D_THETA)
             theta_min += d_theta
             
         return path_msg
