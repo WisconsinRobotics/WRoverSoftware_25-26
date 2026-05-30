@@ -148,6 +148,8 @@ class Nav(Node):
 
             alignment_factor = 1.0 - rotation_effort # If max rotation (i.e 1.0), then forward speed is exactly 0, if rotation is 0.0, forward speed is exactly 1.0
             target_linear_x = base_target_speed * alignment_factor
+
+            self.get_logger().info(f"bearing={target_bearing:.1f} heading={self.heading:.1f} error={error:.1f}")
         
         # SLEW RATE LIMITER - smooth swerve acceleration and deceleration
 
@@ -168,7 +170,6 @@ class Nav(Node):
         cmd = [float(self.current_linear_x), 0.0, float(self.current_rot_left), float(self.current_rot_right)]
         msg = Float32MultiArray()
         msg.data = cmd
-        self.get_logger().info(f"bearing={target_bearing:.1f} heading={self.heading:.1f} error={error:.1f}")
         self.drive_pub.publish(msg)
 
 
