@@ -10,6 +10,7 @@ from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float32
 from std_msgs.msg import Bool
 from ublox_ubx_msgs.msg import UBXNavPVT
+from geogrpahiclib.geodesic import Geodesic
 
 
 class CameraHandler(Node):
