@@ -829,19 +829,33 @@ class StateMachineNode(Node):
         )
 
         return math.atan2(y, x)
-        
+
+    def clean(self):
+        self.stop_node("nav_node")
+        self.stop_node("aruco_nav_node")
+        self.stop_node("object_nav_node")
 
 
 # === Main ===
 def main(args=None):
     rclpy.init(args=args)
-    
+
     state_machine = StateMachineNode()
-    
-    rclpy.spin(state_machine)
-    
-    state_machine.destroy_node()
-    rclpy.shutdown()
+
+    def shutdown_handler(_sig, _frame):
+        state_machine.clean()
+        rclpy.shutdown()
+    signal.signal(signal.SIGINT, shutdown_handler)
+
+    try:
+        rclpy.spin(state_machine)
+    except Exception as e:
+        state_machine.get_logger().error(f"Unhandled exception: {e}")
+    finally:
+        state_machine.clean()
+        state_machine.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
