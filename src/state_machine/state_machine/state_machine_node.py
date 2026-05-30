@@ -254,13 +254,11 @@ class StateMachineNode(Node):
         
     # Calculate the current location using the average of the two coordinates
     def calculate_pos(self):
-        # TODO
         # Check if we've received at least one message from both antennas
-        # if None in [self.rover1_lat, self.rover1_lon, self.rover2_lat, self.rover2_lon]:
-        #    return
+        if None in [self.rover1_lat, self.rover1_lon, self.rover2_lat, self.rover2_lon]:
+            return
             
-        # self.loc = [(self.rover1_lat + self.rover2_lat) / 2.0, (self.rover1_lon + self.rover2_lon) / 2.0]
-        self.loc = [self.rover1_lat, self.rover1_lon]
+        self.loc = [(self.rover1_lat + self.rover2_lat) / 2.0, (self.rover1_lon + self.rover2_lon) / 2.0]
 
 
     
@@ -426,7 +424,7 @@ class StateMachineNode(Node):
             return
             
         # Match with the closest target
-        target = self.paths[self.curr_target][self.curr_waypoint]
+        target = self.paths[self.curr_target][-1]
         target = min(self.points.keys(), key=lambda k: self.haversine(k[0], k[1], target[0], target[1])) 
         
         # If within 20m of aruco/object
