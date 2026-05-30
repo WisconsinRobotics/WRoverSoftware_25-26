@@ -488,9 +488,11 @@ class StateMachineNode(Node):
             self.update_waypoint()
 
             return
+        
+        print(self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]))
                 
-        # If distance between current location and waypoint is within 1m
-        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 1:
+        # If distance between current location and waypoint is within 2m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 2.0:
             # Increment current waypoint
             self.curr_waypoint += 1
             
@@ -541,8 +543,8 @@ class StateMachineNode(Node):
 
             return
             
-        # If distance between current location and waypoint is within 1m
-        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 1:
+        # If distance between current location and waypoint is within 2m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 2.0:
             # Increment current waypoint
             self.curr_waypoint += 1
             
@@ -593,8 +595,8 @@ class StateMachineNode(Node):
 
             return
             
-        # If distance between current location and waypoint is within 1m
-        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 1:
+        # If distance between current location and waypoint is within 2m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 2.0:
             # Increment current waypoint
             self.curr_waypoint += 1
             
