@@ -8,19 +8,28 @@ from std_msgs.msg import Float32
 from ublox_ubx_msgs.msg import UBXNavPVT
 
 class Nav(Node):
-    def __init__(self):
+    def __init__(self, target_lat, target_lon):
         # Initialize node
         super().__init__('navigation')
 
-        self.waypoint_sub = self.create_subscription(Float64MultiArray, '/waypoint', self.waypoint_cb, 10)
         self.current_pos_sub = self.create_subscription(UBXNavPVT, '/rover1/ubx_nav_pvt', self.current_pos_cb, 10)
         self.heading_sub = self.create_subscription(Float32, '/heading', self.heading_cb, 10)
         
         # Swerve publisher
         self.drive_pub = self.create_publisher(Float32MultiArray, "/swerve", 10)
 
-        self.target_lat = None
-        self.target_lon = None
+        # Create led publisher
+        self.led_publisher = self.create_publisher(Float32MultiArray, 'led', 1)
+        self.led_msg = Float32MultiArray()
+        
+        # Set led to red at startup
+        self.led_msg.data = [255.0, 0.0, 0.0]
+        self.led_publisher.publish(self.led_msg)
+
+        # Set user inputted coordinates
+        self.target_lat = target_lat
+        self.target_lon = target_lon
+        
         self.current_lat = None
         self.current_lon = None
         self.heading = None
@@ -34,12 +43,13 @@ class Nav(Node):
         
         self.TELEMETRY_TIMEOUT = 5.0 # Seconds
 
+        # LED Flashing parameters
+        self.interval = 0.1
+        self.counter = 0
+
         # controls output at 10 hz
-        self.timer = self.create_timer(0.1, self.control_loop)
-        self.get_logger().info("GPS Waypoint Navigator initialized (Proportional Mode)...")
-        
-    def waypoint_cb(self, msg):
-        self.target_lat, self.target_lon = msg.data[0], msg.data[1] # lat, lon
+        self.timer = self.create_timer(self.interval, self.control_loop)
+        self.get_logger().info(f"GPS Waypoint Navigator initialized! Target: ({self.target_lat}, {self.target_lon})...")
 
     def current_pos_cb(self, msg):
         self.last_gps_time = self.get_clock().now()
@@ -50,7 +60,7 @@ class Nav(Node):
             self.current_lat = current_lat
             self.current_lon = current_lon
         else:
-            alpha = 0.9
+            alpha
             self.current_lat = (alpha * current_lat) + ((1.0 - alpha) * self.current_lat)
             self.current_lon = (alpha * current_lon) + ((1.0 - alpha) * self.current_lon)
 
@@ -108,6 +118,27 @@ class Nav(Node):
             self.target_lat, self.target_lon
         )
         
+        # --- DESTINATION REACHED LOGIC ---
+        if dist_to_target < 1.5:
+            # Stop moving
+            self.stop_rover()
+            self.counter += 1
+            
+            # Flash green at 2 Hz (or requested interval rate)
+            if self.counter % int(0.5 / self.interval) == 0:
+                # Typecast to list protects from ROS2 Float32MultiArray evaluating as array.array type natively
+                if list(self.led_msg.data) != [0.0, 255.0, 0.0]:
+                    self.led_msg.data = [0.0, 255.0, 0.0]
+                else:
+                    self.led_msg.data = [0.0, 0.0, 0.0]
+                    
+                self.led_publisher.publish(self.led_msg)
+            
+            self.get_logger().info(f"Target Reached! Distance: {dist_to_target:.2f}m", throttle_duration_sec=1.0)
+            return
+            
+
+        # --- NORMAL DRIVING LOGIC ---
         target_bearing = self.calculate_bearing(
             self.current_lat, self.current_lon,
             self.target_lat, self.target_lon
@@ -129,7 +160,7 @@ class Nav(Node):
 
         # 2. Turn Speed Scales proportionally with error
         # Yields a turning effort mapped to your [-1.0, 1.0] expected wheel logic limits
-        turn_speed = max(min(abs(error) * self.KP_TURN, 1.0), 0.15) - 1.0
+        turn_speed = max(min(abs(error) * self.KP_TURN, 1.3), 0.05) - 1.0
         
         # Base neutrals
         rot_left = -1.0
@@ -158,8 +189,16 @@ class Nav(Node):
                 
             
 def main(args=None):
+    print("=== GNSS Navigator Initiating ===")
+    try:
+        t_lat = float(input("Enter target Latitude:  "))
+        t_lon = float(input("Enter target Longitude: "))
+    except ValueError:
+        print("Invalid input. Please enter valid numeric decimal coordinates.")
+        return
+
     rclpy.init(args=args)
-    node = Nav()
+    node = Nav(target_lat=t_lat, target_lon=t_lon)
 
     try:
         rclpy.spin(node)
