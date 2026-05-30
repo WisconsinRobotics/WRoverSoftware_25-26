@@ -489,6 +489,7 @@ class StateMachineNode(Node):
 
             return
         
+        # TODO
         print(self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]))
                 
         # If distance between current location and waypoint is within 2m
@@ -728,6 +729,8 @@ class StateMachineNode(Node):
         
         self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
         self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
+        self.get_logger().info(f"Current target: {self.curr_target}")
+        self.get_logger().info(f"Current waypoint: {self.curr_waypoint}")
 
     # Function to track dance off
     def dance_off_tracking(self):
