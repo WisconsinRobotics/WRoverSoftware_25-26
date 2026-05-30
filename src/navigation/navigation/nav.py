@@ -122,23 +122,23 @@ class Nav(Node):
         speed_factor = max(0.2, 1.0 - (abs(error) / 45.0))
         
         # Also drop speed if we are close to the target distance-wise
-        DECEL_DIST_M = 3.0
+        DECEL_DIST_M = 4.0
         dist_factor = min(dist_to_target / DECEL_DIST_M, 1.0)
         
         forward_speed = self.MAX_FORWARD_SPEED * speed_factor * dist_factor
 
         # 2. Turn Speed Scales proportionally with error
         # Yields a turning effort mapped to your [-1.0, 1.0] expected wheel logic limits
-        turn_speed = max(min(abs(error) * self.KP_TURN, 2.0), 0.15) - 1.0
+        turn_speed = max(min(abs(error) * self.KP_TURN, 1.0), 0.15) - 1.0
         
         # Base neutrals
         rot_left = -1.0
         rot_right = -1.0
 
         # Apply deadband of 2 degrees
-        if error > 7.0:
+        if error > 10.0:
             rot_right = turn_speed
-        elif error < -7.0:
+        elif error < -10.0:
             rot_left = turn_speed
 
         cmd = [float(forward_speed), 0.0, float(rot_left), float(rot_right)]
