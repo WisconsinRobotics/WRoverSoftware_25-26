@@ -723,6 +723,9 @@ class StateMachineNode(Node):
 
     # Update waypoint msg
     def update_waypoint(self):
+        if self.curr_target >= len(self.paths) or self.curr_waypoint >= len(self.paths[self.curr_target]):
+            return
+        
         self.waypoint_msg.data = [self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]]
         self.get_logger().info(f"Updated waypoint to ({self.waypoint_msg.data[0]}, {self.waypoint_msg.data[1]})")
 
