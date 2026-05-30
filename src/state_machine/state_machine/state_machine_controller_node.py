@@ -14,7 +14,7 @@ class StateMachineControllerNode(Node):
         self.thread.start()
         
     def get_user_input(self):
-        print("Available Commands: continue, stop, skip")
+        print("Available Commands: continue, stop, skip (go to next target), next (go to next point)")
         print("Continue: continue the autonomous mission")
         print("Stop: stop autonomous mission and enter manual control mode")
         print("Skip: after stopping, skip the current target and start navigating to to the next target")
@@ -23,7 +23,7 @@ class StateMachineControllerNode(Node):
         while rclpy.ok():
             cmd = input("Enter command: ")
             
-            if cmd in ['continue', 'stop', 'skip']:
+            if cmd in ['continue', 'stop', 'skip', 'next']:
                 msg = String()
                 msg.data = cmd
                 self.publisher.publish(msg)

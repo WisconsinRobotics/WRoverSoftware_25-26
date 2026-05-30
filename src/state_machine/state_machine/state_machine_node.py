@@ -49,6 +49,7 @@ class ROVER_COMMAND(str, Enum):
     STOP = "stop"
     CONTINUE = "continue"
     SKIP = "skip"
+    NEXT = "next"
 
 class TARGET_LABEL(str, Enum):
     ARUCO1 = "aruco1"
@@ -475,6 +476,18 @@ class StateMachineNode(Node):
                 self.state = ROVER_STATE.OBJECT_NAV
                 
                 return
+
+        # Go to the next point
+        if self.state_machine_controller == ROVER_COMMAND.NEXT:
+            self.state_machine_controller = ROVER_COMMAND.EMPTY
+
+            # Increment current waypoint
+            self.curr_waypoint += 1
+            
+            # Update to the next waypoint
+            self.update_waypoint()
+
+            return
                 
         # If distance between current location and waypoint is within 0.6m
         if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 0.6:
@@ -515,6 +528,18 @@ class StateMachineNode(Node):
             self.state = ROVER_STATE.FLASHING
             
             return
+        
+        # Go to the next point
+        if self.state_machine_controller == ROVER_COMMAND.NEXT:
+            self.state_machine_controller = ROVER_COMMAND.EMPTY
+
+            # Increment current waypoint
+            self.curr_waypoint += 1
+            
+            # Update to the next waypoint
+            self.update_waypoint()
+
+            return
             
         # If distance between current location and waypoint is within 0.6m
         if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 0.6:
@@ -554,6 +579,18 @@ class StateMachineNode(Node):
             self.get_logger().info("Object reached, switching to flashing mode")
             self.state = ROVER_STATE.FLASHING
             
+            return
+        
+        # Go to the next point
+        if self.state_machine_controller == ROVER_COMMAND.NEXT:
+            self.state_machine_controller = ROVER_COMMAND.EMPTY
+
+            # Increment current waypoint
+            self.curr_waypoint += 1
+            
+            # Update to the next waypoint
+            self.update_waypoint()
+
             return
             
         # If distance between current location and waypoint is within 0.6m
