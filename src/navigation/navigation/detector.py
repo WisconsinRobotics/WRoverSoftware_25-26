@@ -10,7 +10,7 @@ from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float32
 from std_msgs.msg import Bool
 from ublox_ubx_msgs.msg import UBXNavPVT
-from geogrpahiclib.geodesic import Geodesic
+from geographiclib.geodesic import Geodesic
 
 
 class CameraHandler(Node):
@@ -236,7 +236,7 @@ class CameraHandler(Node):
 
         dt = 0.1
         LIN_ACCEL_RATE = 0.5
-        LIN_DECEL_RATE = 1.0
+        LIN_DECEL_RATE = 6.0
         ROT_ACCEL_RATE = 0.8
         
         slew = lambda curr, target, step_acc, step_dec: min(curr + step_acc, target) if target > curr else max(curr - step_dec, target)
