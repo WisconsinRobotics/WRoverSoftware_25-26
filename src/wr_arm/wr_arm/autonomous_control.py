@@ -53,14 +53,20 @@ class ArmLogic(Node):
             self.arm_listener_side_to_side_current,
             10)
         self.side_to_side_can_go = True
-        self.msg_side_to_side_zero = Float64()
-        self.msg_side_to_side_zero.data = 0.0
+        self.msg_zero = Float64()
+        self.msg_zero.data = 0.0
         
         self.current_up_and_down = self.create_subscription(
             Bool,
             'current_side_to_side',
             self.arm_listener_up_and_down_current,
             10)
+        self.current_gripper = self.create_subscription(
+            Bool,
+            'current_gripper',
+            self.arm_listener_gripper_current,
+            10)
+
         self.up_and_down_can_go = True
         self.msg_up_and_down_zero = Float64()
         self.msg_up_and_down_zero.data = 0.0
@@ -88,6 +94,7 @@ class ArmLogic(Node):
         self.moving_left = False
         self.hit_left = False
         self.hit_right = False
+        self.gripper_can_go = True
 
 
         #Define messages beforehand
@@ -131,20 +138,25 @@ class ArmLogic(Node):
     #Put publishers in timer to limit rate of publishing
     def timer_callback(self):
         #self.get_logger().info("Hit left: " + str(self.hit_left) + " Hit right: " + str(self.hit_right))
-        if((self.hit_right or self.hit_left) and self.D_PAD[4] != 1):
-            self.arm_publisher_side_to_side.publish(self.msg_side_to_side_zero)
-        else:
-            self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
+        #if((self.hit_right or self.hit_left) and self.D_PAD[4] != 1):
+            #self.arm_publisher_side_to_side.publish(self.msg_zero)
+        #else:
+        self.arm_publisher_side_to_side.publish(self.msg_side_to_side)
 
-        if(self.up_and_down_can_go):
+        if(not self.up_and_down_can_go or self.D_PAD[4] == 1 or self.D_PAD[5] == 1):
             self.arm_publisher_up_and_down.publish(self.msg_up_and_down)
         else:
             self.arm_publisher_up_and_down.publish(self.msg_up_and_down_zero)
+        
+        if(self.gripper_can_go and self.D_PAD[8] == 1):
+            self.arm_publisher_gripper.publish(self.msg_gripper)
+        else:
+            self.arm_publisher_gripper.publish(self.msg_zero)
 
         self.arm_publisher_forwards_and_bacwards.publish(self.msg_forwards_and_backwards)
         self.arm_publisher_wrist_left.publish(self.msg_wrist_left)
         self.arm_publisher_wrist_right.publish(self.msg_wrist_right)
-        self.arm_publisher_gripper.publish(self.msg_gripper)
+        
 
 
     def get_linear_rail_speed(self, left, right) -> Float64:
@@ -207,6 +219,10 @@ class ArmLogic(Node):
     #Read check current to see if we have limit
     def arm_listener_up_and_down_current(self, msg):
         self.up_and_down_can_go = msg.data
+
+    #Read check current to see if we have limit
+    def arm_listener_gripper_current(self, msg):
+        self.gripper_can_go = msg.data
     
     def get_gripper_speed(self, a, b) -> float:
         if a == 1:
@@ -263,8 +279,8 @@ class ArmLogic(Node):
         buttons = msg.data
         
         #Expecting D-Pad
-        self.D_PAD = [buttons[0], buttons[1], buttons[2], buttons[3], buttons[6],buttons[7], buttons[8],buttons[9]]
-         # up, down, left, right, x, y, Bumper Left, Bumper Right
+        self.D_PAD = [buttons[0], buttons[1], buttons[2], buttons[3], buttons[6],buttons[7], buttons[8],buttons[9], buttons[4]]
+         # up - 0, down - 1, left - 2, right - 3, x - 4, y - 5, Bumper Left - 6, Bumper Right - 7, b-button - 8
         
         #self.get_logger().info('I heard: "%s"' % self.D_PAD)
         #Expecting A and B buttons
