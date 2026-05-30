@@ -2,7 +2,6 @@ import cv2 as cv
 import depthai as dai
 import numpy as np
 import math
-from geographiclib.geodesic import Geodesic
 
 import rclpy
 from rclpy.node import Node
@@ -38,6 +37,11 @@ class CameraHandler(Node):
         self.heading_sub = self.create_subscription(Float32, '/heading', self.heading_cb, 10)
         self.drive_pub = self.create_publisher(Float32MultiArray, "/swerve", 10)
         self.signal_pub = self.create_publisher(Bool, "/reached_signal", 10)
+
+        self.MAX_FORWARD_SPEED = 1.0
+        self.current_linear_x = 0.0
+        self.current_rot_left = -1.0
+        self.current_rot_right = -1.0
 
         self.curr_waypoint = (None, None)
         self.curr_pos = (None, None)
@@ -118,16 +122,31 @@ class CameraHandler(Node):
         return float(np.linalg.norm([tVec[0], tVec[2]]))
     
 
-    # DEPRECATED - uses Haversine approximations, replaced with Geodesic computation.
-    # @staticmethod
-    # def compute_bearing(p1, p2):
-    #     lat1 = math.radians(p1[0]);  lon1 = math.radians(p1[1])
-    #     lat2 = math.radians(p2[0]);  lon2 = math.radians(p2[1])
-    #     dlon = lon2 - lon1
-    #     x    = math.sin(dlon) * math.cos(lat2)
-    #     y    = (math.cos(lat1) * math.sin(lat2)
-    #             - math.sin(lat1) * math.cos(lat2) * math.cos(dlon))
-    #     return (math.degrees(math.atan2(x, y)) + 360) % 360
+    # Uses Haversine approximations, replaced with Geodesic computation.
+    @staticmethod
+    def haversine_distance(p1, p2):
+        R = 6371000.0  # Earth radius in meters
+        lat1, lon1 = math.radians(p1[0]), math.radians(p1[1])
+        lat2, lon2 = math.radians(p2[0]), math.radians(p2[1])
+        
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+        
+        a = math.sin(dlat / 2.0)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2.0)**2
+        c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+        
+        return R * c
+    
+    @staticmethod
+    def compute_bearing(p1, p2):
+        lat1, lon1 = math.radians(p1[0]), math.radians(p1[1])
+        lat2, lon2 = math.radians(p2[0]), math.radians(p2[1])
+        dlon = lon2 - lon1
+        
+        x = math.sin(dlon) * math.cos(lat2)
+        y = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlon)
+        
+        return (math.degrees(math.atan2(x, y)) + 360) % 360
 
 
     def waypoint_cb(self, msg):
@@ -146,12 +165,12 @@ class CameraHandler(Node):
         distance = None
         error = 0.0
         sgnl_msg = Bool()
+        sgnl_msg.data = False # Set non detection by default
 
         # Define swerve Neutral state
-        linear_x = 0.0
-        linear_y = 0.0
-        rot_left = -1.0
-        rot_right = -1.0
+        target_linear_x = 0.0
+        target_rot_left = -1.0
+        target_rot_right = -1.0
 
         # First case is when we see Aruco, we must drive to it - so signal that to the State Machine, and override GPS follower
         if detection is not None:
@@ -163,115 +182,71 @@ class CameraHandler(Node):
             # is_tag_tracking = True
 
             # Handle case when distance <=1.0 here too
-            if distance <= 1.0:
+            if distance <= 2.0:
                 sgnl_msg.data = True
-                self.signal_pub.publish(sgnl_msg)
-
-                out_msg = Float32MultiArray()
-                out_msg.data = [0.0, 0.0, -1.0, -1.0]
-                self.drive_pub.publish(out_msg) # Stop rover
-                return
-            
-            if self.is_aligning:
-                if abs(error) <= 3.0:
-                    self.is_aligning = False
+                # Let target speed be 0
+                # We have to stop once we are within 2.0 meters, don't want to run the object/aruco tag over... TODO
             else:
-                if abs(error) > 8.0:
-                    self.is_aligning = True # If significant deviation, realign
+                rotation_effort = min(abs(error) / 45.0, 1.0)
+                if error > 4.0:
+                    target_rot_right = -1.0 + (rotation_effort * 2.0)
+                elif error < -4.0:
+                    target_rot_left = -1.0 + (rotation_effort * 2.0)
+                
+                DECEL_DIST_M = 3.0
+                base_target_speed = min(distance / DECEL_DIST_M, self.MAX_FORWARD_SPEED)
+                alignment_factor = 1.0 - rotation_effort
+                target_linear_x = base_target_speed * alignment_factor
             
-            if self.is_aligning:
-                rotation_effort = min(abs(error) / 30.0, 1.0)
-                if error > 0:
-                    rot_right = -1.0 + (rotation_effort * 2.0)
-                else:
-                    rot_left = -1.0 + (rotation_effort * 2.0)
-                linear_x = 0.0
-            else:
-                rot_left = -1.0
-                rot_right = -1.0
-                linear_x = min(distance / 2.0, 0.8)
-
-        elif self.curr_pos[0] is not None and self.curr_pos[1] is not None and self.curr_waypoint[0] is not None and self.curr_waypoint[1] is not None and self.heading is not None:
-            # target_bearing = self.compute_bearing(self.curr_pos, self.curr_waypoint)
-            self.is_aligning = False # Now we are not aligning to a tag, rather following spiral path
+        elif self.curr_pos[0] is not None and self.curr_pos[1] is not None and self.curr_waypoint[0] is not None and self.curr_waypoint[1] is not None and self.heading is not None:            
             
-            inv = self.geodesic.Inverse(self.curr_pos[0], self.curr_pos[1], self.curr_waypoint[0], self.curr_waypoint[1])
-            distance = inv['s12']
+            distance = self.haversine_distance(self.curr_pos, self.curr_waypoint)
             
             if distance <= 1.0:
-                out_msg = Float32MultiArray()
-                out_msg.data = [0.0, 0.0, -1.0, -1.0]
-                self.drive_pub.publish(out_msg)
-                return
-            target_bearing = inv['azi1'] # Is -180 to 180 degrees
-            # Compass heading: 0=N Clockwise
-            bearing_diff = target_bearing - self.heading
-            
-            # Normalize to [-180, 180]
-            error = (bearing_diff + 180) % 360 - 180 # positive = right, negative = left
-
-            rotation_effort = min(abs(error) / 70.0, 1.0)
-
-            if error > 2.0:
-                rot_right = -1.0 + (rotation_effort * 2.0)
-            elif error < -2.0:
-                rot_left = -1.0 + (rotation_effort * 2.0)
+                pass # in this case targets, stay default which is no motion
             else:
-                # Keep a 2 degree deadband, maintain neutral resolution
-                pass
+                target_bearing = self.compute_bearing(self.curr_pos, self.curr_waypoint) # Is -180 to 180 degrees
+                
+                # Compass heading: 0=N Clockwise
+                bearing_diff = target_bearing - self.heading
+                
+                # Normalize to [-180, 180]
+                error = (bearing_diff + 180) % 360 - 180 # positive = right, negative = left
 
-            if abs(error) < 20.0:
-                linear_x = min(distance / 2.0, 0.6)
-            else:
-                linear_x = 0.0
+                rotation_effort = min(abs(error) / 70.0, 1.0)
+
+                if error > 4.0:
+                    target_rot_right = -1.0 + (rotation_effort * 2.0)
+                elif error < -4.0:
+                    target_rot_left = -1.0 + (rotation_effort * 2.0)
+                else:
+                    # Keep a 4 degree deadband, maintain neutral resolution
+                    pass
+
+                DECEL_DIST_M = 3.0
+                base_target_speed = min(distance / DECEL_DIST_M, self.MAX_FORWARD_SPEED)
+                alignment_factor = 1.0 - rotation_effort
+                target_linear_x = base_target_speed * alignment_factor
         else:
-            # Missing data dont move - SM handles it
-            return
-        
-        # if is_tag_tracking and distance is not None and distance <= 1.0:
-        #     cmd = [0.0, 0.0, -1.0, -1.0] # No forward, sideways or rotational message
-        #     out_msg = Float32MultiArray()
-        #     out_msg.data = cmd
-            
-        #     sgnl_msg.data = True
-        #     self.signal_pub.publish(sgnl_msg)
-        #     self.drive_pub.publish(out_msg)
-        #     return
+            # Missing telemetry data
+            pass
 
-        # if self.is_aligning:
-        #     # If we are currently turning, keep turning until we are highly accurate 
-        #     if abs(error) <= 3.0:
-        #         self.is_aligning = False
-        # else:
-        #     # If we are driving, allow some slop. Only stop to fix it if we drift past 8°
-        #     if abs(error) > 8.0:
-        #         self.is_aligning = True
-
-        # KP = 0.02   
-        # MAX_FORWARD = 0.8
-        # MAX_TURN = 0.8
-
-        
-        
-        # if self.is_aligning:
-        #     forward_speed = 0.0
-        #     turn_speed = max(min(abs(error) * KP, MAX_TURN), 0.2)
-        # else:
-        #     # Pure Forward Drive
-        #     forward_speed = MAX_FORWARD
-        #     turn_speed = -1.0
-
-        # Positive error means the target is to the right.
-        # if error > 0:
-        #     cmd = [forward_speed, 0.0, -1.0, turn_speed]  # Turn Right
-        # else:
-        #     cmd = [forward_speed, 0.0, turn_speed, -1.0]  # Turn Left
-
-        # Publish the command
-        sgnl_msg.data = False
         self.signal_pub.publish(sgnl_msg)
+
+        dt = 0.1
+        LIN_ACCEL_RATE = 0.5
+        LIN_DECEL_RATE = 1.0
+        ROT_ACCEL_RATE = 0.8
+        
+        slew = lambda curr, target, step_acc, step_dec: min(curr + step_acc, target) if target > curr else max(curr - step_dec, target)
+        self.current_linear_x = slew(self.current_linear_x, target_linear_x, LIN_ACCEL_RATE * dt, LIN_DECEL_RATE * dt)
+        self.current_rot_left = slew(self.current_rot_left, target_rot_left, ROT_ACCEL_RATE * dt, ROT_ACCEL_RATE * dt)
+        self.current_rot_right = slew(self.current_rot_right, target_rot_right, ROT_ACCEL_RATE * dt, ROT_ACCEL_RATE * dt)
+        
+        # Publish the command
+        cmd = [float(self.current_linear_x), 0.0, float(self.current_rot_left), float(self.current_rot_right)]
         out_msg = Float32MultiArray()
-        out_msg.data = [linear_x, linear_y, rot_left, rot_right]
+        out_msg.data = cmd
         self.drive_pub.publish(out_msg)
 
 
