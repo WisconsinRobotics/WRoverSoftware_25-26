@@ -34,6 +34,12 @@ STUCK_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 30      # 30 secs tr
 STUCK_DISTANCE_THRESHOLD = 1                                        # 1 meter trigger threshold
 DANCE_OFF_FRAMES_THRESHOLD = int(1 / TIMER_CALLBACK_INTERVAL) * 7   # 7 seconds dance off time
 
+def red(str):
+    return "\033[31m" + str + "\033[0m"
+
+def blue(str):
+    return "\033[34m" + str + "\033[0m"
+
 class ROVER_STATE(str, Enum):
     PLANNING = "PLANNING"
     MANUAL = "MANUAL"
