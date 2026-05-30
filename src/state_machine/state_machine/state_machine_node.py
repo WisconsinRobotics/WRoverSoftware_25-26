@@ -248,7 +248,7 @@ class StateMachineNode(Node):
         self.calculate_pos()
         
     # Callback function for second antenna
-    def rover2_callback(self, loc_msg):
+    def rover2_callback(self, loc_msg): 
         self.rover2_lat = loc_msg.lat * 1e-7
         self.rover2_lon = loc_msg.lon * 1e-7
         self.calculate_pos()
@@ -414,7 +414,7 @@ class StateMachineNode(Node):
             
     def nav(self):
         # If reached end of path (this would only happen if reached gnss target since added spiral path)
-        if self.curr_waypoint == len(self.paths[self.curr_target]):
+        if self.curr_target < len(self.paths) and self.curr_waypoint >= len(self.paths[self.curr_target]):
             # Stop nav node
             self.stop_node("nav_node")
             
