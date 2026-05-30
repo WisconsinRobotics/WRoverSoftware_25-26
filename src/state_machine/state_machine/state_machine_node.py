@@ -489,8 +489,8 @@ class StateMachineNode(Node):
 
             return
                 
-        # If distance between current location and waypoint is within 0.6m
-        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 0.6:
+        # If distance between current location and waypoint is within 1m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 1:
             # Increment current waypoint
             self.curr_waypoint += 1
             
@@ -541,8 +541,8 @@ class StateMachineNode(Node):
 
             return
             
-        # If distance between current location and waypoint is within 0.6m
-        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 0.6:
+        # If distance between current location and waypoint is within 1m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 1:
             # Increment current waypoint
             self.curr_waypoint += 1
             
@@ -593,8 +593,8 @@ class StateMachineNode(Node):
 
             return
             
-        # If distance between current location and waypoint is within 0.6m
-        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 0.6:
+        # If distance between current location and waypoint is within 1m
+        if self.haversine(self.loc[0], self.loc[1], self.paths[self.curr_target][self.curr_waypoint][0], self.paths[self.curr_target][self.curr_waypoint][1]) < 1:
             # Increment current waypoint
             self.curr_waypoint += 1
             
