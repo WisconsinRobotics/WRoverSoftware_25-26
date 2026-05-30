@@ -9,7 +9,7 @@ from collections import deque
 
 class SectorDepthClassifier():
     def __init__(self):
-        self.debug   = True
+        self.debug   = False
         self.onRover = True
 
         # ── ZMQ video stream ───────────────────────────────────────────────
@@ -19,14 +19,14 @@ class SectorDepthClassifier():
         self.socket.bind("tcp://*:5555")
         print("Video streamer ready on port 5555")
         
-        SCALE = 1.0
+        SCALE = 2.0
 
         # ── Camera intrinsics ──────────────────────────────────────────────
         self.X_PIXEL_OFFSET = np.float32(643.2372 / SCALE)
         self.Y_PIXEL_OFFSET = np.float32(367.1311 / SCALE)
         self.FOCAL_LENGTH   = np.float32(568.15 / SCALE)
-        self.W = int(640 / SCALE)
-        self.H = int(360 / SCALE)
+        self.W = 640
+        self.H = 360
 
         # ── Obstacle avoidance params ──────────────────────────────────────
         self.DEPTH_THRESH = np.float32(4.5)   # metres — beyond this = ignore
@@ -41,8 +41,8 @@ class SectorDepthClassifier():
         # ── VFH histogram state ────────────────────────────────────────────
         self.sector_state    = np.zeros(self.NUM_SECTORS, dtype=int)
         self.hist_persistent = np.zeros(self.NUM_SECTORS)
-        self.T_HIGH          = 12
-        self.T_LOW           = 8
+        self.T_HIGH          = 9
+        self.T_LOW           = 6
         self.MIN_VALLEY_SECTS = 1
         self.SMAX             = 4
 
@@ -55,7 +55,7 @@ class SectorDepthClassifier():
 
         # GPS antenna offset from rover center, in robot body frame (meters)
         # Positive = forward of center, positive left_m = left of center
-        self.GPS_FWD_M  =  0.05
+        self.GPS_FWD_M  =  0.17
         self.GPS_LEFT_M =  0.4518  
 
         # Camera position offset from rover center, in robot body frame (meters)
@@ -73,7 +73,7 @@ class SectorDepthClassifier():
         self.prev_rx = 0.0
         self.prev_ry = 0.0
 
-        self.ground_thresh = -0.40 # Maybe -0.3 for going over small obstacles? TUNE : 0.55 away from ground - 0.15 for 3/4 of a wheel
+        self.ground_thresh = -0.3 # Maybe -0.3 for going over small obstacles? TUNE : 0.55 away from ground - 0.15 for 3/4 of a wheel
 
         self.map_res = 0.1
         
@@ -323,7 +323,7 @@ class SectorDepthClassifier():
             valid_depth = (depth_full > 0.001) & (depth_full < self.DEPTH_THRESH)
         
         bush_mask = self._vegetation_mask(self.rgb_frame)
-        obstacle_mask = valid_depth & ~ground_mask & ~bush_mask
+        obstacle_mask = valid_depth & ~ground_mask #& ~bush_mask
         free_mask = valid_depth & (ground_mask | bush_mask)
     
         heading_rad = math.radians(90.0 - compass_angle)
@@ -464,7 +464,7 @@ class SectorDepthClassifier():
         self.elevation_map[cleared_mask] = float(self.ground_thresh)
 
         # APPLY FOOTPRINT
-        self.map[self.footprint_mask]           = 0.0
+        # self.map[self.footprint_mask]           = 0.0
         self.elevation_map[self.footprint_mask] = float(self.ground_thresh)
         self.elevation_map[self.map < 0.05] = self.ground_thresh
         return ground_mask, bush_mask
