@@ -197,6 +197,12 @@ class CameraHandler(Node):
             
             inv = self.geodesic.Inverse(self.curr_pos[0], self.curr_pos[1], self.curr_waypoint[0], self.curr_waypoint[1])
             distance = inv['s12']
+            
+            if distance <= 1.0:
+                out_msg = Float32MultiArray()
+                out_msg.data = [0.0, 0.0, -1.0, -1.0]
+                self.drive_pub.publish(out_msg)
+                return
             target_bearing = inv['azi1'] # Is -180 to 180 degrees
             # Compass heading: 0=N Clockwise
             bearing_diff = target_bearing - self.heading
@@ -204,7 +210,7 @@ class CameraHandler(Node):
             # Normalize to [-180, 180]
             error = (bearing_diff + 180) % 360 - 180 # positive = right, negative = left
 
-            rotation_effort = min(abs(error) / 45.0, 1.0)
+            rotation_effort = min(abs(error) / 70.0, 1.0)
 
             if error > 2.0:
                 rot_right = -1.0 + (rotation_effort * 2.0)
@@ -215,7 +221,7 @@ class CameraHandler(Node):
                 pass
 
             if abs(error) < 20.0:
-                linear_x = min(distance / 2.0, 1.5)
+                linear_x = min(distance / 2.0, 0.6)
             else:
                 linear_x = 0.0
         else:
