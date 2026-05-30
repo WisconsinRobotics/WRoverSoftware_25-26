@@ -60,7 +60,7 @@ class Nav(Node):
             self.current_lat = current_lat
             self.current_lon = current_lon
         else:
-            alpha = 0.8
+            alpha = 0.9
             self.current_lat = (alpha * current_lat) + ((1.0 - alpha) * self.current_lat)
             self.current_lon = (alpha * current_lon) + ((1.0 - alpha) * self.current_lon)
 
@@ -155,7 +155,7 @@ class Nav(Node):
 
         dt = 0.1 # Loop runs at 10 Hz so we have 0.1 seconds per tick
         LIN_ACCEL_RATE = 0.5 # Max units per second to speed up
-        LIN_DECEL_RATE = 1.0 # Max units per second to slowdown - currently dominates over accel
+        LIN_DECEL_RATE = 6.0 # Max units per second to slowdown - currently dominates over accel
 
         # Rotational acceleration
         # range of -1.0 to 1.0, so change is of 2 units.
