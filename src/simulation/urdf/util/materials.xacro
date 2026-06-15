@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    
+    <!--
+    Macro that automatically makes a material for gazebo robot
+    
+    @param material_name : the name of the material in urdf and RVIZ
+    @param r : red value [0, 1.0]
+    @param g : green value [0, 1.0]
+    @param b : blue value [0,1.0]
+    @param a : alpha value [0,1.0]
+    -->
+    <xacro:macro name = "gz_material_inline" params = "r g b a">
+        <material>
+                <ambient>${r} ${g} ${b} ${a}</ambient>
+                <diffuse>${r} ${g} ${b} ${a}</diffuse>
+                <specular>0.1 0.1 0.1 ${a}</specular>
+                <emissive>0 0 0 ${a}</emissive>
+        </material>
+    </xacro:macro>
+
+    <!--
+    Macro that automatically makes a material that works for both RVIZ and Gazebo robot
+    
+    @param link_name : name of the link that the material is associated to in Gazebo
+    @param material_name : the name of the material in urdf and RVIZ
+    @param r : red value [0, 1.0]
+    @param g : green value [0, 1.0]
+    @param b : blue value [0,1.0]
+    @param a : alpha value [0,1.0]
+    -->
+    <xacro:macro name = "urdf_gz_material" params = "link_name material_name r g b a">
+        <material name = "${material_name}">
+            <color rgba="${r} ${g} ${b} ${a}"/>
+        </material>
+        <gazebo reference="${link_name}">
+            <visual>
+                <material>
+                    <ambient>${r} ${g} ${b} ${a}</ambient>
+                    <diffuse>${r} ${g} ${b} ${a}</diffuse>
+                    <specular>0.1 0.1 0.1 ${a}</specular>
+                    <emissive>0 0 0 ${a}</emissive>
+                </material>
+            </visual>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name = "body_mat" params = "link_name">
+        <xacro:urdf_gz_material
+            link_name = "${link_name}"
+            material_name = "body_mat"
+            r = "0" g = "0" b = "0.8" a = "1.0"
+        />
+    </xacro:macro>
+
+    <xacro:macro name = "gz_collision_visual_mat">
+        <xacro:gz_material_inline
+            r = "0" g = "0.8" b = "0.8" a = "0.5"
+        />
+    </xacro:macro>
+</robot>

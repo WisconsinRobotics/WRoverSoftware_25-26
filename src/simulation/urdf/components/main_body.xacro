@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name = "main_body">
+        <!-- Imports -->
+         <!-- I dont understand why but ROS1 imports only work for imports T_T -->
+        <xacro:include filename="$(find simulation)/urdf/util/materials.xacro"/>
+        <!-- Collision Boxes-->
+        <xacro:property name="collision_x" value = "0.507"/>
+        <xacro:property name="collision_y" value = "0.686"/>
+        <xacro:property name="collision_z" value = "0.2"/>
+
+        <link name = "main_body">
+            <!-- Inertial Values-->
+            <inertial>
+                <mass value="9.71867012"/>
+                <inertia
+                    ixx="0.5"
+                    ixy="0.0"
+                    ixz="0.0"
+                    iyy="0.5"
+                    iyz="0.0"
+                    izz="0.5"
+                />
+            </inertial>
+
+            <!-- Visuals -->
+            <visual name = "main_body_visual">
+                <geometry>
+                    <!-- And ros2 imports only work for meshes T_T -->
+                    <mesh filename = "package://simulation/meshes/main_chassis.stl"/>
+                </geometry>
+                <xacro:body_mat link_name = "main_body"/>
+            </visual>
+
+            <!-- Collisions-->
+            <collision name = "main_body_collision">
+                <geometry>
+                    <box size="${collision_x} ${collision_y} ${collision_z}"/>
+                </geometry>
+                <origin xyz="0 -0.1 0.093" rpy="0 0 0"/>
+            </collision>
+        </link>
+
+        <joint name="base_to_body" type="fixed">
+            <parent link="base_link"/>
+            <child link="main_body"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </joint>
+    </xacro:macro>
+</robot>

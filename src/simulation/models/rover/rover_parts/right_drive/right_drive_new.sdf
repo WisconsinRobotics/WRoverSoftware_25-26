@@ -72,7 +72,7 @@ The hitboxes also need to change
                 <!-- center of mass -> -->
                 <pose>0.292 0.343 -0.211 0 0 0</pose>
                 <inertia>
-                    <ixx>08.402e-5</ixx>
+                    <ixx>8.402e-5</ixx>
                     <ixy>4.130e-6</ixy>
                     <ixz>2.454e-10</ixz>
                     <iyy>7.958e-5</iyy>
@@ -152,7 +152,7 @@ The hitboxes also need to change
                 <!-- center of mass -> -->
                 <pose>0.292 -0.574 -0.211 0 0 0</pose>
                 <inertia>
-                    <ixx>08.407e-5</ixx>
+                    <ixx>8.407e-5</ixx>
                     <ixy>3.706e-6</ixy>
                     <ixz>2.436e-10</ixz>
                     <iyy>7.893e-5</iyy>
@@ -262,7 +262,7 @@ The hitboxes also need to change
                     <velocity>10</velocity>
                 </limit>
                 <dynamics>
-                    <damping>0.5</damping>
+                    <damping>2.0</damping>
                     <friction>0.1</friction>
                 </dynamics>
             </axis>
@@ -298,7 +298,7 @@ The hitboxes also need to change
                     <upper>1e9</upper>
                 </limit>
                 <dynamics>
-                    <damping>0.5</damping>
+                    <damping>2.0</damping>
                     <friction>0.1</friction>
                 </dynamics>
             </axis>
@@ -312,14 +312,47 @@ The hitboxes also need to change
         <plugin filename="gz-sim-joint-controller-system"
         name="gz::sim::systems::JointController">
             <joint_name>back_wheel_to_swivel</joint_name>
-            <initial_velocity>1.0</initial_velocity>
+            <initial_velocity>0.0</initial_velocity>
+            <use_force_commands>false</use_force_commands>
+            <topic>rover/drive/BR_wheel_swivel</topic>
+            <p_gain>20.0</p_gain>
+            <i_gain>0.1</i_gain>
+            <d_gain>0.5</d_gain>
         </plugin>
 
         <plugin filename="gz-sim-joint-controller-system"
         name="gz::sim::systems::JointController">
             <joint_name>front_wheel_to_swivel</joint_name>
-            <initial_velocity>-1.0</initial_velocity>
+            <use_force_commands>false</use_force_commands>
+            <initial_velocity>0.0</initial_velocity>
+            <topic>rover/drive/TR_wheel_swivel</topic>
+            <p_gain>20.0</p_gain>
+            <i_gain>0.1</i_gain>
+            <d_gain>0.5</d_gain>
         </plugin>
+
+        <plugin filename="gz-sim-joint-controller-system"
+        name="gz::sim::systems::JointController">
+            <joint_name>front_swivel_to_chasis</joint_name>
+            <initial_velocity>0.0</initial_velocity>
+            <use_force_commands>false</use_force_commands>
+            <topic>rover/drive/TR_swivel_chasis</topic>
+            <p_gain>20.0</p_gain>
+            <i_gain>0.1</i_gain>
+            <d_gain>0.5</d_gain>
+        </plugin>
+
+        <plugin filename="gz-sim-joint-controller-system"
+        name="gz::sim::systems::JointController">
+            <joint_name>back_swivel_to_chasis</joint_name>
+            <use_force_commands>false</use_force_commands>
+            <initial_velocity>0.0</initial_velocity>
+            <topic>rover/drive/BR_swivel_chasis</topic>
+            <p_gain>20.0</p_gain>
+            <i_gain>0.1</i_gain>
+            <d_gain>0.5</d_gain>
+        </plugin>
+
 
     </model>
 </sdf>

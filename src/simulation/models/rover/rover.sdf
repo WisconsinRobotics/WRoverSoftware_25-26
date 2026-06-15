@@ -3,7 +3,7 @@
 <sdf version = "1.9">
     <model name = "rover">
         <pose> 1 0 1 0 0 0</pose>
-        <gravity> false </gravity>
+        <gravity> true </gravity>
         <include>
             <uri>model://rover/rover_parts/main_body</uri>
         </include>
@@ -19,7 +19,7 @@
         </include>
     
 
-        <joint name = "main_body_to_right_chasis" type="revolute">
+        <joint name = "main_body_to_right_chasis" type="fixed">
             <parent>main_body::body</parent>
             <child>swerve_right::chasis</child>
             <axis>
@@ -37,7 +37,7 @@
         </joint>
 
         
-        <joint name = "main_body_to_left_chasis" type="revolute">
+        <joint name = "main_body_to_left_chasis" type="fixed">
             <parent>main_body::body</parent>
             <child>swerve_left::chasis</child>
             <axis>
